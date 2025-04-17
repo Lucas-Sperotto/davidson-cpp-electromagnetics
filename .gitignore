@@ -1,0 +1,19 @@
+# Build artifacts
+build/
+*.o
+*.obj
+*.exe
+*.out
+*.a
+*.so
+*.dll
+
+# Editor files
+*.swp
+*.bak
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
