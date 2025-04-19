@@ -1,10 +1,6 @@
 #include <vector>
 
-extern int NUM_ELEMENTS;
-extern int NUM_EDGES;
-extern std::vector<std::vector<int>> ELEMENT_EDGES;  // ELEMENT_EDGES[elem][local_edge]
-extern std::vector<int> dof_RWG;                     // Mapeamento edge -> dof index
-extern std::vector<std::vector<int>> DOFLOCALNUM;    // DOFLOCALNUM[dof][2]
+#include "globals.h"
 
 void find_local_dofs() {
     DOFLOCALNUM.resize(dof_RWG.size(), std::vector<int>(2, -1)); // Inicializa com -1

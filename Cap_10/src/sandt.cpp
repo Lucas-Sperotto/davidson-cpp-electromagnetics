@@ -4,8 +4,7 @@
 #include <cassert>
 #include <Eigen/Dense>
 
-// Estrutura auxiliar: tripla de índices das arestas locais
-extern std::vector<std::array<int, 2>> LOCALEDGENODES; // geralmente = {{0,1},{0,2},{1,2}}
+#include "globals.h"
 
 // Retorna S e T: matrizes locais 3×3 do elemento de Whitney
 std::pair<std::vector<std::vector<double>>, std::vector<std::vector<double>>>

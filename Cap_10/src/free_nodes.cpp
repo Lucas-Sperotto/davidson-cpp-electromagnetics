@@ -1,5 +1,6 @@
 #include <vector>
 #include <cmath>
+#include <algorithm>
 
 extern int NUM_NODES;
 extern std::vector<std::vector<double>> NODE_COORD;

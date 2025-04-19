@@ -1,11 +1,7 @@
 #include <vector>
 #include <algorithm>
 
-extern int NUM_ELEMENTS, NUM_EDGES;
-extern std::vector<std::vector<int>> ELEMENTS;         // ELEMENTS[e][0..2] são os vértices
-extern std::vector<std::vector<int>> ELEMENT_EDGES;    // ELEMENT_EDGES[e][0..2]
-extern std::vector<std::vector<int>> EDGES;            // EDGES[i] = {n1, n2}
-extern std::vector<std::vector<int>> LOCALEDGENODES;   // LOCALEDGENODES[3] = {{0,1}, {0,2}, {1,2}}
+#include "globals.h"
 
 void edgemake() {
     EDGES.clear();

@@ -1,5 +1,6 @@
 #include <vector>
 #include <utility>
+#include <stdexcept>
 
 // Retorna pesos e coordenadas baricêntricas para quadratura de ordem 6 em triângulo
 std::pair<std::vector<double>, std::vector<std::vector<double>>> tri_quad(int order) {

@@ -1,6 +1,9 @@
 #include <vector>
 #include <cmath>
 #include <utility>
+#include <Eigen/Dense>
+
+#include "globals.h"
 
 // Dependências
 std::vector<std::vector<double>> LTQN(const std::vector<double>& lambda,

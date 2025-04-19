@@ -1,6 +1,8 @@
 #include <vector>
 #include <Eigen/Dense>
 
+#include "simplex2D.h"
+
 // Externas
 extern std::vector<std::vector<int>> ELEMENTS;
 extern std::vector<std::vector<double>> NODE_COORD;

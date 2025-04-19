@@ -40,10 +40,11 @@ void plot_field(const std::vector<double>& dofs,
                 double x2 = NODE_COORD[nodes[1]][0], y2 = NODE_COORD[nodes[1]][1];
                 double x3 = NODE_COORD[nodes[2]][0], y3 = NODE_COORD[nodes[2]][1];
 
-                double x_min = std::min({x1, x2, x3});
-                double x_max = std::max({x1, x2, x3});
-                double y_min = std::min({y1, y2, y3});
-                double y_max = std::max({y1, y2, y3});
+                double x_min = std::min(std::min(x1, x2), x3);
+                double x_max = std::max(std::max(x1, x2), x3);
+                double y_min = std::min(std::min(y1, y2), y3);
+                double y_max = std::max(std::max(y1, y2), y3);
+
 
                 if (xc >= x_min && xc <= x_max && yc >= y_min && yc <= y_max) {
                     std::vector<double> lambda = simplex2D(i_elem, xc, yc);
