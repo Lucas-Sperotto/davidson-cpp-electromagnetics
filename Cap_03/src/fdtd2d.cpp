@@ -4,6 +4,7 @@
 #include <vector>
 #include <cmath>
 #include <fstream>
+#include <filesystem>
 #include "gaussder.cpp"
 
 // Constantes físicas
@@ -13,6 +14,10 @@ const double mu_0 = 4 * M_PI * 1e-7;
 const double eta_0 = std::sqrt(mu_0 / eps_0);
 
 void run_fdtd2d_simulation() {
+
+    const std::string out_dir = PROJECT_OUT_DIR;
+    std::filesystem::create_directories(out_dir);
+
     int refine = 1;
     int N_x = refine * 200;
     int N_y = refine * 100;
@@ -72,12 +77,13 @@ void run_fdtd2d_simulation() {
     std::cout << "Simulação finalizada. Valores de E_y armazenados." << std::endl;
 
     // Exportar resultados para CSV
-    std::ofstream file("out/ey_point1.csv");
+    std::ofstream file(out_dir + "/ey_point1.csv");
     file << "tempo_ns,Ey_Vpm\n";
     for (int m = 0; m < M; ++m) {
         double time_ns = m * delta_t * 1e9;
         file << time_ns << "," << E_y_point1[m] << "\n";
     }
     file.close();
-    std::cout << "Arquivo salvo em: out/ey_point1.csv" << std::endl;
+    std::cout << "Arquivo salvo em: " << out_dir << "/ey_point1.csv" << std::endl;
 }
+

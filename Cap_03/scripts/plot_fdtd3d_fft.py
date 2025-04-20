@@ -2,9 +2,12 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 
+# Diretórios
+out_dir = "../out"
+
 # Carrega os dados da FFT
 try:
-    df_fft = pd.read_csv('out/hz_center_fft.csv')
+    df_fft = pd.read_csv('../out/hz_center_fft.csv')
     plt.plot(df_fft['freq_Hz'] / 1e6, df_fft['abs_Hz'], label='$|H_z(f)|$')
 except FileNotFoundError:
     print("Arquivo hz_center_fft.csv não encontrado.")
@@ -20,5 +23,5 @@ plt.ylabel('$|H_z|$ (normalizado)')
 plt.title('Espectro de Fourier de $H_z$ no centro da cavidade')
 plt.grid(True)
 plt.tight_layout()
-plt.savefig('out/hz_center_fft_plot.png', dpi=300)
+plt.savefig('../out/hz_center_fft_plot.png', dpi=300)
 plt.show()

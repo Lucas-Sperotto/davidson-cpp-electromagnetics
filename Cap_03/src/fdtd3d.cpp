@@ -5,12 +5,18 @@
 #include <cmath>
 #include <fstream>
 #include <complex>
+#include <filesystem>
 
 const double eps_0 = 8.854e-12;
 const double mu_0 = 4 * M_PI * 1e-7;
 const double c = 1.0 / std::sqrt(eps_0 * mu_0);
 
 void run_fdtd3d_simulation() {
+
+    const std::string out_dir = PROJECT_OUT_DIR;
+    std::filesystem::create_directories(out_dir);
+
+
     int refine = 2;
     int N_x = 8 * refine;
     int N_y = 4 * refine;
@@ -24,7 +30,7 @@ void run_fdtd3d_simulation() {
     double dy = L_y / N_y;
     double dz = L_z / N_z;
 
-    double delta_s = std::min({dx, dy, dz});
+    double delta_s = std::min(std::min(dx, dy), dz);
     double delta_t = delta_s / (std::sqrt(3.0) * c);
 
     int N_t = 1024 * refine;
@@ -91,7 +97,7 @@ void run_fdtd3d_simulation() {
                         (i < N_x ? H_x[i][j][k] - H_x[i][j - 1][k] : 0.0) / dy);
     }
 
-    std::ofstream file("out/hz_center_fft.csv");
+    std::ofstream file(out_dir + "/hz_center_fft.csv");
     file << "freq_Hz,abs_Hz\n";
     double delta_f = 1.0 / (N_t * delta_t);
     for (int k = 1; k < N_t / 2; ++k) {
@@ -103,5 +109,5 @@ void run_fdtd3d_simulation() {
         file << k * delta_f << "," << std::abs(sum) << "\n";
     }
     file.close();
-    std::cout << "FFT de H_z salva em: out/hz_center_fft.csv" << std::endl;
+    std::cout << "FFT de H_z salva em: " << out_dir << "/hz_center_fft.csv" << std::endl;
 }

@@ -83,4 +83,26 @@ python3 plots/plot_fdtd3d_fft.py
 
 ---
 
+## 📸 Exemplos de Saídas Geradas
+
+### 🟢 Comparação do Campo \( E_y \) com e sem PML
+
+> Campo elétrico \( E_y \) registrado ao longo do tempo em um ponto fixo da malha 2D.  
+> A linha sólida representa a simulação com ABC; a tracejada, com PML.  
+> A diferença entre as curvas evidencia o desempenho superior da PML em absorver a onda incidente sem reflexões artificiais.
+
+![Comparação Ey com/sem PML](out/ey_point1_comparison.png)
+
+---
+
+### 🔵 Espectro de \( H_z \) na Cavidade 3D
+
+> Magnitude da FFT do campo magnético \( H_z \) no centro da cavidade PEC \(1 \times 0{,}5 \times 0{,}75\) m.  
+> As linhas verticais tracejadas representam os modos TE analíticos da cavidade, permitindo comparação direta com os picos simulados.
+
+![Espectro Hz na cavidade 3D](out/hz_center_fft_plot.png)
+
+
+---
+
 📚 Este capítulo faz parte do repositório de tradução dos códigos MATLAB para C++, com foco em fidelidade física, extensibilidade computacional e documentação didática.
