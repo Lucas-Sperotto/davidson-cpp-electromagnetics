@@ -18,27 +18,27 @@ void renumber_dof_LTQN(const std::vector<int>& dof_free_flag,
     // Primeira família (e1)
     for (int i_edge = 0; i_edge < NUM_EDGES; ++i_edge) {
         if (dof_free_flag[i_edge]) {
-            ++counter;
             dof_e1[i_edge] = counter;
+            ++counter;
         }
     }
 
     // Segunda família (e2)
     for (int i_edge = 0; i_edge < NUM_EDGES; ++i_edge) {
         if (dof_free_flag[i_edge]) {
-            ++counter;
             dof_e2[i_edge] = counter;
+            ++counter;
         }
     }
 
     // DOFs de face
     for (int i_elem = 0; i_elem < NUM_ELEMENTS; ++i_elem) {
-        ++counter;
         dof_f1[i_elem] = counter;
+        ++counter;
     }
     for (int i_elem = 0; i_elem < NUM_ELEMENTS; ++i_elem) {
-        ++counter;
         dof_f2[i_elem] = counter;
+        ++counter;
     }
 
     NUM_DOFS = counter;

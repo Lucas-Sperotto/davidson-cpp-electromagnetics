@@ -26,8 +26,8 @@ const double mu_r = 1.0;
 
 void Eigen2D()
 {
-    double a = 2.286e-2;
-    double b = 1.016e-2;
+    double a = 1.0;
+    double b = 0.5;
 
     std::vector<std::vector<double>> x_nodes, y_nodes;
     trimesh(a, b, 8, 4, x_nodes, y_nodes); // também preenche ELEMENTS e NODE_COORD
@@ -141,12 +141,21 @@ void Eigen2D()
     VectorXd eigvals = solver.eigenvalues();
     MatrixXd eigvecs = solver.eigenvectors();
 
+    for (int i = 0; i < eigvals.size(); ++i)
+        std::cout << "Autovalor[" << i << "]: " << eigvals[i] << std::endl;
+
+
     std::vector<std::pair<double, int>> indexed_kc;
     for (int i = 0; i < eigvals.size(); ++i)
         if (eigvals[i] > 0)
             indexed_kc.emplace_back(std::sqrt(eigvals[i]), i);
     std::sort(indexed_kc.begin(), indexed_kc.end());
     std::cout << "Indexed kc size: " << indexed_kc.size() << std::endl;
+
+    for (int i = 0; i < indexed_kc.size(); ++i)
+        std::cout << "kc[" << i << "]: " << indexed_kc[i].first << std::endl;
+
+
     std::vector<int> node_flag;
     int num_free_nodes = 0;
     free_nodes(a, b, node_flag, num_free_nodes);
