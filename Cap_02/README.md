@@ -59,36 +59,36 @@ As imagens são salvas na pasta `Cap_02/out/`. Veja abaixo algumas delas:
 ### 📈 `voltage_final.png`
 > **Tensão no tempo final** da simulação senoidal (`fdtd_1D_demo`). Mostra a distribuição espacial da tensão após convergência.
 
-![voltage_final](../out/voltage_final.png)
+![voltage_final](/out/voltage_final.png)
 
 ---
 
 ### 🌡️ `voltage_heatmap.png`
 > **Mapa de calor V(z,t)** representando a evolução temporal da tensão ao longo do espaço.
 
-![voltage_heatmap](../out/voltage_heatmap.png)
+![voltage_heatmap](/out/voltage_heatmap.png)
 
 ---
 
 ### 📊 `fft_magnitude.png` e `fft_phase.png`
 > Módulo e fase da FFT na componente k=2, relacionada à frequência fundamental da fonte senoidal.
 
-![fft_magnitude](../out/fft_magnitude.png)
-![fft_phase](../out/fft_phase.png)
+![fft_magnitude](/out/fft_magnitude.png)
+![fft_phase](/out/fft_phase.png)
 
 ---
 
 ### 🕒 `wb_time_response.png`
 > Gráfico temporal do pulso aplicado e da resposta na carga (versão wideband).
 
-![wb_time_response](../out/wb_time_response.png)
+![wb_time_response](/out/wb_time_response.png)
 
 ---
 
 ### 📡 `wb_transfer_function.png`
 > Função de transferência `|V_L / V_S|` em função da frequência, simulada via pulso e FFT.
 
-![wb_transfer_function](../out/wb_transfer_function.png)
+![wb_transfer_function](/out/wb_transfer_function.png)
 
 ## Ligação com README geral
 
