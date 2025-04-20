@@ -2,8 +2,7 @@
 #include <cmath>
 #include <cstdlib>
 
-extern std::vector<std::vector<int>> ELEMENTS;            // ELEMENTS[e][0..2]
-extern std::vector<std::vector<double>> NODE_COORD;       // NODE_COORD[n][0] = x, [1] = y
+#include "globals.h"
 
 // Retorna (lambda, area) — coordenadas baricêntricas e área do triângulo
 std::pair<std::vector<double>, double> simplex2D(int elem_num, double xp, double yp) {

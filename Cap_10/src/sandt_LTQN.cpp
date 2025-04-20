@@ -4,16 +4,9 @@
 #include <Eigen/Dense>
 
 #include "globals.h"
-
-// Dependências
-std::vector<std::vector<double>> LTQN(const std::vector<double>& lambda,
-                                      const std::vector<std::vector<double>>& nabla_lambda);
-
-std::vector<double> curl_LTQN(const std::vector<double>& lambda,
-                              const std::vector<std::vector<double>>& nabla_lambda);
-
-// Quadratura de ordem 6: retorna pesos e pontos baricêntricos
-std::pair<std::vector<double>, std::vector<std::vector<double>>> tri_quad(int order);
+#include "LTQN.h"
+#include "curl_LTQN.h"   
+#include "tri_quad.h"  
 
 // Retorna S, T (8x8) para elemento LTQN com vértices (x1,y1), (x2,y2), (x3,y3)
 std::pair<std::vector<std::vector<double>>, std::vector<std::vector<double>>>

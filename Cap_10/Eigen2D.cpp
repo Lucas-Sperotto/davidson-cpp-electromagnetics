@@ -15,8 +15,6 @@
 #include "free_nodes.h"
 #include "plot_field.h"
 
-
-
 using namespace Eigen;
 
 #include "globals.h"
@@ -71,28 +69,61 @@ void Eigen2D()
         const auto &trinodes = ELEMENTS[ielem];
         std::cout << "Tri[" << ielem << "] = (" << trinodes[0] << ", " << trinodes[1] << ", " << trinodes[2] << ")\n";
 
+        for (int j = 0; j < 3; ++j)
+        {
+            if (trinodes[j] < 0 || trinodes[j] >= NODE_COORD.size())
+            {
+                std::cerr << "Erro: índice inválido no elemento " << ielem << ": trinodes[" << j << "] = "
+                          << trinodes[j] << " (NODE_COORD tem tamanho " << NODE_COORD.size() << ")\n";
+                exit(EXIT_FAILURE);
+            }
+        }
+
         double x1 = NODE_COORD[trinodes[0]][0], y1 = NODE_COORD[trinodes[0]][1];
         double x2 = NODE_COORD[trinodes[1]][0], y2 = NODE_COORD[trinodes[1]][1];
         double x3 = NODE_COORD[trinodes[2]][0], y3 = NODE_COORD[trinodes[2]][1];
 
         std::cout << "Calling sandt with nodes: "
-        << "(" << x1 << "," << y1 << "), "
-        << "(" << x2 << "," << y2 << "), "
-        << "(" << x3 << "," << y3 << ")\n";
+                  << "(" << x1 << ", " << y1 << "), "
+                  << "(" << x2 << ", " << y2 << "), "
+                  << "(" << x3 << ", " << y3 << ")\n";
 
         auto [S_elem, T_elem] = sandt(x1, y1, x2, y2, x3, y3); // retorna 3x3
-
+        std::cout << "Saiu de sandt para o elemento [" << ielem << "]\n";
         for (int jedge = 0; jedge < 3; ++jedge)
         {
-            int jj = dof_e1[ELEMENT_EDGES[ielem][jedge]];
+            int edge_j = ELEMENT_EDGES[ielem][jedge];
+            if (edge_j < 0 || edge_j >= dof_e1.size())
+            {
+                std::cerr << "Erro: edge_j=" << edge_j << " inválido (dof_e1 tem tamanho " << dof_e1.size() << ")\n";
+                exit(EXIT_FAILURE);
+            }
+
+            int jj = dof_e1[edge_j];
+            if (jj < 0 || jj >= S.size())
+            {
+                std::cerr << "Erro: edge_j=" << edge_j << " inválido (dof_e1 tem tamanho " << dof_e1.size() << ")\n";
+                exit(EXIT_FAILURE);
+            }
+
             for (int kedge = 0; kedge < 3; ++kedge)
             {
-                int kk = dof_e1[ELEMENT_EDGES[ielem][kedge]];
-                if (jj && kk)
+                int edge_k = ELEMENT_EDGES[ielem][kedge];
+                if (edge_k < 0 || edge_k >= dof_e1.size())
                 {
-                    S[jj][kk] += S_elem[jedge][kedge];
-                    T[jj][kk] += T_elem[jedge][kedge];
+                    std::cerr << "Erro: edge_k=" << edge_k << " inválido (dof_e1 tem tamanho " << dof_e1.size() << ")\n";
+                    exit(EXIT_FAILURE);
                 }
+
+                int kk = dof_e1[edge_k];
+                if (kk < 0 || kk >= S[jj].size())
+                {
+                    std::cerr << "Erro: kk=" << kk << " inválido (dof_e1 tem tamanho " << S.size() << ")\n";
+                    exit(EXIT_FAILURE);
+                }
+
+                S[jj][kk] += S_elem[jedge][kedge];
+                T[jj][kk] += T_elem[jedge][kedge];
             }
         }
     }
@@ -104,6 +135,7 @@ void Eigen2D()
             S_mat(i, j) = S[i][j] / mu_r;
             T_mat(i, j) = T[i][j] * eps_r;
         }
+    std::cout << "S_mat dimensions: " << S_mat.rows() << " x " << S_mat.cols() << std::endl;
 
     GeneralizedSelfAdjointEigenSolver<MatrixXd> solver(S_mat, T_mat);
     VectorXd eigvals = solver.eigenvalues();
@@ -114,7 +146,7 @@ void Eigen2D()
         if (eigvals[i] > 0)
             indexed_kc.emplace_back(std::sqrt(eigvals[i]), i);
     std::sort(indexed_kc.begin(), indexed_kc.end());
-
+    std::cout << "Indexed kc size: " << indexed_kc.size() << std::endl;
     std::vector<int> node_flag;
     int num_free_nodes = 0;
     free_nodes(a, b, node_flag, num_free_nodes);

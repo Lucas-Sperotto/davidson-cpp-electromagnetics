@@ -3,8 +3,7 @@
 #include <limits>
 #include <algorithm>
 
-extern int NUM_NODES;
-extern std::vector<std::vector<double>> NODE_COORD;
+#include "globals.h"
 
 // Marca os nós com condição de contorno inhomogênea (prescrita no condutor central)
 void prescr_nodes_mstrip(double a, double b, double h, double w,

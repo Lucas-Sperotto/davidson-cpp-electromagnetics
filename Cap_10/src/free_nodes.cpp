@@ -2,8 +2,7 @@
 #include <cmath>
 #include <algorithm>
 
-extern int NUM_NODES;
-extern std::vector<std::vector<double>> NODE_COORD;
+#include "globals.h"
 
 void free_nodes(double a, double b, std::vector<int>& node_flag, int& num_free_nodes) {
     node_flag.resize(NUM_NODES, 1);  // Começa marcando todos como livres

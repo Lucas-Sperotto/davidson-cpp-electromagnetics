@@ -1,6 +1,6 @@
 #include <vector>
 
-extern int NUM_EDGES, NUM_ELEMENTS, NUM_DOFS;
+#include "globals.h"
 
 // Renumera os graus de liberdade LTQN: dois por aresta (e1, e2) e dois por elemento (f1, f2)
 void renumber_dof_LTQN(const std::vector<int>& dof_free_flag,

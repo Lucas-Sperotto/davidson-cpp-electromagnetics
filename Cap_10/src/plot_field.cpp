@@ -3,15 +3,10 @@
 #include <cassert>
 #include <cmath>
 
-// Externos do sistema
-extern int NUM_ELEMENTS;
-extern std::vector<std::vector<int>> ELEMENTS;       // elementos triangulares
-extern std::vector<std::vector<double>> NODE_COORD;  // coordenadas dos nós
-extern std::vector<std::vector<int>> ELEMENT_EDGES;  // arestas por elemento
 
-// Funções auxiliares (pré-definidas)
-std::vector<double> simplex2D(int elem_num, double x, double y);  // retorna lambda
-std::vector<std::vector<double>> whitney(int elem_num, double x, double y);  // retorna w_ij
+#include "globals.h"
+#include "simplex2D.h"
+#include "whitney.h"
 
 // Avalia e armazena o campo vetorial (para visualização posterior)
 void plot_field(const std::vector<double>& dofs,
@@ -47,7 +42,7 @@ void plot_field(const std::vector<double>& dofs,
 
 
                 if (xc >= x_min && xc <= x_max && yc >= y_min && yc <= y_max) {
-                    std::vector<double> lambda = simplex2D(i_elem, xc, yc);
+                    std::vector<double> lambda = simplex2D(i_elem, xc, yc).first; // coordenadas baricêntricas
                     double tol = 1e-4;
 
                     if (lambda[0] >= -tol && lambda[0] <= 1 + tol &&

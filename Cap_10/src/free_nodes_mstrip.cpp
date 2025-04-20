@@ -3,8 +3,7 @@
 #include <limits>
 #include <algorithm>
 
-extern int NUM_NODES;
-extern std::vector<std::vector<double>> NODE_COORD;
+#include "globals.h"
 
 void free_nodes_mstrip(double a, double b, double h, double w,
                        std::vector<int>& node_flag, int& num_free_nodes) {

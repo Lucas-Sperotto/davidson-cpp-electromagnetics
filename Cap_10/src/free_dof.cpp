@@ -2,9 +2,7 @@
 #include <cmath>
 #include <limits>
 
-extern int NUM_EDGES;
-extern std::vector<std::vector<int>> EDGES;               // Cada aresta é [n1, n2]
-extern std::vector<std::vector<double>> NODE_COORD;       // Coordenadas dos nós
+#include "globals.h"
 
 std::vector<int> free_dof(double a, double b) {
     std::vector<int> dof_flag(NUM_EDGES, 1);  // Inicializa todos como livres

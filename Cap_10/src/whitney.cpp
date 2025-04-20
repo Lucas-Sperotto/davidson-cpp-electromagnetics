@@ -3,9 +3,7 @@
 
 #include "simplex2D.h"
 
-// Externas
-extern std::vector<std::vector<int>> ELEMENTS;
-extern std::vector<std::vector<double>> NODE_COORD;
+#include "globals.h"
 
 // Retorna as 3 funções de Whitney no triângulo elem_num, avaliadas no ponto (x,y)
 std::vector<std::vector<double>> whitney(int elem_num, double x, double y) {

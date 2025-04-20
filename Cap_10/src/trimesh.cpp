@@ -2,9 +2,7 @@
 #include <cmath>
 #include <cassert>
 
-extern int NUM_ELEMENTS, NUM_NODES;
-extern std::vector<std::vector<int>> ELEMENTS;
-extern std::vector<std::vector<double>> NODE_COORD;
+#include "globals.h"
 
 // Gera malha triangular uniforme
 void trimesh(double a, double b, int Nx, int Ny,
