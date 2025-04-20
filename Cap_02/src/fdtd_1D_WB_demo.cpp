@@ -16,7 +16,8 @@ double gaussder_norm(double t, double m, double sigma) {
 }
 
 int main() {
-    fs::create_directories("Cap_02/out");
+    const std::string out_dir = PROJECT_OUT_DIR;
+    fs::create_directories(out_dir);
 
     const double C = 1.0;
     const double L = 1.0;
@@ -92,7 +93,7 @@ int main() {
         I_nmin1 = I_n;
     }
 
-    std::ofstream f_vs("Cap_02/out/fdtd_wb_vs.csv"), f_vl("Cap_02/out/fdtd_wb_vl.csv");
+    std::ofstream f_vs(out_dir + "/fdtd_wb_vs.csv"), f_vl(out_dir + "/fdtd_wb_vl.csv");
     for (int i = 0; i < Nk; ++i) {
         f_vs << time[i] << "," << Vs[i] << "\n";
         f_vl << time[i] << "," << Vl[i] << "\n";
@@ -116,7 +117,7 @@ int main() {
         fftw_execute(p1);
         fftw_execute(p2);
 
-        std::ofstream tf_file("Cap_02/out/fdtd_wb_tf.csv");
+        std::ofstream tf_file(out_dir + "/fdtd_wb_tf.csv");
         double delta_f = 1.0 / (Nk * delta_t);
         for (int i = 0; i < Nk / 2; ++i) {
             double f = i * delta_f;

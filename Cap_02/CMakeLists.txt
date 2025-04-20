@@ -6,7 +6,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Diretórios
 include_directories(${CMAKE_SOURCE_DIR}/src)
-file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/out)
+file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/Cap_02/out)
+
+# Define macro para diretório de saída
+add_compile_definitions(PROJECT_OUT_DIR="${CMAKE_SOURCE_DIR}/out")
 
 # FFTW
 find_package(PkgConfig REQUIRED)

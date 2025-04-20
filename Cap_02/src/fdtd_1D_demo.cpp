@@ -9,7 +9,8 @@
 namespace fs = std::filesystem;
 
 int main() {
-    fs::create_directories("Cap_02/out");
+    const std::string out_dir = PROJECT_OUT_DIR;
+    fs::create_directories(out_dir);
 
     const double h = 0.25;
     const double C = 1.0;
@@ -80,12 +81,12 @@ int main() {
     }
 
     // Export voltage at last time step
-    std::ofstream file1("Cap_02/out/fdtd_voltage.csv");
+    std::ofstream file1(out_dir + "/fdtd_voltage.csv");
     for (const auto& v : V_n) file1 << v << "\n";
     file1.close();
 
     // Export voltage over time
-    std::ofstream file2("Cap_02/out/fdtd_time_series.csv");
+    std::ofstream file2(out_dir + "/fdtd_time_series.csv");
     for (const auto& row : V_time_series) {
         for (size_t j = 0; j < row.size(); ++j)
             file2 << row[j] << (j == row.size() - 1 ? "\n" : ",");
@@ -113,7 +114,7 @@ int main() {
         fftw_free(out);
     }
 
-    std::ofstream file3("Cap_02/out/fdtd_spectrum.csv");
+    std::ofstream file3(out_dir + "/fdtd_spectrum.csv");
     for (int z = 0; z < Nz; ++z)
         file3 << spectrum[z][0] << "," << spectrum[z][1] << "\n";
     file3.close();
