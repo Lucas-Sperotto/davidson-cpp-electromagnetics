@@ -4,6 +4,7 @@
 #include <vector>
 #include <cmath>
 #include <fstream>
+#include <filesystem>
 #include "gaussder.cpp"
 
 const double c = 2.997925e8;
@@ -12,10 +13,15 @@ const double mu_0 = 4 * M_PI * 1e-7;
 const double eta_0 = std::sqrt(mu_0 / eps_0);
 
 void run_fdtd2d_pml_simulation() {
+
+    const std::string out_dir = PROJECT_OUT_DIR;
+    std::filesystem::create_directories(out_dir);
+
+
     int refine = 1;
     int N_x = refine * 200;
     int N_y = refine * 200;
-    int M = refine * 350;
+    int M = refine * 512;
     int L = N_x / 2;
     int d_cell = 10;
 
@@ -132,12 +138,12 @@ void run_fdtd2d_pml_simulation() {
         E_y_point1[m] = E_y[point1_x][point1_y];
     }
 
-    std::ofstream file("out/ey_point1_pml.csv");
+    std::ofstream file(out_dir + "/ey_point1_pml.csv");
     file << "tempo_ns,Ey_Vpm\n";
     for (int m = 0; m < M; ++m) {
         double time_ns = m * delta_t * 1e9;
         file << time_ns << "," << E_y_point1[m] << "\n";
     }
     file.close();
-    std::cout << "Simulação com PML finalizada. Resultados em out/ey_point1_pml.csv" << std::endl;
+    std::cout << "Simulação com PML finalizada. Resultados em " << out_dir << "/ey_point1_pml.csv" << std::endl;
 }

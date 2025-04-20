@@ -3,10 +3,10 @@
 #include "include/fdtd2d_pml.hpp"
 
 int main() {
-#ifdef RUN_PML
+//#ifdef RUN_PML
     run_fdtd2d_pml_simulation();
-#else
+//#else
     run_fdtd2d_simulation();
-#endif
+//#endif
     return 0;
 }

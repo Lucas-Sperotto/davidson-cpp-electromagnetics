@@ -20,7 +20,7 @@ void run_fdtd2d_simulation() {
 
     int refine = 1;
     int N_x = refine * 200;
-    int N_y = refine * 100;
+    int N_y = refine * 200;
     int M = refine * 512;
     int L = N_x / 2;
     int L1 = 20;
