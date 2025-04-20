@@ -88,7 +88,7 @@ As imagens são salvas na pasta `Cap_02/out/`. Veja abaixo algumas delas:
 ### 📡 `wb_transfer_function.png`
 > Função de transferência `|V_L / V_S|` em função da frequência, simulada via pulso e FFT.
 
-![wb_transfer_function](/out/wb_transfer_function.png)
+![wb_transfer_function](/Cap_02/out/wb_transfer_function.png)
 
 ## Ligação com README geral
 
