@@ -11,6 +11,17 @@ voltage_final = np.loadtxt(os.path.join(out_dir, "fdtd_voltage.csv"))
 voltage_series = np.loadtxt(os.path.join(out_dir, "fdtd_time_series.csv"), delimiter=",")
 spectrum = np.loadtxt(os.path.join(out_dir, "fdtd_spectrum.csv"), delimiter=",")
 
+
+data = csvread('comparison_voltage.csv', 1, 0); % pula cabeçalho
+
+plot(data(:,1), data(:,2), '-', data(:,1), data(:,3), '--', ...
+     data(:,4), data(:,5), 'o', data(:,4), data(:,6), '+');
+legend('Real, exact','Imag, exact','Real, FDTD','Imag, FDTD', 'Location', 'Best');
+xlabel('z (m)');
+ylabel('Steady-state voltage (V)');
+
+
+
 # Parâmetros
 Nz = voltage_final.shape[0]
 Nk = voltage_series.shape[0]
