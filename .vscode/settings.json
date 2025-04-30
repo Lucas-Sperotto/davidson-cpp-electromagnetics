@@ -22,5 +22,6 @@
         "xstddef": "cpp",
         "xtr1common": "cpp",
         "xutility": "cpp"
-    }
+    },
+    "cmake.sourceDirectory": "C:/Projects/davidson-cpp-electromagnetics/Cap_02"
 }
