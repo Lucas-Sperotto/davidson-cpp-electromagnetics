@@ -5,6 +5,7 @@
 #include <fstream>
 #include <filesystem>
 #include <fftw3.h>
+#include <complex>      // std::complex
 
 namespace fs = std::filesystem;
 
@@ -65,7 +66,7 @@ int main()
     std::vector<std::vector<double>> V_period;
 
     std::vector<std::complex<double>> V_prev_period_freq(Nz, std::complex<double>(0.0, 0.0));
-
+    std::vector<std::complex<double>> V_period_freq(Nz, std::complex<double>(0.0, 0.0));
     // Time loop
     for (int nn = 2; nn <= Nk; ++nn)
     {
@@ -110,7 +111,7 @@ int main()
         }
 
         // FFT over M time samples per spatial point (per column)
-        std::vector<std::complex<double>> V_period_freq(Nz, std::complex<double>(0.0, 0.0));
+        //std::vector<std::complex<double>> V_period_freq(Nz, std::complex<double>(0.0, 0.0));
         // Aloca in/out e cria plano FFTW uma vez só
         fftw_complex *in = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * M);
         fftw_complex *out = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * M);
@@ -245,7 +246,7 @@ int main()
 
     std::ofstream file3(out_dir + "/fdtd_spectrum.csv");
     for (int z = 0; z < Nz; ++z)
-        file3 << spectrum[z][0] << "," << spectrum[z][1] << "\n";
+        file3 << V_period_freq[z].real() << "," << V_period_freq[z].imag() << "\n";
     file3.close();
 
     std::cout << "Simulation complete. Output saved in Cap_02/out/.\n";
