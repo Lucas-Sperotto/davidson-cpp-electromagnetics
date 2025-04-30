@@ -5,13 +5,38 @@
 #include <fstream>
 #include <filesystem>
 #include <fftw3.h>
-#include <complex>      // std::complex
+#include <complex> // std::complex
+#include <iomanip>
+
+
+
+
 
 namespace fs = std::filesystem;
+
+double compute_relative_error(const std::vector<std::complex<double>> &current,
+                              const std::vector<std::complex<double>> &previous)
+{
+    double num = 0.0;   // Numerador: ||current - previous||^2
+    double denom = 0.0; // Denominador: ||current||^2
+
+    for (size_t i = 0; i < current.size(); ++i)
+    {
+        std::complex<double> diff = current[i] - previous[i];
+        num += std::norm(diff);         // |diff|^2
+        denom += std::norm(current[i]); // |current[i]|^2
+    }
+
+    if (denom == 0.0)
+        return 0.0; // Evita divisão por zero (ou pode lançar exceção)
+
+    return std::sqrt(num) / std::sqrt(denom);
+}
 
 int main()
 {
     const std::string out_dir = PROJECT_OUT_DIR;
+    std::cout << std::setprecision(15) << std::fixed;
     fs::create_directories(out_dir);
 
     const double h = 0.25; // length [m]
@@ -63,13 +88,15 @@ int main()
     std::vector<double> V_n(Nz, 0.0), I_n(Nz, 0.0);
 
     std::vector<std::vector<double>> V_time_series;
-    std::vector<std::vector<double>> V_period;
+    std::vector<std::vector<double>> V_period(M, std::vector<double>(Nz, 0.0));
 
-    std::vector<std::complex<double>> V_prev_period_freq(Nz, std::complex<double>(0.0, 0.0));
-    std::vector<std::complex<double>> V_period_freq(Nz, std::complex<double>(0.0, 0.0));
+    std::vector<std::vector<std::complex<double>>> V_prev_period_freq(M, std::vector<std::complex<double>>(Nz, {0.0, 0.0}));
+    std::vector<std::vector<std::complex<double>>> V_period_freq(M, std::vector<std::complex<double>>(Nz, {0.0, 0.0}));
+    std::cout << "1" << std::endl;
     // Time loop
     for (int nn = 2; nn <= Nk; ++nn)
     {
+        std::cout << nn << std::endl;
         double Vo_nmin1 = V0 * std::cos(2.0 * M_PI * freq * (nn - 2.0) * delta_t); // Source.
         V_n[0] = (1.0 - beta1) * V_nmin1[0] - 2.0 * I_nmin1[0] + (2.0 / Rs) * Vo_nmin1;
 
@@ -99,56 +126,67 @@ int main()
         V_nmin1 = V_n;
         I_nmin1 = I_n;
         V_time_series.push_back(V_n);
+        int index = nn % M;
+        if (index == 0)
+            index = M;
+        std::cout << "index: " << index << std::endl;
+        V_period[index] = V_n;
 
-        if (V_period.size() < M)
-        {
-            V_period.push_back(V_n);
-        }
-        else
-        {
-            V_period.erase(V_period.begin());
-            V_period.push_back(V_n);
-        }
+        std::cout << "1.1" << std::endl;
 
-        // FFT over M time samples per spatial point (per column)
-        //std::vector<std::complex<double>> V_period_freq(Nz, std::complex<double>(0.0, 0.0));
-        // Aloca in/out e cria plano FFTW uma vez só
-        fftw_complex *in = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * M);
-        fftw_complex *out = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * M);
-        fftw_plan p = fftw_plan_dft_1d(M, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
+        std::cout << "V_period.size(): " << V_period.size() << std::endl;
+        std::cout << "V_period[0].size(): " << V_period[0].size() << std::endl;
 
-        for (int z = 0; z < Nz; ++z)
+        if (index == M)
         {
-            // Preenche vetor de entrada com a coluna z
-            for (int m = 0; m < M; ++m)
+            // FFT over M time samples per spatial point (per column)
+            // std::vector<std::complex<double>> V_period_freq(Nz, std::complex<double>(0.0, 0.0));
+            // Aloca in/out e cria plano FFTW uma vez só
+            fftw_complex *in = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * M);
+            fftw_complex *out = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * M);
+            fftw_plan p = fftw_plan_dft_1d(M, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
+            std::cout << "1.2" << std::endl;
+            for (int z = 0; z < Nz; ++z)
             {
-                in[m][0] = V_period[m][z]; // real
-                in[m][1] = 0.0;            // imag
+                std::cout << " = " << z << std::endl;
+                // Preenche vetor de entrada com a coluna z
+                for (int m = 0; m < M; ++m)
+                {
+                    in[m][0] = V_period[z][m]; // real
+                    in[m][1] = 0.0;            // imag
+                }
+                std::cout << "1.2.1" << std::endl;
+                // Executa FFT
+                fftw_execute(p);
+                std::cout << "1.2.2" << std::endl;
+                for (int m = 0; m < M; ++m)
+                {
+                    V_period_freq[z][m] = std::complex<double>(out[m][0], out[m][1]); // real, imag
+                }
+                std::cout << "1.2.3" << std::endl;
+                // out[2][0]; // real part at k=2
+                // out[2][1]; // imag part at k=2
             }
-            // Executa FFT
-            fftw_execute(p);
-            V_period_freq[z] = std::complex<double>(out[2][0], out[2][1]);
-            // out[2][0]; // real part at k=2
-            // out[2][1]; // imag part at k=2
+            std::cout << "1.3" << std::endl;
+            // Finaliza FFTW
+            fftw_destroy_plan(p);
+            fftw_free(in);
+            fftw_free(out);
+            std::cout << "1.4" << std::endl;
+            const double k = 2; // See discussion toward end of file regarding the index k.
+            double eps = compute_relative_error(V_period_freq[k], V_prev_period_freq[k]);
+            // Note that RMS norm includes inverse of root of length of vector, but it cancels above.
+            // The FFTs in the numerator and denominator of the above expression are
+            // both unscaled - the scale factors cancel here. See later comments regarding correct scaling of the FFT.
+
+            // Exit loop, or overwrite for next period:
+            if (eps < 0.002)
+                break;
+            std::cout << "1.5" << std::endl;
+            V_prev_period_freq = V_period_freq;
         }
-        // Finaliza FFTW
-        fftw_destroy_plan(p);
-        fftw_free(in);
-        fftw_free(out);
-
-        const double k = 2; // See discussion toward end of file regarding the index k.
-        double eps = std::abs((V_period_freq[k] - V_prev_period_freq[k]) / std::abs(V_period_freq[k]));
-        // Note that RMS norm includes inverse of root of length of vector, but it cancels above.
-        // The FFTs in the numerator and denominator of the above expression are
-        // both unscaled - the scale factors cancel here. See later comments regarding correct scaling of the FFT.
-
-        // Exit loop, or overwrite for next period:
-        if (eps < 0.002)
-            break;
-
-        V_prev_period_freq = V_period_freq;
     }
-
+    std::cout << "2" << std::endl;
     /* Now compute exact reults (p.36) and compare to the simulated ones.
     For the phasor results, what is needed is the first harmonic of the
     Fourier series expansion. The discussion in the textbook on p.58 refers to the general use of the
@@ -163,16 +201,18 @@ int main()
     taken in to account.
     Furthermore, the factor of 2 comes from the negative and positive frequency
     components of the Fourier integral.*/
-
-
+    std::cout << "2" << std::endl;
     for (int i = 0; i < Nz; ++i)
     {
         V_n[i] *= delta_t / (C * delta_z);
-        V_period_freq[i] *= delta_t / (C * delta_z);
-        V_period_freq[i] *= (2.0 * delta_t / T);
+        for (int m = 0; m < M; ++m)
+        {
+            V_period_freq[m][i] *= delta_t / (C * delta_z);
+            V_period_freq[m][i] *= (2.0 * delta_t / T);
+        }
     }
-
-    const double k = 2;
+    std::cout << "3" << std::endl;
+    const double k = 1;
     std::vector<double> z(Nz, 0.0);
     for (int i = 0; i < Nz; ++i)
     {
@@ -181,7 +221,7 @@ int main()
     const double lambda = c / freq;
     const double beta = 2.0 * M_PI / lambda;
     const double Gamma = (Rl - Z_0) / (Rl + Z_0); // Eq. (2.16)
-    const double V_plus = 0.5 * V0; // for matched source, Eq. (2.15)
+    const double V_plus = 0.5 * V0;               // for matched source, Eq. (2.15)
 
     std::vector<double> z_exact;
     for (double zz = 0.0; zz <= h + 1e-9; zz += 0.01)
@@ -197,6 +237,7 @@ int main()
         std::complex<double> term1 = std::exp(std::complex<double>(0, -phase_shift));
         std::complex<double> term2 = Gamma * std::exp(std::complex<double>(0, phase_shift));
         V_exact[i] = V_plus * (term1 + term2); // Eq. (2.14)
+        std::cout << "V_exact[" << i << "]" << V_exact[i] << std::endl;
     }
 
     std::ofstream file(out_dir + "/comparison_voltage.csv");
@@ -220,7 +261,7 @@ int main()
         file << ",";
 
         if (i < N_fdtd)
-            file << z[i] << "," << V_period_freq[i].real() << "," << V_period_freq[i].imag();
+            file << z[i] << "," << V_period_freq[k][i].real() << "," << V_period_freq[k][i].imag();
         else
             file << ",,";
 
@@ -246,7 +287,7 @@ int main()
 
     std::ofstream file3(out_dir + "/fdtd_spectrum.csv");
     for (int z = 0; z < Nz; ++z)
-        file3 << V_period_freq[z].real() << "," << V_period_freq[z].imag() << "\n";
+        file3 << V_period_freq[k][z].real() << "," << V_period_freq[k][z].imag() << "\n";
     file3.close();
 
     std::cout << "Simulation complete. Output saved in Cap_02/out/.\n";
