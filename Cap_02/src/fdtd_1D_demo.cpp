@@ -101,13 +101,13 @@ int main()
         V_n[0] = (1.0 - beta1) * V_nmin1[0] - 2.0 * I_nmin1[0] + (2.0 / Rs) * Vo_nmin1;
 
         // Loop code, the vectorial instructions are not used in this traduction.
-        for (int kk = 1; kk < Nz - 1; ++kk)
+        for (int kk = 1; kk < (Nz - 1); ++kk)
             V_n[kk] = V_nmin1[kk] - (I_nmin1[kk] - I_nmin1[kk - 1]);
 
         V_n[Nz - 1] = (1.0 - beta2) * V_nmin1[Nz - 1] + 2.0 * I_nmin1[Nz - 2];
 
         // Loop code, the vectorial instructions are not used in this traduction.
-        for (int kk = 0; kk < Nz - 1; ++kk)
+        for (int kk = 0; kk < (Nz - 1); ++kk)
             I_n[kk] = I_nmin1[kk] - r * (V_n[kk + 1] - V_n[kk]);
 
         double norm_new = 0.0, norm_old = 0.0;
@@ -129,13 +129,13 @@ int main()
         int index = nn % M;
         if (index == 0)
             index = M;
-        std::cout << "index: " << index << std::endl;
+        //std::cout << "index: " << index << std::endl;
         V_period[index] = V_n;
 
-        std::cout << "1.1" << std::endl;
+        //std::cout << "1.1" << std::endl;
 
-        std::cout << "V_period.size(): " << V_period.size() << std::endl;
-        std::cout << "V_period[0].size(): " << V_period[0].size() << std::endl;
+        //std::cout << "V_period.size(): " << V_period.size() << std::endl;
+        //std::cout << "V_period[0].size(): " << V_period[0].size() << std::endl;
 
         if (index == M)
         {
@@ -145,7 +145,7 @@ int main()
             fftw_complex *in = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * M);
             fftw_complex *out = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * M);
             fftw_plan p = fftw_plan_dft_1d(M, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
-            std::cout << "1.2" << std::endl;
+            //std::cout << "1.2" << std::endl;
             for (int z = 0; z < Nz; ++z)
             {
                 std::cout << " = " << z << std::endl;
@@ -155,25 +155,25 @@ int main()
                     in[m][0] = V_period[z][m]; // real
                     in[m][1] = 0.0;            // imag
                 }
-                std::cout << "1.2.1" << std::endl;
+                //std::cout << "1.2.1" << std::endl;
                 // Executa FFT
                 fftw_execute(p);
-                std::cout << "1.2.2" << std::endl;
+                //std::cout << "1.2.2" << std::endl;
                 for (int m = 0; m < M; ++m)
                 {
                     V_period_freq[z][m] = std::complex<double>(out[m][0], out[m][1]); // real, imag
                 }
-                std::cout << "1.2.3" << std::endl;
+                //std::cout << "1.2.3" << std::endl;
                 // out[2][0]; // real part at k=2
                 // out[2][1]; // imag part at k=2
             }
-            std::cout << "1.3" << std::endl;
+            //std::cout << "1.3" << std::endl;
             // Finaliza FFTW
             fftw_destroy_plan(p);
             fftw_free(in);
             fftw_free(out);
-            std::cout << "1.4" << std::endl;
-            const double k = 2; // See discussion toward end of file regarding the index k.
+            //std::cout << "1.4" << std::endl;
+            const double k = 1; // See discussion toward end of file regarding the index k.
             double eps = compute_relative_error(V_period_freq[k], V_prev_period_freq[k]);
             // Note that RMS norm includes inverse of root of length of vector, but it cancels above.
             // The FFTs in the numerator and denominator of the above expression are
@@ -182,11 +182,11 @@ int main()
             // Exit loop, or overwrite for next period:
             if (eps < 0.002)
                 break;
-            std::cout << "1.5" << std::endl;
+            //std::cout << "1.5" << std::endl;
             V_prev_period_freq = V_period_freq;
         }
     }
-    std::cout << "2" << std::endl;
+    //std::cout << "2" << std::endl;
     /* Now compute exact reults (p.36) and compare to the simulated ones.
     For the phasor results, what is needed is the first harmonic of the
     Fourier series expansion. The discussion in the textbook on p.58 refers to the general use of the
@@ -201,17 +201,18 @@ int main()
     taken in to account.
     Furthermore, the factor of 2 comes from the negative and positive frequency
     components of the Fourier integral.*/
-    std::cout << "2" << std::endl;
+    //std::cout << "2" << std::endl;
     for (int i = 0; i < Nz; ++i)
     {
         V_n[i] *= delta_t / (C * delta_z);
+        std::cout << " V_n[" << i << "]: " <<  V_n[i] << std::endl;
         for (int m = 0; m < M; ++m)
         {
             V_period_freq[m][i] *= delta_t / (C * delta_z);
             V_period_freq[m][i] *= (2.0 * delta_t / T);
         }
     }
-    std::cout << "3" << std::endl;
+    //std::cout << "3" << std::endl;
     const double k = 1;
     std::vector<double> z(Nz, 0.0);
     for (int i = 0; i < Nz; ++i)
@@ -237,7 +238,7 @@ int main()
         std::complex<double> term1 = std::exp(std::complex<double>(0, -phase_shift));
         std::complex<double> term2 = Gamma * std::exp(std::complex<double>(0, phase_shift));
         V_exact[i] = V_plus * (term1 + term2); // Eq. (2.14)
-        std::cout << "V_exact[" << i << "]" << V_exact[i] << std::endl;
+        std::cout << "V_exact[" << i << "]: " << V_exact[i] << std::endl;
     }
 
     std::ofstream file(out_dir + "/comparison_voltage.csv");
