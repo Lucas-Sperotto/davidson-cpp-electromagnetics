@@ -12,13 +12,13 @@ voltage_series = np.loadtxt(os.path.join(out_dir, "fdtd_time_series.csv"), delim
 spectrum = np.loadtxt(os.path.join(out_dir, "fdtd_spectrum.csv"), delimiter=",")
 
 
-data = csvread('comparison_voltage.csv', 1, 0); % pula cabeçalho
+#data = csvread('comparison_voltage.csv', 1, 0); % pula cabeçalho
 
-plot(data(:,1), data(:,2), '-', data(:,1), data(:,3), '--', ...
-     data(:,4), data(:,5), 'o', data(:,4), data(:,6), '+');
-legend('Real, exact','Imag, exact','Real, FDTD','Imag, FDTD', 'Location', 'Best');
-xlabel('z (m)');
-ylabel('Steady-state voltage (V)');
+#plot(data(:,1), data(:,2), '-', data(:,1), data(:,3), '--', ...
+#     data(:,4), data(:,5), 'o', data(:,4), data(:,6), '+');
+#legend('Real, exact','Imag, exact','Real, FDTD','Imag, FDTD', 'Location', 'Best');
+#xlabel('z (m)');
+#ylabel('Steady-state voltage (V)');
 
 
 
@@ -70,4 +70,4 @@ plt.ylabel("Fase (rad)")
 plt.grid(True)
 plt.savefig(os.path.join(out_dir, "fft_phase.png"))
 
-plt.show()
+#plt.show()

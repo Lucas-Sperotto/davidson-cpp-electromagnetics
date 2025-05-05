@@ -2,13 +2,21 @@
 // Arquivo fonte principal
 
 #include <iostream>   // Para entrada e saída padrão (ex: std::cout)
+                      // Doc: https://en.cppreference.com/w/cpp/io
 #include <vector>     // Para usar o container std::vector (vetores dinâmicos)
+                      // Doc: https://en.cppreference.com/w/cpp/container/vector
 #include <cmath>      // Funções matemáticas padrão (ex: std::sqrt, std::norm)
+                      // Doc: https://en.cppreference.com/w/cpp/header/cmath
 #include <fstream>    // Para operações de arquivo (ex: std::ofstream)
+                      // Doc: https://en.cppreference.com/w/cpp/header/fstream
 #include <filesystem> // Para criação e manipulação de diretórios
+                      // Doc: https://en.cppreference.com/w/cpp/filesystem
 #include <fftw3.h>    // Biblioteca FFTW para transformada rápida de Fourier
+                      // Doc: http://www.fftw.org/doc/
 #include <complex>    // Para números complexos com std::complex
+                      // Doc: https://en.cppreference.com/w/cpp/numeric/complex
 #include <iomanip>    // Para manipular formatação de saída (ex: std::setprecision)
+                      // Doc: https://en.cppreference.com/w/cpp/io/manip
 
 // Definindo um alias para a biblioteca filesystem para simplificar chamadas
 namespace fs = std::filesystem;
@@ -193,7 +201,7 @@ int main()
             // Note that RMS norm includes inverse of root of length of vector, but it cancels above.
             // The FFTs in the numerator and denominator of the above expression are
             // both unscaled - the scale factors cancel here. See later comments regarding correct scaling of the FFT.
-            std::cout << "eps = " << eps << std::endl;
+            //std::cout << "eps = " << eps << std::endl;
             // Exit loop, or overwrite for next period:
             if (eps < 1E-12) // 0.002)//1E-6)
                 break;

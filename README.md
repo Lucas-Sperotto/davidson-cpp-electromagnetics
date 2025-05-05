@@ -40,3 +40,10 @@ All auxiliary functions are modular and reusable.
 
 This project is unofficial and is not affiliated with Prof. D. B. Davidson or Cambridge University Press. The translations are provided for educational and research purposes only.
 
+Dependências: C++ sudo apt install build-essential gfortran -y
+Cmake sudo apt install cmake -y
+pkg-config sudo apt install pkg-config -y
+python sudo apt install python3 python3-pip -y
+numpy sudo apt install python3-numpy -y
+matplotlib sudo apt install python3-matplotlib -y
+pandas sudo apt install python3-pandas -y
