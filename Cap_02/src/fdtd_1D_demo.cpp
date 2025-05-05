@@ -1,61 +1,75 @@
-// Cap_02/src/fdtd_1D_demo.cpp
-#include <iostream>
-#include <vector>
-#include <cmath>
-#include <fstream>
-#include <filesystem>
-#include <fftw3.h>
-#include <complex> // std::complex
-#include <iomanip>
+// Capítulo 2 - Exemplo de FDTD 1D (Método das Diferenças Finitas no Domínio do Tempo)
+// Arquivo fonte principal
 
+#include <iostream>   // Para entrada e saída padrão (ex: std::cout)
+#include <vector>     // Para usar o container std::vector (vetores dinâmicos)
+#include <cmath>      // Funções matemáticas padrão (ex: std::sqrt, std::norm)
+#include <fstream>    // Para operações de arquivo (ex: std::ofstream)
+#include <filesystem> // Para criação e manipulação de diretórios
+#include <fftw3.h>    // Biblioteca FFTW para transformada rápida de Fourier
+#include <complex>    // Para números complexos com std::complex
+#include <iomanip>    // Para manipular formatação de saída (ex: std::setprecision)
 
-
-
-
+// Definindo um alias para a biblioteca filesystem para simplificar chamadas
 namespace fs = std::filesystem;
 
+// Função que calcula o erro relativo entre dois vetores complexos
+// Este erro é usado como critério de convergência da simulação
 double compute_relative_error(const std::vector<std::complex<double>> &current,
                               const std::vector<std::complex<double>> &previous)
 {
-    double num = 0.0;   // Numerador: ||current - previous||^2
-    double denom = 0.0; // Denominador: ||current||^2
+    double num = 0.0;   // Numerador da fórmula: ||current - previous||^2
+    double denom = 0.0; // Denominador da fórmula: ||current||^2
 
+    // Percorre todos os elementos dos vetores para calcular o erro
     for (size_t i = 0; i < current.size(); ++i)
     {
-        std::complex<double> diff = current[i] - previous[i];
-        num += std::norm(diff);         // |diff|^2
-        denom += std::norm(current[i]); // |current[i]|^2
+        std::complex<double> diff = current[i] - previous[i]; // Diferença entre os elementos
+        num += std::norm(diff);                               // Soma do quadrado do módulo da diferença (|diff|^2)
+        denom += std::norm(current[i]);                       // Soma do quadrado do módulo do elemento atual (|current[i]|^2)
     }
 
     if (denom == 0.0)
-        return 0.0; // Evita divisão por zero (ou pode lançar exceção)
+        return 0.0; // Se o denominador for zero (evita divisão por zero), retorna 0.0
 
+    // Retorna a raiz quadrada do erro relativo
     return std::sqrt(num) / std::sqrt(denom);
 }
 
+// Função principal do programa
 int main()
 {
+    // Define o diretório de saída onde os arquivos de resultado serão salvos
+    // O diretório de saída é definido como "Cap_02/out/"
+    // essa informação é deninida no CMakeLists.txt
+    // e é passada como variável de ambiente para o programa
     const std::string out_dir = PROJECT_OUT_DIR;
+
+    // Define a precisão de saída padrão para 15 casas decimais e formato fixo (não científico)
     std::cout << std::setprecision(15) << std::fixed;
+
+    // Cria o diretório de saída (se não existir)
     fs::create_directories(out_dir);
 
-    const double h = 0.25; // length [m]
-    const double C = 1.0;
-    const double L = 1.0;
-    const double c = 1.0 / std::sqrt(L * C);
-    const double Z_0 = std::sqrt(L / C);
-    const double Rs = 1.0; //[Ohm]
+    // Parâmetros iniciais da simulação
+    const int k = 1;                         // See discussion toward end of file regarding the index k.
+    const double h = 0.25;                   // Comprimento total da linha de transmissão (em metros) [m]
+    const double C = 1.0;                    // Capacitância por unidade de comprimento
+    const double L = 1.0;                    // Indutância por unidade de comprimento
+    const double c = 1.0 / std::sqrt(L * C); // Velocidade de propagação na linha (v = 1/sqrt(LC))
+    const double Z_0 = std::sqrt(L / C);     // Impedância característica da linha de transmissão
+    const double Rs = 1.0;                   // Resistência da fonte [Ohm]
 
     double Rl;
-    std::cout << "Load resistance? (Z_0 = 1 Ohm) Default: 2 -> ";
-    std::string input;
-    std::getline(std::cin, input);
-    Rl = input.empty() ? 2.0 : std::stod(input);
+    // std::cout << "Load resistance? (Z_0 = 1 Ohm) Default: 2 -> ";
+    // std::string input;
+    // std::getline(std::cin, input);
+    Rl = 2.0; // input.empty() ? 2.0 : std::stod(input);
 
     const double V0 = 1.0; // Amplitude of source voltage [V]
     // const double Rl = 1;
     const double freq = 4.0; // freq of applied sinusoid [Hz]
-    const int Nz = 11;
+    const int Nz = 26;
     const double delta_z = h / (Nz - 1); // Number of points
 
     // Nk = 400; // Number of time steps for 0.25
@@ -71,7 +85,7 @@ int main()
         is not also the same time sample in the next period.*/
     const double delta_t = T / M;
 
-    const int Nk = 16 * M; // A maximum number of periods to run if the convergence criteria eps is not achieved.
+    const int Nk = 2048 * M; // 16 * M; // A maximum number of periods to run if the convergence criteria eps is not achieved.
 
     /* An abritary growth factor indicating instability
         Don't make too close to 1, since the early time
@@ -83,7 +97,8 @@ int main()
     const double r = (delta_t * delta_t) / (L * C * delta_z * delta_z);
 
     //  First time step - Initialize.
-    std::vector<double> V_nmin1(Nz, 0.0), I_nmin1(Nz, 0.0);
+    std::vector<double> V_nmin1(Nz, 0.0), I_nmin1(Nz,
+                                                  0.0);
     // Pre-allocation
     std::vector<double> V_n(Nz, 0.0), I_n(Nz, 0.0);
 
@@ -92,11 +107,11 @@ int main()
 
     std::vector<std::vector<std::complex<double>>> V_prev_period_freq(M, std::vector<std::complex<double>>(Nz, {0.0, 0.0}));
     std::vector<std::vector<std::complex<double>>> V_period_freq(M, std::vector<std::complex<double>>(Nz, {0.0, 0.0}));
-    std::cout << "1" << std::endl;
-    // Time loop
-    for (int nn = 2; nn <= Nk; ++nn)
+    // std::cout << "1" << std::endl;
+    //  Time loop
+    for (int nn = 2; true; ++nn)//nn <= Nk; ++nn)
     {
-        std::cout << nn << std::endl;
+        //std::cout << "nn: " << nn << std::endl;
         double Vo_nmin1 = V0 * std::cos(2.0 * M_PI * freq * (nn - 2.0) * delta_t); // Source.
         V_n[0] = (1.0 - beta1) * V_nmin1[0] - 2.0 * I_nmin1[0] + (2.0 / Rs) * Vo_nmin1;
 
@@ -129,13 +144,13 @@ int main()
         int index = nn % M;
         if (index == 0)
             index = M;
-        //std::cout << "index: " << index << std::endl;
+        // std::cout << "index: " << index << std::endl;
         V_period[index] = V_n;
 
-        //std::cout << "1.1" << std::endl;
+        // std::cout << "1.1" << std::endl;
 
-        //std::cout << "V_period.size(): " << V_period.size() << std::endl;
-        //std::cout << "V_period[0].size(): " << V_period[0].size() << std::endl;
+        // std::cout << "V_period.size(): " << V_period.size() << std::endl;
+        // std::cout << "V_period[0].size(): " << V_period[0].size() << std::endl;
 
         if (index == M)
         {
@@ -145,48 +160,48 @@ int main()
             fftw_complex *in = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * M);
             fftw_complex *out = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * M);
             fftw_plan p = fftw_plan_dft_1d(M, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
-            //std::cout << "1.2" << std::endl;
+            // std::cout << "1.2" << std::endl;
             for (int z = 0; z < Nz; ++z)
             {
-                std::cout << " = " << z << std::endl;
+                //std::cout << "z = " << z << std::endl;
                 // Preenche vetor de entrada com a coluna z
                 for (int m = 0; m < M; ++m)
                 {
-                    in[m][0] = V_period[z][m]; // real
+                    in[m][0] = V_period[m][z]; // real
                     in[m][1] = 0.0;            // imag
                 }
-                //std::cout << "1.2.1" << std::endl;
-                // Executa FFT
+                // std::cout << "1.2.1" << std::endl;
+                //  Executa FFT
                 fftw_execute(p);
-                //std::cout << "1.2.2" << std::endl;
+                // std::cout << "1.2.2" << std::endl;
                 for (int m = 0; m < M; ++m)
                 {
-                    V_period_freq[z][m] = std::complex<double>(out[m][0], out[m][1]); // real, imag
+                    V_period_freq[m][z] = std::complex<double>(out[m][0], out[m][1]); // real, imag
                 }
-                //std::cout << "1.2.3" << std::endl;
-                // out[2][0]; // real part at k=2
-                // out[2][1]; // imag part at k=2
+                // std::cout << "1.2.3" << std::endl;
+                //  out[2][0]; // real part at k=2
+                //  out[2][1]; // imag part at k=2
             }
-            //std::cout << "1.3" << std::endl;
-            // Finaliza FFTW
+            // std::cout << "1.3" << std::endl;
+            //  Finaliza FFTW
             fftw_destroy_plan(p);
             fftw_free(in);
             fftw_free(out);
-            //std::cout << "1.4" << std::endl;
-            const double k = 1; // See discussion toward end of file regarding the index k.
+            // std::cout << "1.4" << std::endl;
+
             double eps = compute_relative_error(V_period_freq[k], V_prev_period_freq[k]);
             // Note that RMS norm includes inverse of root of length of vector, but it cancels above.
             // The FFTs in the numerator and denominator of the above expression are
             // both unscaled - the scale factors cancel here. See later comments regarding correct scaling of the FFT.
-
+            std::cout << "eps = " << eps << std::endl;
             // Exit loop, or overwrite for next period:
-            if (eps < 0.002)
+            if (eps < 1E-12) // 0.002)//1E-6)
                 break;
-            //std::cout << "1.5" << std::endl;
+            // std::cout << "1.5" << std::endl;
             V_prev_period_freq = V_period_freq;
         }
     }
-    //std::cout << "2" << std::endl;
+    // std::cout << "2" << std::endl;
     /* Now compute exact reults (p.36) and compare to the simulated ones.
     For the phasor results, what is needed is the first harmonic of the
     Fourier series expansion. The discussion in the textbook on p.58 refers to the general use of the
@@ -201,19 +216,19 @@ int main()
     taken in to account.
     Furthermore, the factor of 2 comes from the negative and positive frequency
     components of the Fourier integral.*/
-    //std::cout << "2" << std::endl;
+    // std::cout << "2" << std::endl;
     for (int i = 0; i < Nz; ++i)
     {
         V_n[i] *= delta_t / (C * delta_z);
-        std::cout << " V_n[" << i << "]: " <<  V_n[i] << std::endl;
+        //std::cout << " V_n[" << i << "]: " << V_n[i] << std::endl;
         for (int m = 0; m < M; ++m)
         {
             V_period_freq[m][i] *= delta_t / (C * delta_z);
             V_period_freq[m][i] *= (2.0 * delta_t / T);
+            // std::cout << "V_period_freq[" << m << "][" << i << "]: " << V_period_freq[m][i] << std::endl;
         }
     }
-    //std::cout << "3" << std::endl;
-    const double k = 1;
+    // std::cout << "3" << std::endl;
     std::vector<double> z(Nz, 0.0);
     for (int i = 0; i < Nz; ++i)
     {
@@ -238,7 +253,7 @@ int main()
         std::complex<double> term1 = std::exp(std::complex<double>(0, -phase_shift));
         std::complex<double> term2 = Gamma * std::exp(std::complex<double>(0, phase_shift));
         V_exact[i] = V_plus * (term1 + term2); // Eq. (2.14)
-        std::cout << "V_exact[" << i << "]: " << V_exact[i] << std::endl;
+        //std::cout << "V_exact[" << i << "]: " << V_exact[i] << std::endl;
     }
 
     std::ofstream file(out_dir + "/comparison_voltage.csv");
@@ -288,9 +303,67 @@ int main()
 
     std::ofstream file3(out_dir + "/fdtd_spectrum.csv");
     for (int z = 0; z < Nz; ++z)
+    {
         file3 << V_period_freq[k][z].real() << "," << V_period_freq[k][z].imag() << "\n";
+        //std::cout << "V_period_freq[" << k << "][" << z << "]: " << V_period_freq[k][z] << std::endl;
+    }
     file3.close();
 
     std::cout << "Simulation complete. Output saved in Cap_02/out/.\n";
+
+    // ==============================================
+    // Cálculo do erro global (norma L2 relativa)
+    // e erro relativo ponto a ponto + geração CSV
+    // ==============================================
+
+    // Arquivo de saída CSV
+    std::ofstream csv_file(out_dir + "/erro_relativo.csv");
+
+    // Inicializa variáveis para calcular norma L2
+    double sum_sq_error = 0.0;        // Soma dos quadrados dos erros
+    double sum_sq_exact = 0.0;        // Soma dos quadrados dos valores exatos
+    double rel_error[V_exact.size()]; // Erro relativo para cada ponto
+    // Vamos supor que você tem M pontos (mesmo tamanho que V_exact)
+    for (size_t i = 0; i < V_exact.size(); ++i)
+    {
+        // Diferença complexa entre solução exata e simulada
+        std::complex<double> diff = V_exact[i] - V_period_freq[k][i];
+
+        // Norma (módulo) da diferença
+        double abs_error = std::abs(diff);
+
+        // Norma (módulo) do valor exato
+        double abs_exact = std::abs(V_exact[i]);
+
+        // Erro relativo: |erro| / |exato| (com proteção contra divisão por zero)
+        rel_error[i] = (abs_exact > 1e-12) ? (abs_error / abs_exact) : 0.0;
+
+        std::cout << "Erro[" << i << "]" << rel_error[i] << " %" << std::endl;
+        // Acumula para norma L2
+        sum_sq_error += abs_error * abs_error;
+        sum_sq_exact += abs_exact * abs_exact;
+    }
+
+    // Calcula a norma L2 relativa
+    double global_L2_error = std::sqrt(sum_sq_error) / std::sqrt(sum_sq_exact);
+
+    csv_file << "Norma_L2_Relativa: " << global_L2_error << "\n";
+
+    // Escreve cabeçalho para indicar o conteúdo
+    csv_file << "Erro relativo ponto a ponto entre V_exact e V_period_freq\n";
+    csv_file << "Index,Erro_relativo\n";
+
+    for (size_t i = 0; i < V_exact.size(); ++i)
+    {
+        csv_file << i << "," << rel_error[i] << "\n";
+    }
+
+    // Fecha o arquivo para reabrir no modo de inserção no topo
+    csv_file.close();
+
+    // Também imprime no console para referência rápida
+    std::cout << "Norma L2 relativa: " << global_L2_error << std::endl;
+    std::cout << "Arquivo CSV 'erro_relativo.csv' gerado com sucesso.\n";
+
     return 0;
 }
