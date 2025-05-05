@@ -14,7 +14,7 @@ with open(file_path, 'r') as f:
 
 # Cria o gráfico
 plt.figure(figsize=(10, 6))
-plt.plot(df['Index (z)'], df['Erro_relativo (%)'], marker='o')
+plt.plot(df['Index'], df['Erro_relativo'], marker='o')
 plt.title('Erro Relativo ponto a ponto')
 plt.xlabel('Index (z)')
 plt.ylabel('Erro Relativo (%)')
