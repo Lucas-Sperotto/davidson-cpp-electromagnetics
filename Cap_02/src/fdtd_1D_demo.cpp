@@ -1,5 +1,6 @@
 // Capítulo 2 - Exemplo de FDTD 1D (Método das Diferenças Finitas no Domínio do Tempo)
 // Arquivo fonte principal
+// Problema tratado na Figura 2.2
 
 #include <iostream>   // Para entrada e saída padrão (ex: std::cout)
                       // Doc: https://en.cppreference.com/w/cpp/io
@@ -59,11 +60,11 @@ int main()
     // Cria o diretório de saída (se não existir)
     fs::create_directories(out_dir);
 
-    // Parâmetros iniciais da simulação
+    // Parâmetros iniciais da simulação (pagina 38 do livro)
     const int k = 1;                         // See discussion toward end of file regarding the index k.
     const double h = 0.25;                   // Comprimento total da linha de transmissão (em metros) [m]
-    const double C = 1.0;                    // Capacitância por unidade de comprimento
-    const double L = 1.0;                    // Indutância por unidade de comprimento
+    const double C = 1.0;                    // Capacitância por unidade de comprimento [F/m]
+    const double L = 1.0;                    // Indutância por unidade de comprimento [H/m]
     const double c = 1.0 / std::sqrt(L * C); // Velocidade de propagação na linha (v = 1/sqrt(LC))
     const double Z_0 = std::sqrt(L / C);     // Impedância característica da linha de transmissão
     const double Rs = 1.0;                   // Resistência da fonte [Ohm]
@@ -100,13 +101,12 @@ int main()
         behaviour can indeed grow quite quickly.*/
     const double growth = 1.5;
 
-    const double beta1 = 2.0 * delta_t / (Rs * C * delta_z);
-    const double beta2 = 2.0 * delta_t / (Rl * C * delta_z);
-    const double r = (delta_t * delta_t) / (L * C * delta_z * delta_z);
+    const double beta1 = 2.0 * delta_t / (Rs * C * delta_z); // Eq. (2.67)
+    const double beta2 = 2.0 * delta_t / (Rl * C * delta_z); // Eq. (2.68)
+    const double r = (delta_t * delta_t) / (L * C * delta_z * delta_z); // Eq. (2.69)
 
     //  First time step - Initialize.
-    std::vector<double> V_nmin1(Nz, 0.0), I_nmin1(Nz,
-                                                  0.0);
+    std::vector<double> V_nmin1(Nz, 0.0), I_nmin1(Nz, 0.0);
     // Pre-allocation
     std::vector<double> V_n(Nz, 0.0), I_n(Nz, 0.0);
 
@@ -117,21 +117,21 @@ int main()
     std::vector<std::vector<std::complex<double>>> V_period_freq(M, std::vector<std::complex<double>>(Nz, {0.0, 0.0}));
     // std::cout << "1" << std::endl;
     //  Time loop
-    for (int nn = 2; true; ++nn)//nn <= Nk; ++nn)
+    for (int nn = 1; true; ++nn)//nn <= Nk; ++nn)
     {
         //std::cout << "nn: " << nn << std::endl;
-        double Vo_nmin1 = V0 * std::cos(2.0 * M_PI * freq * (nn - 2.0) * delta_t); // Source.
-        V_n[0] = (1.0 - beta1) * V_nmin1[0] - 2.0 * I_nmin1[0] + (2.0 / Rs) * Vo_nmin1;
+        double Vo_nmin1 = V0 * std::cos(2.0 * M_PI * freq * (nn - 2) * delta_t); // Source.
+        V_n[0] = (1.0 - beta1) * V_nmin1[0] - 2.0 * I_nmin1[0] + (2.0 / Rs) * Vo_nmin1; // Eq. (2.63)
 
         // Loop code, the vectorial instructions are not used in this traduction.
         for (int kk = 1; kk < (Nz - 1); ++kk)
-            V_n[kk] = V_nmin1[kk] - (I_nmin1[kk] - I_nmin1[kk - 1]);
+            V_n[kk] = V_nmin1[kk] - (I_nmin1[kk] - I_nmin1[kk - 1]); // Eq. (2.64)
 
-        V_n[Nz - 1] = (1.0 - beta2) * V_nmin1[Nz - 1] + 2.0 * I_nmin1[Nz - 2];
+        V_n[Nz - 1] = (1.0 - beta2) * V_nmin1[Nz - 1] + 2.0 * I_nmin1[Nz - 2];  // Eq. (2.65)
 
         // Loop code, the vectorial instructions are not used in this traduction.
         for (int kk = 0; kk < (Nz - 1); ++kk)
-            I_n[kk] = I_nmin1[kk] - r * (V_n[kk + 1] - V_n[kk]);
+            I_n[kk] = I_nmin1[kk] - r * (V_n[kk + 1] - V_n[kk]);    // Eq. (2.66)
 
         double norm_new = 0.0, norm_old = 0.0;
         for (int i = 0; i < Nz; ++i)
@@ -244,6 +244,8 @@ int main()
     }
     const double lambda = c / freq;
     const double beta = 2.0 * M_PI / lambda;
+
+    
     const double Gamma = (Rl - Z_0) / (Rl + Z_0); // Eq. (2.16)
     const double V_plus = 0.5 * V0;               // for matched source, Eq. (2.15)
 
@@ -313,7 +315,7 @@ int main()
     for (int z = 0; z < Nz; ++z)
     {
         file3 << V_period_freq[k][z].real() << "," << V_period_freq[k][z].imag() << "\n";
-        //std::cout << "V_period_freq[" << k << "][" << z << "]: " << V_period_freq[k][z] << std::endl;
+        std::cout << "V_period_freq[" << k << "][" << z << "]: " << V_period_freq[k][z] << std::endl;
     }
     file3.close();
 
