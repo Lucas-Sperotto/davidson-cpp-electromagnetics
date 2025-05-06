@@ -32,10 +32,10 @@ plt.plot(z_exact, V_exact_real, '-', label='Real, exact')
 plt.plot(z_exact, V_exact_imag, '--', label='Imag, exact')
 
 # Círculo transparente: parte real FDTD
-plt.plot(z_fdtd, V_fdtd_real, 'o', mfc='none', label='Real FDTD')
+plt.plot(z_fdtd, V_fdtd_real, 'o', mfc='none', label='Real, FDTD')
 
 # Sinal de +: parte imaginária FDTD
-plt.plot(z_fdtd, V_fdtd_imag, '+', label='Imag FDTD')
+plt.plot(z_fdtd, V_fdtd_imag, '+', label='Imag, FDTD')
 
 # Configurações dos eixos e da legenda
 plt.xlabel('z (m)')
