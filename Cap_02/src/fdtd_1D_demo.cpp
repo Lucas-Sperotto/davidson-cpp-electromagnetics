@@ -118,7 +118,7 @@ int main()
     // std::cout << "1" << std::endl;
     double Vo_nmin1;
     //  Time loop
-    for (int nn = 1; nn <= Nk; ++nn)
+    for (int nn = 1; true; ++nn)//nn <= Nk; ++nn)
     {
         //std::cout << "nn: " << nn << std::endl;
         Vo_nmin1 = V0 * std::cos(2.0 * M_PI * freq * (nn - 2) * delta_t); // Source.
@@ -151,14 +151,14 @@ int main()
         I_nmin1 = I_n;
         V_time_series.push_back(V_n);
         // MATLAB: index = mod(nn, M); if index == 0, index = M;
-        int index = (nn - 1) % M;// C++ 0-based
+        int index = (nn - 1) % M; // C++ 0-based
         
         V_period[index] = V_n;
 
         // std::cout << "V_period.size(): " << V_period.size() << std::endl;
         // std::cout << "V_period[0].size(): " << V_period[0].size() << std::endl;
 
-        if (index == (M - 1))
+        if (index == (M - 1)) // C++ 0-based
         {
             // FFT over M time samples per spatial point (per column)
             // std::vector<std::complex<double>> V_period_freq(Nz, std::complex<double>(0.0, 0.0));
@@ -201,7 +201,7 @@ int main()
             // both unscaled - the scale factors cancel here. See later comments regarding correct scaling of the FFT.
             //std::cout << "eps = " << eps << std::endl;
             // Exit loop, or overwrite for next period:
-            if (eps < 0.002) // 0.002)//1E-6)
+            if (eps < 1e-12) // 0.002)
                 break;
             // std::cout << "1.5" << std::endl;
             V_prev_period_freq = V_period_freq;
@@ -234,10 +234,10 @@ int main()
             // std::cout << "V_period_freq[" << m << "][" << i << "]: " << V_period_freq[m][i] << std::endl;
         }
     }
-    for (int i = 0; i < Nz; ++i)
-    {
-        std::cout << "V_period[" << (M - 1) << "][" << i << "]: " << V_period[(M - 1)][i] << std::endl;
-    }
+    //for (int i = 0; i < Nz; ++i)
+    //{
+        //std::cout << "V_period[" << (M - 1) << "][" << i << "]: " << V_period[(M - 1)][i] << std::endl;
+    //}
     // std::cout << "3" << std::endl;
     std::vector<double> z(Nz, 0.0);
     for (int i = 0; i < Nz; ++i)
@@ -316,7 +316,7 @@ int main()
     for (int z = 0; z < Nz; ++z)
     {
         file3 << V_period_freq[k][z].real() << "," << V_period_freq[k][z].imag() << "\n";
-        std::cout << "V_period_freq[" << k << "][" << z << "]: " << V_period_freq[k][z] << std::endl;
+        //std::cout << "V_period_freq[" << k << "][" << z << "]: " << V_period_freq[k][z] << std::endl;
     }
     file3.close();
 
@@ -349,7 +349,7 @@ int main()
         // Erro relativo: |erro| / |exato| (com proteção contra divisão por zero)
         rel_error[i] = (abs_exact > 1e-12) ? (abs_error / abs_exact) : 0.0;
 
-        std::cout << "Erro[" << i << "]" << rel_error[i] << " %" << std::endl;
+        //std::cout << "Erro[" << i << "]" << rel_error[i] << " %" << std::endl;
         // Acumula para norma L2
         sum_sq_error += abs_error * abs_error;
         sum_sq_exact += abs_exact * abs_exact;
@@ -373,9 +373,9 @@ int main()
     csv_file.close();
 
     // Também imprime no console para referência rápida
-    std::cout << "Norma L2 relativa: " << global_L2_error << std::endl;
+    //std::cout << "Norma L2 relativa: " << global_L2_error << std::endl;
     std::cout << "Arquivo CSV 'erro_relativo.csv' gerado com sucesso.\n";
-
+    /*
     std::cout << "beta: " << beta << std::endl;
     std::cout << "beta1: " << beta1 << std::endl;
     std::cout << "beta2: " << beta2 << std::endl;
@@ -400,13 +400,6 @@ int main()
     std::cout << "V_plus: " << V_plus << std::endl;
     std::cout << "Vo_nmin1: " << Vo_nmin1 << std::endl;
     std::cout << "Z_0: " << Z_0 << std::endl;
-
-
-
-
-
-
-
-
+    */
     return 0;
 }
