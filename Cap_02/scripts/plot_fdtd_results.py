@@ -1,5 +1,6 @@
 # Cap_02/scripts/plot_fdtd_results.py
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 import os
 
@@ -11,14 +12,43 @@ voltage_final = np.loadtxt(os.path.join(out_dir, "fdtd_voltage.csv"))
 voltage_series = np.loadtxt(os.path.join(out_dir, "fdtd_time_series.csv"), delimiter=",")
 spectrum = np.loadtxt(os.path.join(out_dir, "fdtd_spectrum.csv"), delimiter=",")
 
+comparison_voltage = pd.read_csv(os.path.join(out_dir, 'comparison_voltage.csv'))
 
-#data = csvread('comparison_voltage.csv', 1, 0); % pula cabeçalho
+# Extrai os dados
+z_exact = comparison_voltage['z_exact']
+V_exact_real = comparison_voltage['Re(V_exact)']
+V_exact_imag = comparison_voltage['Im(V_exact)']
+z_fdtd = comparison_voltage['z_fdtd']
+V_fdtd_real = comparison_voltage['Re(V_fdtd)']
+V_fdtd_imag = comparison_voltage['Im(V_fdtd)']
 
-#plot(data(:,1), data(:,2), '-', data(:,1), data(:,3), '--', ...
-#     data(:,4), data(:,5), 'o', data(:,4), data(:,6), '+');
-#legend('Real, exact','Imag, exact','Real, FDTD','Imag, FDTD', 'Location', 'Best');
-#xlabel('z (m)');
-#ylabel('Steady-state voltage (V)');
+# Cria o gráfico
+plt.figure(figsize=(8, 6))
+
+# Linha cheia: parte real exata
+plt.plot(z_exact, V_exact_real, '-', label='Real, exact')
+
+# Linha tracejada: parte imaginária exata
+plt.plot(z_exact, V_exact_imag, '--', label='Imag, exact')
+
+# Círculo transparente: parte real FDTD
+plt.plot(z_fdtd, V_fdtd_real, 'o', mfc='none', label='Real FDTD')
+
+# Sinal de +: parte imaginária FDTD
+plt.plot(z_fdtd, V_fdtd_imag, '+', label='Imag FDTD')
+
+# Configurações dos eixos e da legenda
+plt.xlabel('z (m)')
+plt.ylabel('Steady-state voltage (V)')
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+
+# Salva o gráfico como arquivo PNG
+plt.savefig(os.path.join(out_dir, 'comparison_voltage_plot.png'), dpi=300)
+
+# Exibe o gráfico
+plt.show()
 
 
 
