@@ -116,11 +116,12 @@ int main()
     std::vector<std::vector<std::complex<double>>> V_prev_period_freq(M, std::vector<std::complex<double>>(Nz, {0.0, 0.0}));
     std::vector<std::vector<std::complex<double>>> V_period_freq(M, std::vector<std::complex<double>>(Nz, {0.0, 0.0}));
     // std::cout << "1" << std::endl;
+    double Vo_nmin1;
     //  Time loop
-    for (int nn = 1; true; ++nn)//nn <= Nk; ++nn)
+    for (int nn = 1; nn <= Nk; ++nn)
     {
         //std::cout << "nn: " << nn << std::endl;
-        double Vo_nmin1 = V0 * std::cos(2.0 * M_PI * freq * (nn - 2) * delta_t); // Source.
+        Vo_nmin1 = V0 * std::cos(2.0 * M_PI * freq * (nn - 2) * delta_t); // Source.
         V_n[0] = (1.0 - beta1) * V_nmin1[0] - 2.0 * I_nmin1[0] + (2.0 / Rs) * Vo_nmin1; // Eq. (2.63)
 
         // Loop code, the vectorial instructions are not used in this traduction.
@@ -149,18 +150,15 @@ int main()
         V_nmin1 = V_n;
         I_nmin1 = I_n;
         V_time_series.push_back(V_n);
-        int index = nn % M;
-        if (index == 0)
-            index = M;
-        // std::cout << "index: " << index << std::endl;
+        // MATLAB: index = mod(nn, M); if index == 0, index = M;
+        int index = (nn - 1) % M;// C++ 0-based
+        
         V_period[index] = V_n;
-
-        // std::cout << "1.1" << std::endl;
 
         // std::cout << "V_period.size(): " << V_period.size() << std::endl;
         // std::cout << "V_period[0].size(): " << V_period[0].size() << std::endl;
 
-        if (index == M)
+        if (index == (M - 1))
         {
             // FFT over M time samples per spatial point (per column)
             // std::vector<std::complex<double>> V_period_freq(Nz, std::complex<double>(0.0, 0.0));
@@ -203,7 +201,7 @@ int main()
             // both unscaled - the scale factors cancel here. See later comments regarding correct scaling of the FFT.
             //std::cout << "eps = " << eps << std::endl;
             // Exit loop, or overwrite for next period:
-            if (eps < 1E-12) // 0.002)//1E-6)
+            if (eps < 0.002) // 0.002)//1E-6)
                 break;
             // std::cout << "1.5" << std::endl;
             V_prev_period_freq = V_period_freq;
@@ -236,6 +234,10 @@ int main()
             // std::cout << "V_period_freq[" << m << "][" << i << "]: " << V_period_freq[m][i] << std::endl;
         }
     }
+    for (int i = 0; i < Nz; ++i)
+    {
+        std::cout << "V_period[" << (M - 1) << "][" << i << "]: " << V_period[(M - 1)][i] << std::endl;
+    }
     // std::cout << "3" << std::endl;
     std::vector<double> z(Nz, 0.0);
     for (int i = 0; i < Nz; ++i)
@@ -245,7 +247,6 @@ int main()
     const double lambda = c / freq;
     const double beta = 2.0 * M_PI / lambda;
 
-    
     const double Gamma = (Rl - Z_0) / (Rl + Z_0); // Eq. (2.16)
     const double V_plus = 0.5 * V0;               // for matched source, Eq. (2.15)
 
@@ -374,6 +375,38 @@ int main()
     // Também imprime no console para referência rápida
     std::cout << "Norma L2 relativa: " << global_L2_error << std::endl;
     std::cout << "Arquivo CSV 'erro_relativo.csv' gerado com sucesso.\n";
+
+    std::cout << "beta: " << beta << std::endl;
+    std::cout << "beta1: " << beta1 << std::endl;
+    std::cout << "beta2: " << beta2 << std::endl;
+    std::cout << "c: " << c << std::endl;
+    std::cout << "C: " << C << std::endl;
+    std::cout << "delta_f: " << delta_f << std::endl;
+    std::cout << "delta_t: " << delta_t << std::endl;
+    std::cout << "delta_z: " << delta_z << std::endl;
+    std::cout << "freq: " << freq << std::endl;
+    std::cout << "Gamma: " << Gamma << std::endl;
+    std::cout << "growth: " << growth << std::endl;
+    std::cout << "h: " << h << std::endl;
+    std::cout << "k: " << k << std::endl;
+    std::cout << "L: " << L << std::endl;
+    std::cout << "lambda: " << lambda << std::endl;
+    std::cout << "M: " << M << std::endl;
+    std::cout << "r: " << r << std::endl;
+    std::cout << "Rl: " << Rl << std::endl;
+    std::cout << "Rs: " << Rs << std::endl;
+    std::cout << "T: " << T << std::endl;
+    std::cout << "V0: " << V0 << std::endl;
+    std::cout << "V_plus: " << V_plus << std::endl;
+    std::cout << "Vo_nmin1: " << Vo_nmin1 << std::endl;
+    std::cout << "Z_0: " << Z_0 << std::endl;
+
+
+
+
+
+
+
 
     return 0;
 }
