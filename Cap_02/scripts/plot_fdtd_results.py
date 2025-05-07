@@ -8,17 +8,10 @@ import os
 # Diretórios
 out_dir = "../out"
 
-<<<<<<< HEAD
 
-=======
-# Carrega dados
-#voltage_final = np.loadtxt(os.path.join(out_dir, "fdtd_voltage.csv"))
-#voltage_series = np.loadtxt(os.path.join(out_dir, "fdtd_time_series.csv"), delimiter=",")
-#spectrum = np.loadtxt(os.path.join(out_dir, "fdtd_spectrum.csv"), delimiter=",")
-# Lê os parâmetros da simulação
-parametros = pd.read_csv(os.path.join(out_dir, 'simulation_parameters.csv'))
->>>>>>> 02dbb9f44372e349752897152c760907dc11fd1b
+
 comparison_voltage = pd.read_csv(os.path.join(out_dir, 'comparison_voltage.csv'))
+parametros = pd.read_csv(os.path.join(out_dir, 'simulation_parameters.csv'))
 
 
 #print("\nParâmetros da Simulação:")
