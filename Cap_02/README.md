@@ -86,6 +86,16 @@ As imagens são salvas na pasta `Cap_02/out/`. Veja abaixo algumas delas:
 
 ---
 
+### 🔌 `current_simulation.gif`
+
+> **Animação da evolução temporal da corrente** `I(z,t)` ao longo do espaço.
+
+<p align="center">
+  <img src="/Cap_02/out/current_simulation.gif" alt="current_simulation">
+</p>
+
+---
+
 ### 🕒 `wb_time_response.png`
 > Gráfico temporal do pulso aplicado e da resposta na carga (versão wideband).
 
