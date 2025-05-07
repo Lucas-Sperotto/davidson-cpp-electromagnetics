@@ -54,6 +54,9 @@ int main()
     // e é passada como variável de ambiente para o programa
     const std::string out_dir = PROJECT_OUT_DIR;
 
+    std::ofstream voltage_log(out_dir + "/voltage_over_time.csv");
+    std::ofstream current_log(out_dir + "/current_over_time.csv");
+
     // Define a precisão de saída padrão para 15 casas decimais e formato fixo (não científico)
     std::cout << std::setprecision(15) << std::fixed;
 
@@ -68,6 +71,7 @@ int main()
     const double c = 1.0 / std::sqrt(L * C); // Velocidade de propagação na linha (v = 1/sqrt(LC))
     const double Z_0 = std::sqrt(L / C);     // Impedância característica da linha de transmissão
     const double Rs = 1.0;                   // Resistência da fonte [Ohm]
+    const double epsilon = 1E-12;            // 0.002    // Tolerância para o erro relativo (critério de convergência)
 
     double Rl;
     // std::cout << "Load resistance? (Z_0 = 1 Ohm) Default: 2 -> ";
@@ -101,16 +105,31 @@ int main()
         behaviour can indeed grow quite quickly.*/
     const double growth = 1.5;
 
-    const double beta1 = 2.0 * delta_t / (Rs * C * delta_z); // Eq. (2.67)
-    const double beta2 = 2.0 * delta_t / (Rl * C * delta_z); // Eq. (2.68)
+    const double beta1 = 2.0 * delta_t / (Rs * C * delta_z);            // Eq. (2.67)
+    const double beta2 = 2.0 * delta_t / (Rl * C * delta_z);            // Eq. (2.68)
     const double r = (delta_t * delta_t) / (L * C * delta_z * delta_z); // Eq. (2.69)
+
+
+    // Cabeçalho: TimeStep, V[1], V[2], ..., V[Nz]
+    voltage_log << "TimeStep";
+    for (size_t i = 0; i < Nz; ++i)
+        voltage_log << ",V[" << (i + 1) << "]";
+    voltage_log << "\n";
+
+    // Cabeçalho: TimeStep, I[1], I[2], ..., I[Nz]
+    current_log << "TimeStep";
+    for (size_t i = 0; i < Nz; ++i)
+        current_log << ",I[" << (i + 1) << "]";
+    current_log << "\n";
+
+
 
     //  First time step - Initialize.
     std::vector<double> V_nmin1(Nz, 0.0), I_nmin1(Nz, 0.0);
     // Pre-allocation
     std::vector<double> V_n(Nz, 0.0), I_n(Nz, 0.0);
 
-    std::vector<std::vector<double>> V_time_series;
+    // std::vector<std::vector<double>> V_time_series;
     std::vector<std::vector<double>> V_period(M, std::vector<double>(Nz, 0.0));
 
     std::vector<std::vector<std::complex<double>>> V_prev_period_freq(M, std::vector<std::complex<double>>(Nz, {0.0, 0.0}));
@@ -118,21 +137,21 @@ int main()
     // std::cout << "1" << std::endl;
     double Vo_nmin1;
     //  Time loop
-    for (int nn = 1; true; ++nn)//nn <= Nk; ++nn)
+    for (int nn = 1; true; ++nn) // nn <= Nk; ++nn)
     {
-        //std::cout << "nn: " << nn << std::endl;
-        Vo_nmin1 = V0 * std::cos(2.0 * M_PI * freq * (nn - 2) * delta_t); // Source.
+        // std::cout << "nn: " << nn << std::endl;
+        Vo_nmin1 = V0 * std::cos(2.0 * M_PI * freq * (nn - 2) * delta_t);               // Source.
         V_n[0] = (1.0 - beta1) * V_nmin1[0] - 2.0 * I_nmin1[0] + (2.0 / Rs) * Vo_nmin1; // Eq. (2.63)
 
         // Loop code, the vectorial instructions are not used in this traduction.
         for (int kk = 1; kk < (Nz - 1); ++kk)
             V_n[kk] = V_nmin1[kk] - (I_nmin1[kk] - I_nmin1[kk - 1]); // Eq. (2.64)
 
-        V_n[Nz - 1] = (1.0 - beta2) * V_nmin1[Nz - 1] + 2.0 * I_nmin1[Nz - 2];  // Eq. (2.65)
+        V_n[Nz - 1] = (1.0 - beta2) * V_nmin1[Nz - 1] + 2.0 * I_nmin1[Nz - 2]; // Eq. (2.65)
 
         // Loop code, the vectorial instructions are not used in this traduction.
         for (int kk = 0; kk < (Nz - 1); ++kk)
-            I_n[kk] = I_nmin1[kk] - r * (V_n[kk + 1] - V_n[kk]);    // Eq. (2.66)
+            I_n[kk] = I_nmin1[kk] - r * (V_n[kk + 1] - V_n[kk]); // Eq. (2.66)
 
         double norm_new = 0.0, norm_old = 0.0;
         for (int i = 0; i < Nz; ++i)
@@ -149,10 +168,23 @@ int main()
 
         V_nmin1 = V_n;
         I_nmin1 = I_n;
-        V_time_series.push_back(V_n);
+        // V_time_series.push_back(V_n);
+
+        // Dentro do laço:
+        voltage_log << nn;
+        current_log << nn;
+        for (size_t i = 0; i < Nz; ++i)
+        {
+            double voltage = (delta_t / (C * delta_z)) * V_n[i];
+            voltage_log << "," << voltage;
+            current_log << "," << I_n[i];
+        }
+        voltage_log << "\n";
+        current_log << "\n";
+
         // MATLAB: index = mod(nn, M); if index == 0, index = M;
         int index = (nn - 1) % M; // C++ 0-based
-        
+
         V_period[index] = V_n;
 
         // std::cout << "V_period.size(): " << V_period.size() << std::endl;
@@ -169,8 +201,8 @@ int main()
             // std::cout << "1.2" << std::endl;
             for (int z = 0; z < Nz; ++z)
             {
-                //std::cout << "z = " << z << std::endl;
-                // Preenche vetor de entrada com a coluna z
+                // std::cout << "z = " << z << std::endl;
+                //  Preenche vetor de entrada com a coluna z
                 for (int m = 0; m < M; ++m)
                 {
                     in[m][0] = V_period[m][z]; // real
@@ -199,14 +231,21 @@ int main()
             // Note that RMS norm includes inverse of root of length of vector, but it cancels above.
             // The FFTs in the numerator and denominator of the above expression are
             // both unscaled - the scale factors cancel here. See later comments regarding correct scaling of the FFT.
-            //std::cout << "eps = " << eps << std::endl;
+            // std::cout << "eps = " << eps << std::endl;
             // Exit loop, or overwrite for next period:
-            if (eps < 1e-12) // 0.002)
+            if (eps < epsilon)
                 break;
             // std::cout << "1.5" << std::endl;
             V_prev_period_freq = V_period_freq;
         }
     }
+
+    voltage_log.close();
+    std::cout << "Arquivo CSV 'voltage_over_time.csv' gerado com sucesso.\n";
+
+    current_log.close();
+    std::cout << "Arquivo CSV 'current_over_time.csv' gerado com sucesso.\n";
+
     // std::cout << "2" << std::endl;
     /* Now compute exact reults (p.36) and compare to the simulated ones.
     For the phasor results, what is needed is the first harmonic of the
@@ -226,7 +265,7 @@ int main()
     for (int i = 0; i < Nz; ++i)
     {
         V_n[i] *= delta_t / (C * delta_z);
-        //std::cout << " V_n[" << i << "]: " << V_n[i] << std::endl;
+        // std::cout << " V_n[" << i << "]: " << V_n[i] << std::endl;
         for (int m = 0; m < M; ++m)
         {
             V_period_freq[m][i] *= delta_t / (C * delta_z);
@@ -234,9 +273,9 @@ int main()
             // std::cout << "V_period_freq[" << m << "][" << i << "]: " << V_period_freq[m][i] << std::endl;
         }
     }
-    //for (int i = 0; i < Nz; ++i)
+    // for (int i = 0; i < Nz; ++i)
     //{
-        //std::cout << "V_period[" << (M - 1) << "][" << i << "]: " << V_period[(M - 1)][i] << std::endl;
+    // std::cout << "V_period[" << (M - 1) << "][" << i << "]: " << V_period[(M - 1)][i] << std::endl;
     //}
     // std::cout << "3" << std::endl;
     std::vector<double> z(Nz, 0.0);
@@ -264,13 +303,13 @@ int main()
         std::complex<double> term1 = std::exp(std::complex<double>(0, -phase_shift));
         std::complex<double> term2 = Gamma * std::exp(std::complex<double>(0, phase_shift));
         V_exact[i] = V_plus * (term1 + term2); // Eq. (2.14)
-        //std::cout << "V_exact[" << i << "]: " << V_exact[i] << std::endl;
+        // std::cout << "V_exact[" << i << "]: " << V_exact[i] << std::endl;
     }
 
-    std::ofstream file(out_dir + "/comparison_voltage.csv");
+    std::ofstream voltage_results_file(out_dir + "/comparison_voltage.csv");
 
     // Exporta cabeçalho
-    file << "z_exact,Re(V_exact),Im(V_exact),z_fdtd,Re(V_fdtd),Im(V_fdtd)\n";
+    voltage_results_file << "z_exact,Re(V_exact),Im(V_exact),z_fdtd,Re(V_fdtd),Im(V_fdtd)\n";
 
     // Exporta z_exact e V_exact (pode ter tamanho diferente de Nz)
     size_t N_exact = z_exact.size();
@@ -281,44 +320,48 @@ int main()
     for (size_t i = 0; i < N_max; ++i)
     {
         if (i < N_exact)
-            file << z_exact[i] << "," << real(V_exact[i]) << "," << imag(V_exact[i]);
+            voltage_results_file << z_exact[i] << "," << real(V_exact[i]) << "," << imag(V_exact[i]);
         else
-            file << ",,"; // Deixa vazio se não tem mais z_exact
+            voltage_results_file << ",,"; // Deixa vazio se não tem mais z_exact
 
-        file << ",";
+        voltage_results_file << ",";
 
         if (i < N_fdtd)
-            file << z[i] << "," << V_period_freq[k][i].real() << "," << V_period_freq[k][i].imag();
+            voltage_results_file << z[i] << "," << V_period_freq[k][i].real() << "," << V_period_freq[k][i].imag();
         else
-            file << ",,";
+            voltage_results_file << ",,";
 
-        file << "\n";
+        voltage_results_file << "\n";
     }
 
-    file.close();
+    voltage_results_file.close();
+    std::cout << "Arquivo CSV 'comparison_voltage.csv' gerado com sucesso.\n";
 
-    // Export voltage at last time step
-    std::ofstream file1(out_dir + "/fdtd_voltage.csv");
-    for (const auto &v : V_n)
-        file1 << v << "\n";
-    file1.close();
+    // Salva os dados de entrada em um arquivo CSV
+    std::ofstream params_file(out_dir + "/simulation_parameters.csv");
+
+    params_file << "Parameter,Value\n";
+    params_file << "Nz," << Nz << "\n";
+    params_file << "M," << M << "\n";
+    params_file << "epsilon," << epsilon << "\n";
+    params_file << "C (F/m)," << C << "\n";
+    params_file << "Rs (ohms)," << Rs << "\n";
+    params_file << "Rl (ohms)," << Rl << "\n";
+    params_file << "L (H/m)," << L << "\n";
+    params_file << "h (m)," << h << "\n";
+    params_file << "freq (Hz)," << freq << "\n";
+
+    params_file.close();
+    std::cout << "Arquivo CSV 'simulation_parameters.csv' gerado com sucesso.\n";
 
     // Export voltage over time
-    std::ofstream file2(out_dir + "/fdtd_time_series.csv");
-    for (const auto &row : V_time_series)
-    {
-        for (size_t j = 0; j < row.size(); ++j)
-            file2 << row[j] << (j == row.size() - 1 ? "\n" : ",");
-    }
-    file2.close();
-
-    std::ofstream file3(out_dir + "/fdtd_spectrum.csv");
-    for (int z = 0; z < Nz; ++z)
-    {
-        file3 << V_period_freq[k][z].real() << "," << V_period_freq[k][z].imag() << "\n";
-        //std::cout << "V_period_freq[" << k << "][" << z << "]: " << V_period_freq[k][z] << std::endl;
-    }
-    file3.close();
+    // std::ofstream file2(out_dir + "/fdtd_time_series.csv");
+    // for (const auto &row : V_time_series)
+    //{
+    //    for (size_t j = 0; j < row.size(); ++j)
+    //        file2 << row[j] << (j == row.size() - 1 ? "\n" : ",");
+    //}
+    // file2.close();
 
     std::cout << "Simulation complete. Output saved in Cap_02/out/.\n";
 
@@ -328,7 +371,7 @@ int main()
     // ==============================================
 
     // Arquivo de saída CSV
-    std::ofstream csv_file(out_dir + "/erro_relativo.csv");
+    std::ofstream relative_error_file(out_dir + "/erro_relativo.csv");
 
     // Inicializa variáveis para calcular norma L2
     double sum_sq_error = 0.0;        // Soma dos quadrados dos erros
@@ -349,8 +392,8 @@ int main()
         // Erro relativo: |erro| / |exato| (com proteção contra divisão por zero)
         rel_error[i] = (abs_exact > 1e-12) ? (abs_error / abs_exact) : 0.0;
 
-        //std::cout << "Erro[" << i << "]" << rel_error[i] << " %" << std::endl;
-        // Acumula para norma L2
+        // std::cout << "Erro[" << i << "]" << rel_error[i] << " %" << std::endl;
+        //  Acumula para norma L2
         sum_sq_error += abs_error * abs_error;
         sum_sq_exact += abs_exact * abs_exact;
     }
@@ -358,23 +401,25 @@ int main()
     // Calcula a norma L2 relativa
     double global_L2_error = std::sqrt(sum_sq_error) / std::sqrt(sum_sq_exact);
 
-    csv_file << "Norma_L2_Relativa: " << global_L2_error << "\n";
+    relative_error_file << "Norma_L2_Relativa: " << global_L2_error << "\n";
 
     // Escreve cabeçalho para indicar o conteúdo
-    csv_file << "Erro relativo ponto a ponto entre V_exact e V_period_freq\n";
-    csv_file << "Index,Erro_relativo\n";
+    relative_error_file << "Erro relativo ponto a ponto entre V_exact e V_period_freq\n";
+    relative_error_file << "Index,Erro_relativo\n";
 
     for (size_t i = 0; i < V_exact.size(); ++i)
     {
-        csv_file << i << "," << rel_error[i] << "\n";
+        relative_error_file << i << "," << rel_error[i] << "\n";
     }
 
     // Fecha o arquivo para reabrir no modo de inserção no topo
-    csv_file.close();
+    relative_error_file.close();
+
+    std::cout << "Arquivo CSV 'erro_relativo.csv' gerado com sucesso.\n";
 
     // Também imprime no console para referência rápida
-    //std::cout << "Norma L2 relativa: " << global_L2_error << std::endl;
-    std::cout << "Arquivo CSV 'erro_relativo.csv' gerado com sucesso.\n";
+    std::cout << "Norma L2 relativa: " << global_L2_error << std::endl;
+
     /*
     std::cout << "beta: " << beta << std::endl;
     std::cout << "beta1: " << beta1 << std::endl;
@@ -401,5 +446,8 @@ int main()
     std::cout << "Vo_nmin1: " << Vo_nmin1 << std::endl;
     std::cout << "Z_0: " << Z_0 << std::endl;
     */
+
+    std::cout << "Simulation complete. Output saved in Cap_02/out/.\n";
+
     return 0;
 }
