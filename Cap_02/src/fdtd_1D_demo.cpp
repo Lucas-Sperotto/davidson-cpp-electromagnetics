@@ -98,7 +98,7 @@ int main()
         is not also the same time sample in the next period.*/
     const double delta_t = T / M;
 
-    const int Nk = 32 * M; // 16 * M; // A maximum number of periods to run if the convergence criteria eps is not achieved.
+    const int Nk = 16 * M; // 16 * M; // A maximum number of periods to run if the convergence criteria eps is not achieved.
 
     /* An abritary growth factor indicating instability
         Don't make too close to 1, since the early time
