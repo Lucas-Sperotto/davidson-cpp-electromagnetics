@@ -1,7 +1,8 @@
 Parameter,Value
 Nz,26
 M,64
-epsilon,1e-12
+Nk,2048
+epsilon,1e-09
 C (F/m),1
 Rs (ohms),1
 Rl (ohms),2

@@ -8,11 +8,8 @@ import os
 # Diretórios
 out_dir = "../out"
 
-
-
 comparison_voltage = pd.read_csv(os.path.join(out_dir, 'comparison_voltage.csv'))
 parametros = pd.read_csv(os.path.join(out_dir, 'simulation_parameters.csv'))
-
 
 #print("\nParâmetros da Simulação:")
 #print(parametros.to_string(index=False))
@@ -56,9 +53,27 @@ plt.savefig(os.path.join(out_dir, 'comparison_voltage_plot.png'))
 # Exibe o gráfico
 #plt.show()
 
+# Lê a tabela ignorando as duas primeiras linhas
+df = pd.read_csv(os.path.join(out_dir, 'erro_relativo.csv'), skiprows=2)
+
+# Captura a norma L2 da primeira linha
+with open(os.path.join(out_dir, 'erro_relativo.csv'), 'r') as f:
+    first_line = f.readline().strip()
+    norma_l2 = float(first_line.split(':')[1].strip())
+
+# Cria o gráfico
+plt.figure(figsize=(10, 6))
+plt.plot(df['Index'], df['Erro_relativo'], marker='o')
+plt.title(f'Erro Relativo ponto a ponto\nNorma L2 Relativa: {norma_l2:.6f}') # Adiciona a norma L2 no topo
+plt.xlabel('Index (z)')
+plt.ylabel('Erro Relativo (%)')
+
+plt.grid(True)
+plt.savefig(os.path.join(out_dir, 'erro_relativo.png'), dpi=300)
+
+#plt.show()
 # Lê o arquivo de tensões
 voltage_series = pd.read_csv(os.path.join(out_dir, 'voltage_over_time.csv'))
-
 
 fig, ax = plt.subplots()
 line, = ax.plot([], [], lw=2)
@@ -83,7 +98,7 @@ ani = FuncAnimation(fig, update, frames=len(voltage_series), init_func=init, bli
 # Salva o vídeo
 ani.save(os.path.join(out_dir, 'voltage_simulation.mp4'), writer='ffmpeg')
 ani.save(os.path.join(out_dir, 'voltage_simulation.gif'), writer='pillow', fps=10)
-
+plt.close(fig)  # fecha apenas depois de salvar
 
 # Lê o arquivo CSV da corrente
 current_series = pd.read_csv(os.path.join(out_dir, 'current_over_time.csv'))
@@ -106,35 +121,10 @@ def update(frame):
     ax.set_title(f'Current at timestep {int(current_series.iloc[frame, 0])}')
     return line,
 
-ani = FuncAnimation(fig, update, frames=len(df), init_func=init, blit=True)
+ani = FuncAnimation(fig, update, frames=len(current_series), init_func=init, blit=True)
 
 # Salva o GIF
 ani.save(os.path.join(out_dir, 'current_simulation.mp4'), writer='ffmpeg', fps=10)
 ani.save(os.path.join(out_dir, 'current_simulation.gif'), writer='pillow', fps=10)
 
-
-# Lê a tabela ignorando as duas primeiras linhas
-df = pd.read_csv(os.path.join(out_dir, 'erro_relativo.csv'), skiprows=2)
-
-# Captura a norma L2 da primeira linha
-with open(file_path, 'r') as f:
-    first_line = f.readline().strip()
-    norma_l2 = float(first_line.split(':')[1].strip())
-
-# Cria o gráfico
-plt.figure(figsize=(10, 6))
-plt.plot(df['Index'], df['Erro_relativo'], marker='o')
-plt.title('Erro Relativo ponto a ponto')
-plt.xlabel('Index (z)')
-plt.ylabel('Erro Relativo (%)')
-
-# Adiciona a norma L2 no topo
-plt.text(0.5, 1.02, f'Norma L2 Relativa: {norma_l2:.6f}',
-         ha='center', va='bottom',
-         transform=plt.gca().transAxes,
-         fontsize=12, fontweight='bold')
-
-plt.grid(True)
-plt.savefig(os.path.join(out_dir, 'erro_relativo.png'), dpi=300)
-
-plt.show()
+plt.close(fig)  # fecha apenas depois de salvar

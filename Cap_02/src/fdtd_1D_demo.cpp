@@ -71,7 +71,7 @@ int main()
     const double c = 1.0 / std::sqrt(L * C); // Velocidade de propagação na linha (v = 1/sqrt(LC))
     const double Z_0 = std::sqrt(L / C);     // Impedância característica da linha de transmissão
     const double Rs = 1.0;                   // Resistência da fonte [Ohm]
-    const double epsilon = 1E-12;            // 0.002    // Tolerância para o erro relativo (critério de convergência)
+    const double epsilon = 1E-9;//1E-12;            // 0.002    // Tolerância para o erro relativo (critério de convergência)
 
     double Rl;
     // std::cout << "Load resistance? (Z_0 = 1 Ohm) Default: 2 -> ";
@@ -98,7 +98,7 @@ int main()
         is not also the same time sample in the next period.*/
     const double delta_t = T / M;
 
-    const int Nk = 2048 * M; // 16 * M; // A maximum number of periods to run if the convergence criteria eps is not achieved.
+    const int Nk = 32 * M; // 16 * M; // A maximum number of periods to run if the convergence criteria eps is not achieved.
 
     /* An abritary growth factor indicating instability
         Don't make too close to 1, since the early time
@@ -137,7 +137,7 @@ int main()
     // std::cout << "1" << std::endl;
     double Vo_nmin1;
     //  Time loop
-    for (int nn = 1; true; ++nn) // nn <= Nk; ++nn)
+    for (int nn = 1; nn <= Nk; ++nn)//true; ++nn) // nn <= Nk; ++nn)
     {
         // std::cout << "nn: " << nn << std::endl;
         Vo_nmin1 = V0 * std::cos(2.0 * M_PI * freq * (nn - 2) * delta_t);               // Source.
@@ -343,6 +343,7 @@ int main()
     params_file << "Parameter,Value\n";
     params_file << "Nz," << Nz << "\n";
     params_file << "M," << M << "\n";
+    params_file << "Nk," << Nk << "\n";
     params_file << "epsilon," << epsilon << "\n";
     params_file << "C (F/m)," << C << "\n";
     params_file << "Rs (ohms)," << Rs << "\n";

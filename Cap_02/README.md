@@ -57,27 +57,32 @@ python3 plot_fdtd_wb_results.py
 As imagens são salvas na pasta `Cap_02/out/`. Veja abaixo algumas delas:
 
 ### 📈 `comparison_voltage_plot.png`
-> **Tensão no tempo final** da simulação senoidal (`fdtd_1D_demo`). Mostra a distribuição espacial da tensão após convergência juntamente com a solução analítica. Para verificar as opções de execução acesse o arquivo gerado [Ver arquivo CSV](./out/simulation_parameters.csv).
+
+> **Tensão no tempo final** da simulação senoidal (`fdtd_1D_demo`). Mostra a distribuição espacial da tensão após a convergência, juntamente com a solução analítica. Para verificar os parâmetros de execução, consulte o arquivo gerado: [Ver arquivo CSV](./out/simulation_parameters.csv).
 
 <p align="center">
   <img src="/Cap_02/out/comparison_voltage_plot.png" alt="comparison_voltage_plot">
 </p>
 
+---
+
+### 🌡️ `erro_relativo.png`
+
+> **Erro relativo percentual** ao longo do espaço, correspondente aos valores do gráfico anterior.
+
+<p align="center">
+  <img src="/Cap_02/out/erro_relativo.png" alt="erro_relativo">
+</p>
 
 ---
 
-### 🌡️ `voltage_heatmap.png`
-> **Mapa de calor V(z,t)** representando a evolução temporal da tensão ao longo do espaço.
+### ⚡ `voltage_simulation.gif`
 
-![voltage_heatmap](/Cap_02/out/voltage_heatmap.png)
+> **Animação da evolução temporal da tensão** `V(z,t)` ao longo do espaço.
 
----
-
-### 📊 `fft_magnitude.png` e `fft_phase.png`
-> Módulo e fase da FFT na componente k=2, relacionada à frequência fundamental da fonte senoidal.
-
-![fft_magnitude](/Cap_02/out/fft_magnitude.png)
-![fft_phase](/Cap_02/out/fft_phase.png)
+<p align="center">
+  <img src="/Cap_02/out/voltage_simulation.gif" alt="voltage_simulation">
+</p>
 
 ---
 
