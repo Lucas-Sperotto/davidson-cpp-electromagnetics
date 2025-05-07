@@ -59,7 +59,10 @@ As imagens são salvas na pasta `Cap_02/out/`. Veja abaixo algumas delas:
 ### 📈 `comparison_voltage_plot.png`
 > **Tensão no tempo final** da simulação senoidal (`fdtd_1D_demo`). Mostra a distribuição espacial da tensão após convergência juntamente com a solução analítica.
 
-![comparison_voltage_plot](/Cap_02/out/comparison_voltage_plot.png)
+<p align="center">
+  <img src="/Cap_02/out/comparison_voltage_plot.png" alt="comparison_voltage_plot">
+</p>
+
 
 ---
 
