@@ -8,8 +8,21 @@ import os
 # Diretórios
 out_dir = "../out"
 
+<<<<<<< HEAD
 
+=======
+# Carrega dados
+#voltage_final = np.loadtxt(os.path.join(out_dir, "fdtd_voltage.csv"))
+#voltage_series = np.loadtxt(os.path.join(out_dir, "fdtd_time_series.csv"), delimiter=",")
+#spectrum = np.loadtxt(os.path.join(out_dir, "fdtd_spectrum.csv"), delimiter=",")
+# Lê os parâmetros da simulação
+parametros = pd.read_csv(os.path.join(out_dir, 'simulation_parameters.csv'))
+>>>>>>> 02dbb9f44372e349752897152c760907dc11fd1b
 comparison_voltage = pd.read_csv(os.path.join(out_dir, 'comparison_voltage.csv'))
+
+
+#print("\nParâmetros da Simulação:")
+#print(parametros.to_string(index=False))
 
 # Extrai os dados
 z_exact = comparison_voltage['z_exact']
@@ -41,8 +54,11 @@ plt.legend()
 plt.grid(True)
 plt.tight_layout()
 
+param_text = "\n".join(f"{row['Parameter']}: {row['Value']}" for _, row in parametros.iterrows())
+plt.gcf().text(0.9, 0.2, param_text, ha='right', va='bottom', bbox=dict(facecolor='white', alpha=0.8))
+
 # Salva o gráfico como arquivo PNG
-plt.savefig(os.path.join(out_dir, 'comparison_voltage_plot.png'), dpi=300)
+plt.savefig(os.path.join(out_dir, 'comparison_voltage_plot.png'))
 
 # Exibe o gráfico
 #plt.show()

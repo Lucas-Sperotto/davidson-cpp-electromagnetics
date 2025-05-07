@@ -56,10 +56,13 @@ python3 plot_fdtd_wb_results.py
 
 As imagens são salvas na pasta `Cap_02/out/`. Veja abaixo algumas delas:
 
-### 📈 `voltage_final.png`
-> **Tensão no tempo final** da simulação senoidal (`fdtd_1D_demo`). Mostra a distribuição espacial da tensão após convergência.
+### 📈 `comparison_voltage_plot.png`
+> **Tensão no tempo final** da simulação senoidal (`fdtd_1D_demo`). Mostra a distribuição espacial da tensão após convergência juntamente com a solução analítica. Para verificar as opções de execução acesse o arquivo gerado [Ver arquivo CSV](./out/simulation_parameters.csv).
 
-![voltage_final](/Cap_02/out/voltage_final.png)
+<p align="center">
+  <img src="/Cap_02/out/comparison_voltage_plot.png" alt="comparison_voltage_plot">
+</p>
+
 
 ---
 
