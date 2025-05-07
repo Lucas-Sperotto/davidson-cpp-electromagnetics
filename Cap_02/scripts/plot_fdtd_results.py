@@ -45,7 +45,7 @@ plt.grid(True)
 plt.tight_layout()
 
 # Salva o gráfico como arquivo PNG
-plt.savefig(os.path.join(out_dir, 'comparison_voltage_plot.png'), dpi=300)
+plt.savefig(os.path.join(out_dir, 'comparison_voltage_plot.png'))
 
 # Exibe o gráfico
 plt.show()
