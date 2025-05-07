@@ -61,7 +61,7 @@ As imagens são salvas na pasta `Cap_02/out/`. Veja abaixo algumas delas:
 > **Tensão no tempo final** da simulação senoidal (`fdtd_1D_demo`). Mostra a distribuição espacial da tensão após a convergência, juntamente com a solução analítica. Para verificar os parâmetros de execução, consulte o arquivo gerado: [Ver arquivo CSV](./out/simulation_parameters.csv).
 
 <p align="center">
-  <img src="/Cap_02/out/comparison_voltage_plot.png" alt="comparison_voltage_plot">
+  <img src="Cap_02/out/comparison_voltage_plot.png" alt="comparison_voltage_plot">
 </p>
 
 ---
@@ -71,7 +71,7 @@ As imagens são salvas na pasta `Cap_02/out/`. Veja abaixo algumas delas:
 > **Erro relativo percentual** ao longo do espaço, correspondente aos valores do gráfico anterior.
 
 <p align="center">
-  <img src="/Cap_02/out/erro_relativo.png" alt="erro_relativo">
+  <img src="Cap_02/out/erro_relativo.png" alt="erro_relativo">
 </p>
 
 ---
