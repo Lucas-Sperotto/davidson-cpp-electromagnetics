@@ -78,7 +78,7 @@ As imagens são salvas na pasta `Cap_02/out/`. Veja abaixo algumas delas:
 
 ### ⚡ `voltage_simulation.gif`
 
-> **Animação da evolução temporal da tensão** SV(z,t)S ao longo do espaço.
+> **Animação da evolução temporal da tensão** $V(z,t)$ ao longo do espaço.
 
 <p align="center">
   <img src="/Cap_02/out/voltage_simulation.gif" alt="voltage_simulation">
@@ -88,7 +88,7 @@ As imagens são salvas na pasta `Cap_02/out/`. Veja abaixo algumas delas:
 
 ### 🔌 `current_simulation.gif`
 
-> **Animação da evolução temporal da corrente** SI(z,t)S ao longo do espaço.
+> **Animação da evolução temporal da corrente** $I(z,t)$ ao longo do espaço.
 
 <p align="center">
   <img src="/Cap_02/out/current_simulation.gif" alt="current_simulation">
@@ -104,7 +104,7 @@ As imagens são salvas na pasta `Cap_02/out/`. Veja abaixo algumas delas:
 ---
 
 ### 📡 `wb_transfer_function.png`
-> Função de transferência S|V_L / V_S|S em função da frequência, simulada via pulso e FFT.
+> Função de transferência $|V_L / V_S|$ em função da frequência, simulada via pulso e FFT.
 
 ![wb_transfer_function](/Cap_02/out/wb_transfer_function.png)
 
