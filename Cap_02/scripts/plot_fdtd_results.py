@@ -69,7 +69,7 @@ plt.xlabel('Index (z)')
 plt.ylabel('Erro Relativo (%)')
 
 plt.grid(True)
-plt.savefig(os.path.join(out_dir, 'erro_relativo.png'), dpi=300)
+plt.savefig(os.path.join(out_dir, 'erro_relativo.png'))
 
 #plt.show()
 # Lê o arquivo de tensões
@@ -79,7 +79,7 @@ fig, ax = plt.subplots()
 line, = ax.plot([], [], lw=2)
 ax.set_xlim(1, voltage_series.shape[1]-1)
 ax.set_ylim(-1, 1)
-ax.set_xlabel('Index')
+ax.set_xlabel('Index (z)')
 ax.set_ylabel('Normalized Voltage')
 
 def init():
@@ -97,7 +97,7 @@ ani = FuncAnimation(fig, update, frames=len(voltage_series), init_func=init, bli
 
 # Salva o vídeo
 ani.save(os.path.join(out_dir, 'voltage_simulation.mp4'), writer='ffmpeg')
-ani.save(os.path.join(out_dir, 'voltage_simulation.gif'), writer='pillow', fps=10)
+ani.save(os.path.join(out_dir, 'voltage_simulation.gif'), writer='pillow')
 plt.close(fig)  # fecha apenas depois de salvar
 
 # Lê o arquivo CSV da corrente
@@ -107,7 +107,7 @@ fig, ax = plt.subplots()
 line, = ax.plot([], [], lw=2)
 ax.set_xlim(1, current_series.shape[1]-1)
 ax.set_ylim(-1, 1)  # ajuste se os valores da corrente tiverem outra faixa
-ax.set_xlabel('Index')
+ax.set_xlabel('Index (z)')
 ax.set_ylabel('Current (A)')
 
 def init():
@@ -124,7 +124,7 @@ def update(frame):
 ani = FuncAnimation(fig, update, frames=len(current_series), init_func=init, blit=True)
 
 # Salva o GIF
-ani.save(os.path.join(out_dir, 'current_simulation.mp4'), writer='ffmpeg', fps=10)
-ani.save(os.path.join(out_dir, 'current_simulation.gif'), writer='pillow', fps=10)
+ani.save(os.path.join(out_dir, 'current_simulation.mp4'), writer='ffmpeg')
+ani.save(os.path.join(out_dir, 'current_simulation.gif'), writer='pillow')
 
 plt.close(fig)  # fecha apenas depois de salvar
