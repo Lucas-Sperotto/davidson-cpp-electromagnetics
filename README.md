@@ -47,3 +47,4 @@ python sudo apt install python3 python3-pip -y
 numpy sudo apt install python3-numpy -y
 matplotlib sudo apt install python3-matplotlib -y
 pandas sudo apt install python3-pandas -y
+pillow sudo apt install python3-pil

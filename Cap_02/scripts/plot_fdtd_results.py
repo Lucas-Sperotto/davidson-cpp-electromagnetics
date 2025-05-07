@@ -2,15 +2,12 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
 import os
 
 # Diretórios
 out_dir = "../out"
 
-# Carrega dados
-#voltage_final = np.loadtxt(os.path.join(out_dir, "fdtd_voltage.csv"))
-#voltage_series = np.loadtxt(os.path.join(out_dir, "fdtd_time_series.csv"), delimiter=",")
-#spectrum = np.loadtxt(os.path.join(out_dir, "fdtd_spectrum.csv"), delimiter=",")
 
 comparison_voltage = pd.read_csv(os.path.join(out_dir, 'comparison_voltage.csv'))
 
@@ -48,56 +45,87 @@ plt.tight_layout()
 plt.savefig(os.path.join(out_dir, 'comparison_voltage_plot.png'), dpi=300)
 
 # Exibe o gráfico
-plt.show()
-
-
-
-# Parâmetros
-#Nz = voltage_final.shape[0]
-#Nk = voltage_series.shape[0]
-#dz = 0.25 / (Nz - 1)
-#z = np.linspace(0, 0.25, Nz)
-#t = np.arange(Nk)
-
-# --- Gráfico 1: tensão final ---
-#plt.figure()
-#plt.plot(z, voltage_final)
-#plt.title("Tensão final no tempo (último passo)")
-#plt.xlabel("z (m)")
-#plt.ylabel("V(z, t_final)")
-#plt.grid(True)
-#plt.savefig(os.path.join(out_dir, "voltage_final.png"))
-
-# --- Gráfico 2: mapa de calor V(z,t) ---
-#plt.figure()
-#plt.imshow(voltage_series, aspect='auto', origin='lower',
-#           extent=[0, 0.25, 0, Nk], cmap='jet')
-#plt.colorbar(label="Tensão (V)")
-#plt.xlabel("z (m)")
-#plt.ylabel("Tempo (passos)")
-#plt.title("Evolução temporal da tensão V(z,t)")
-#plt.savefig(os.path.join(out_dir, "voltage_heatmap.png"))
-
-# --- Gráfico 3: espectro (FFT componente k=2) ---
-#real = spectrum[:, 0]
-#imag = spectrum[:, 1]
-#magnitude = np.sqrt(real**2 + imag**2)
-#phase = np.arctan2(imag, real)
-
-#plt.figure()
-#plt.plot(z, magnitude)
-#plt.title("Módulo da FFT na componente k=2")
-#plt.xlabel("z (m)")
-#plt.ylabel("|V_k=2(z)|")
-#plt.grid(True)
-#plt.savefig(os.path.join(out_dir, "fft_magnitude.png"))
-
-#plt.figure()
-#plt.plot(z, phase)
-#plt.title("Fase da FFT na componente k=2")
-#plt.xlabel("z (m)")
-#plt.ylabel("Fase (rad)")
-#plt.grid(True)
-#plt.savefig(os.path.join(out_dir, "fft_phase.png"))
-
 #plt.show()
+
+# Lê o arquivo de tensões
+voltage_series = pd.read_csv(os.path.join(out_dir, 'voltage_over_time.csv'))
+
+
+fig, ax = plt.subplots()
+line, = ax.plot([], [], lw=2)
+ax.set_xlim(1, voltage_series.shape[1]-1)
+ax.set_ylim(-1, 1)
+ax.set_xlabel('Index')
+ax.set_ylabel('Normalized Voltage')
+
+def init():
+    line.set_data([], [])
+    return line,
+
+def update(frame):
+    x = range(1, voltage_series.shape[1])  # posição espacial
+    y = voltage_series.iloc[frame, 1:]     # ignora a coluna TimeStep
+    line.set_data(x, y)
+    ax.set_title(f'Voltage at timestep {voltage_series.iloc[frame, 0]}')
+    return line,
+
+ani = FuncAnimation(fig, update, frames=len(voltage_series), init_func=init, blit=True)
+
+# Salva o vídeo
+ani.save(os.path.join(out_dir, 'voltage_simulation.mp4'), writer='ffmpeg')
+ani.save(os.path.join(out_dir, 'voltage_simulation.gif'), writer='pillow', fps=10)
+
+
+# Lê o arquivo CSV da corrente
+current_series = pd.read_csv(os.path.join(out_dir, 'current_over_time.csv'))
+
+fig, ax = plt.subplots()
+line, = ax.plot([], [], lw=2)
+ax.set_xlim(1, current_series.shape[1]-1)
+ax.set_ylim(-1, 1)  # ajuste se os valores da corrente tiverem outra faixa
+ax.set_xlabel('Index')
+ax.set_ylabel('Current (A)')
+
+def init():
+    line.set_data([], [])
+    return line,
+
+def update(frame):
+    x = range(1, current_series.shape[1])  # posição espacial
+    y = current_series.iloc[frame, 1:]     # ignora a coluna TimeStep
+    line.set_data(x, y)
+    ax.set_title(f'Current at timestep {int(current_series.iloc[frame, 0])}')
+    return line,
+
+ani = FuncAnimation(fig, update, frames=len(df), init_func=init, blit=True)
+
+# Salva o GIF
+ani.save(os.path.join(out_dir, 'current_simulation.mp4'), writer='ffmpeg', fps=10)
+ani.save(os.path.join(out_dir, 'current_simulation.gif'), writer='pillow', fps=10)
+
+
+# Lê a tabela ignorando as duas primeiras linhas
+df = pd.read_csv(os.path.join(out_dir, 'erro_relativo.csv'), skiprows=2)
+
+# Captura a norma L2 da primeira linha
+with open(file_path, 'r') as f:
+    first_line = f.readline().strip()
+    norma_l2 = float(first_line.split(':')[1].strip())
+
+# Cria o gráfico
+plt.figure(figsize=(10, 6))
+plt.plot(df['Index'], df['Erro_relativo'], marker='o')
+plt.title('Erro Relativo ponto a ponto')
+plt.xlabel('Index (z)')
+plt.ylabel('Erro Relativo (%)')
+
+# Adiciona a norma L2 no topo
+plt.text(0.5, 1.02, f'Norma L2 Relativa: {norma_l2:.6f}',
+         ha='center', va='bottom',
+         transform=plt.gca().transAxes,
+         fontsize=12, fontweight='bold')
+
+plt.grid(True)
+plt.savefig(os.path.join(out_dir, 'erro_relativo.png'), dpi=300)
+
+plt.show()
