@@ -33,7 +33,7 @@ Segundo a teoria da linha de transmissão, no modo TEM (Transverse Electromagnet
 A linha de transmissão pode ser modelada por um circuito equivalente **infinitesimal**, composto por uma indutância **$L$** (por metro) e uma capacitância **$C$** (por metro), como mostra a figura:
 
 <p align="center">
-  <img src="/Cap_02/Img1.png" alt="Trecho infinitesimal de uma linha de transmissão unidimensional">
+  <img src="img1.png" alt="Trecho infinitesimal de uma linha de transmissão unidimensional">
 </p>
 
 **Figura 2.1:** Trecho infinitesimal de uma linha de transmissão unidimensional.
@@ -41,13 +41,13 @@ A linha de transmissão pode ser modelada por um circuito equivalente **infinite
 
 ### 📐 **Equações da Linha de Transmissão**
 
-A tensão e a corrente ao longo da linha são descritas pelas **equações do telegrafista (telegraphist's equations):**
+A tensão e a corrente ao longo da linha são descritas pelas **equações do telegrafista (telegraphist's equations):** (eq. 2.13 e eq. 2.14)
 
 $$
-\frac{\partial V}{\partial z} = -L \frac{\partial I}{\partial t}
+\frac{\partial I(z,t)}{\partial z} = -C \frac{\partial V(z,t)}{\partial t}
 $$
 $$
-\frac{\partial I}{\partial z} = -C \frac{\partial V}{\partial t}
+\frac{\partial V(z,t)}{\partial z} = -L \frac{\partial I(z,t)}{\partial t}
 $$
 
 Essas equações são um **caso especial das equações de Maxwell em uma dimensão.**
@@ -67,7 +67,7 @@ O problema modelado é ilustrado na Figura a seguir e considera os seguintes par
 - Resistência de carga $R_L = 2$ $\Omega$
 
 <p align="center">
-  <img src="/Cap_02/Img2.png" alt="Modelo do Problema de Linha de Transmissão">
+  <img src="img2.png" alt="Modelo do Problema de Linha de Transmissão">
 </p>
 
 **Figura 2.2:** Problema modelado da linha de transmissão.
@@ -131,7 +131,7 @@ As imagens são salvas na pasta `Cap_02/out/`. Veja abaixo algumas delas:
 > **Tensão no tempo final** da simulação senoidal (`fdtd_1D_demo`). Mostra a distribuição espacial da tensão após a convergência, juntamente com a solução analítica. Para verificar os parâmetros de execução, consulte o arquivo gerado: [Ver arquivo CSV](./out/simulation_parameters.csv).
 
 <p align="center">
-  <img src="/Cap_02/out/comparison_voltage_plot.png" alt="comparison_voltage_plot">
+  <img src="out/comparison_voltage_plot.png" alt="comparison_voltage_plot">
 </p>
 
 ---
@@ -141,7 +141,7 @@ As imagens são salvas na pasta `Cap_02/out/`. Veja abaixo algumas delas:
 > **Erro relativo percentual** ao longo do espaço, correspondente aos valores do gráfico anterior.
 
 <p align="center">
-  <img src="/Cap_02/out/erro_relativo.png" alt="erro_relativo">
+  <img src="out/erro_relativo.png" alt="erro_relativo">
 </p>
 
 ---
@@ -151,7 +151,7 @@ As imagens são salvas na pasta `Cap_02/out/`. Veja abaixo algumas delas:
 > **Animação da evolução temporal da tensão** $V(z,t)$ ao longo do espaço.
 
 <p align="center">
-  <img src="/Cap_02/out/voltage_simulation.gif" alt="voltage_simulation">
+  <img src="out/voltage_simulation.gif" alt="voltage_simulation">
 </p>
 
 ---
@@ -161,7 +161,7 @@ As imagens são salvas na pasta `Cap_02/out/`. Veja abaixo algumas delas:
 > **Animação da evolução temporal da corrente** $I(z,t)$ ao longo do espaço.
 
 <p align="center">
-  <img src="/Cap_02/out/current_simulation.gif" alt="current_simulation">
+  <img src="out/current_simulation.gif" alt="current_simulation">
 </p>
 
 ---
@@ -177,7 +177,7 @@ As imagens são salvas na pasta `Cap_02/out/`. Veja abaixo algumas delas:
 > Gráfico da resposta temporal: tensão do pulso incidente $V_+(t)$ e tensão na carga $V_L(t)$ (simulação *wideband*).
 
 <p align="center">
-  <img src="/Cap_02/out/wb_time_response.png" alt="wb_time_response">
+  <img src="out/wb_time_response.png" alt="wb_time_response">
 </p>
 
 ---
@@ -187,7 +187,7 @@ As imagens são salvas na pasta `Cap_02/out/`. Veja abaixo algumas delas:
 > Função de transferência $|V_L / V_S|$ obtida a partir da Transformada de Fourier dos sinais de entrada e saída.
 
 <p align="center">
-  <img src="/Cap_02/out/wb_transfer_function.png" alt="wb_transfer_function">
+  <img src="out/wb_transfer_function.png" alt="wb_transfer_function">
 </p>
 
 ---
@@ -197,7 +197,7 @@ As imagens são salvas na pasta `Cap_02/out/`. Veja abaixo algumas delas:
 > Animação da evolução espacial da tensão $V(z,t)$ ao longo da linha de transmissão ao longo do tempo.
 
 <p align="center">
-  <img src="/Cap_02/out/WB_voltage_simulation.gif" alt="WB_voltage_simulation">
+  <img src="out/WB_voltage_simulation.gif" alt="WB_voltage_simulation">
 </p>
 
 ## Ligação com README geral
