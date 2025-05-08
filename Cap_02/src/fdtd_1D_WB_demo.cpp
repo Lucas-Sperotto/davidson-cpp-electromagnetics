@@ -22,12 +22,9 @@
 namespace fs = std::filesystem;
 
 // Função impulso gaussiano derivado normalizado
-double gaussder_norm(double t, double m, double sigma)
-{
-    // return -1.0 / std::sqrt(2.0 * M_PI) * (t - m) / sigma * sigma * sigma * exp(-(t-m)^2/(2*sigma^2));
-    return -std::exp(0.5) * (t - m) / sigma * std::exp(-std::pow((t - m), 2) / (2 * sigma * sigma));
-}
+double gaussder_norm(double, double, double);
 
+// Função principal do programa
 int main()
 {
 
@@ -98,12 +95,16 @@ int main()
 
     for (int nn = 1; nn < Nk; ++nn)
     {
-        double t = (nn - 1) * delta_t;
+        double t = (nn)*delta_t;
         time[nn] = t;
-        double Vo = gaussder_norm(t, offset, sigma);
-        Vs[nn] = Vo;
+    }
 
-        V_n[0] = (1.0 - beta1) * V_nmin1[0] - 2.0 * const_beta * I_nmin1[0] + (2.0 * const_beta / Rs) * Vo;
+    for (int nn = 1; nn < Nk; ++nn)
+    {
+        double Vo_nmin1 = gaussder_norm(time[nn], offset, sigma);
+        Vs[nn] = Vo_nmin1;
+
+        V_n[0] = (1.0 - beta1) * V_nmin1[0] - 2.0 * const_beta * I_nmin1[0] + (2.0 * const_beta / Rs) * Vo_nmin1;
 
         for (int kk = 1; kk < Nz - 1; ++kk)
             V_n[kk] = V_nmin1[kk] - const_beta * (I_nmin1[kk] - I_nmin1[kk - 1]);
@@ -128,11 +129,19 @@ int main()
         V_nmin1 = V_n;
         I_nmin1 = I_n;
     }
+    double tau_s = Z_0 / (Rs + Z_0);
+
+    // for (int i = 0; i < Nk; ++i)
+    // std::cout << "time[" << i << "]" << time[i] << std::endl;
+    // for (int i = 0; i < Nk; ++i)
+    // std::cout << "Vs[" << i << "]" << Vs[i] << std::endl;
+    // for (int i = 0; i < Nz; ++i)
+    // std::cout << "V_n[" << i << "]" << V_n[i] << std::endl;
 
     if (flag)
     {
         std::ofstream f_vs(out_dir + "/fdtd_wb_vs.csv"), f_vl(out_dir + "/fdtd_wb_vl.csv");
-        double tau_s = Z_0 / (Rs + Z_0);
+
         for (int i = 0; i < Nk; ++i)
         {
             f_vs << time[i] << "," << Vs[i] * tau_s << "\n";
@@ -187,6 +196,34 @@ int main()
         fftw_free(out2);
     }
 
+    // std::cout << "ans: " << ans << std::endl;
+    std::cout << "beta1: " << beta1 << std::endl;
+    std::cout << "beta2: " << beta2 << std::endl;
+    std::cout << "c: " << c << std::endl;
+    std::cout << "C: " << C << std::endl;
+    std::cout << "const_beta: " << const_beta << std::endl;
+    std::cout << "Courant: " << Courant << std::endl;
+    std::cout << "delta_t: " << delta_t << std::endl;
+    std::cout << "delta_z: " << delta_z << std::endl;
+    std::cout << "flag: " << flag << std::endl;
+    std::cout << "growth: " << growth << std::endl;
+    std::cout << "h: " << h << std::endl;
+    std::cout << "L: " << L << std::endl;
+    std::cout << "ofset: " << offset << std::endl;
+    std::cout << "sigma: " << sigma << std::endl;
+    // std::cout << "r: " << r << std::endl;
+    std::cout << "Rl: " << Rl << std::endl;
+    std::cout << "Rs: " << Rs << std::endl;
+    std::cout << "tau_s: " << tau_s << std::endl;
+    std::cout << "Z_0: " << Z_0 << std::endl;
+
     std::cout << "Simulação banda larga finalizada. Resultados salvos em Cap_02/out/.\n";
     return 0;
+}
+
+// Função impulso gaussiano derivado normalizado
+double gaussder_norm(double t, double m, double sigma)
+{
+    // return -1.0 / std::sqrt(2.0 * M_PI) * (t - m) / sigma * sigma * sigma * exp(-(t-m)^2/(2*sigma^2));
+    return -std::exp(0.5) * (t - m) / sigma * std::exp(-std::pow((t - m), 2) / (2 * sigma * sigma));
 }

@@ -25,25 +25,7 @@ namespace fs = std::filesystem;
 // Função que calcula o erro relativo entre dois vetores complexos
 // Este erro é usado como critério de convergência da simulação
 double compute_relative_error(const std::vector<std::complex<double>> &current,
-                              const std::vector<std::complex<double>> &previous)
-{
-    double num = 0.0;   // Numerador da fórmula: ||current - previous||^2
-    double denom = 0.0; // Denominador da fórmula: ||current||^2
-
-    // Percorre todos os elementos dos vetores para calcular o erro
-    for (size_t i = 0; i < current.size(); ++i)
-    {
-        std::complex<double> diff = current[i] - previous[i]; // Diferença entre os elementos
-        num += std::norm(diff);                               // Soma do quadrado do módulo da diferença (|diff|^2)
-        denom += std::norm(current[i]);                       // Soma do quadrado do módulo do elemento atual (|current[i]|^2)
-    }
-
-    if (denom == 0.0)
-        return 0.0; // Se o denominador for zero (evita divisão por zero), retorna 0.0
-
-    // Retorna a raiz quadrada do erro relativo
-    return std::sqrt(num) / std::sqrt(denom);
-}
+                              const std::vector<std::complex<double>> &previous);
 
 // Função principal do programa
 int main()
@@ -71,7 +53,7 @@ int main()
     const double c = 1.0 / std::sqrt(L * C); // Velocidade de propagação na linha (v = 1/sqrt(LC))
     const double Z_0 = std::sqrt(L / C);     // Impedância característica da linha de transmissão
     const double Rs = 1.0;                   // Resistência da fonte [Ohm]
-    const double epsilon = 1E-9;//1E-12;            // 0.002    // Tolerância para o erro relativo (critério de convergência)
+    const double epsilon = 1E-9;             // 1E-12;            // 0.002    // Tolerância para o erro relativo (critério de convergência)
 
     double Rl;
     // std::cout << "Load resistance? (Z_0 = 1 Ohm) Default: 2 -> ";
@@ -109,7 +91,6 @@ int main()
     const double beta2 = 2.0 * delta_t / (Rl * C * delta_z);            // Eq. (2.68)
     const double r = (delta_t * delta_t) / (L * C * delta_z * delta_z); // Eq. (2.69)
 
-
     // Cabeçalho: TimeStep, V[1], V[2], ..., V[Nz]
     voltage_log << "TimeStep";
     for (size_t i = 0; i < Nz; ++i)
@@ -121,8 +102,6 @@ int main()
     for (size_t i = 0; i < Nz; ++i)
         current_log << ",I[" << (i + 1) << "]";
     current_log << "\n";
-
-
 
     //  First time step - Initialize.
     std::vector<double> V_nmin1(Nz, 0.0), I_nmin1(Nz, 0.0);
@@ -137,7 +116,7 @@ int main()
     // std::cout << "1" << std::endl;
     double Vo_nmin1;
     //  Time loop
-    for (int nn = 1; nn <= Nk; ++nn)//true; ++nn) // nn <= Nk; ++nn)
+    for (int nn = 1; nn <= Nk; ++nn) // true; ++nn) // nn <= Nk; ++nn)
     {
         // std::cout << "nn: " << nn << std::endl;
         Vo_nmin1 = V0 * std::cos(2.0 * M_PI * freq * (nn - 2) * delta_t);               // Source.
@@ -451,4 +430,27 @@ int main()
     std::cout << "Simulation complete. Output saved in Cap_02/out/.\n";
 
     return 0;
+}
+
+// Função que calcula o erro relativo entre dois vetores complexos
+// Este erro é usado como critério de convergência da simulação
+double compute_relative_error(const std::vector<std::complex<double>> &current,
+                              const std::vector<std::complex<double>> &previous)
+{
+    double num = 0.0;   // Numerador da fórmula: ||current - previous||^2
+    double denom = 0.0; // Denominador da fórmula: ||current||^2
+
+    // Percorre todos os elementos dos vetores para calcular o erro
+    for (size_t i = 0; i < current.size(); ++i)
+    {
+        std::complex<double> diff = current[i] - previous[i]; // Diferença entre os elementos
+        num += std::norm(diff);                               // Soma do quadrado do módulo da diferença (|diff|^2)
+        denom += std::norm(current[i]);                       // Soma do quadrado do módulo do elemento atual (|current[i]|^2)
+    }
+
+    if (denom == 0.0)
+        return 0.0; // Se o denominador for zero (evita divisão por zero), retorna 0.0
+
+    // Retorna a raiz quadrada do erro relativo
+    return std::sqrt(num) / std::sqrt(denom);
 }
