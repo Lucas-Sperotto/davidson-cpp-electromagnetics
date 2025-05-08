@@ -133,10 +133,12 @@ int main()
 
     // for (int i = 0; i < Nk; ++i)
     // std::cout << "time[" << i << "]" << time[i] << std::endl;
-    // for (int i = 0; i < Nk; ++i)
-    // std::cout << "Vs[" << i << "]" << Vs[i] << std::endl;
-    // for (int i = 0; i < Nz; ++i)
-    // std::cout << "V_n[" << i << "]" << V_n[i] << std::endl;
+     //for (int i = 0; i < Nk; ++i)
+     //std::cout << "Vs[" << i << "]" << Vs[i] << std::endl;
+     //for (int i = 0; i < Nz; ++i)
+     //std::cout << "V_n[" << i << "]" << V_n[i] << std::endl;
+     //for (int i = 0; i < Nk; ++i)
+     //std::cout << "Vl[" << i << "]" << Vl[i] << std::endl;
 
     if (flag)
     {
@@ -162,9 +164,9 @@ int main()
 
         for (int i = 0; i < Nk; ++i)
         {
-            in1[i][0] = Vs[i];
+            in1[i][0] = Vl[i];
             in1[i][1] = 0;
-            in2[i][0] = Vl[i];
+            in2[i][0] = Vs[i];
             in2[i][1] = 0;
         }
         fftw_execute(p1);
@@ -177,15 +179,16 @@ int main()
             tf_file_vl << time[i] << "," << Vl[i] << "\n";
         }
         tf_file_vl.close();
-
+        std::vector<std::complex<double>> Tx(Nk, 0.0);
         double delta_f = 1.0 / (Nk * delta_t);
-        for (int i = 0; i < (Nk / 2); ++i)
+        for (int i = 0; i < (Nk / 32); ++i)
         {
             double f = i * delta_f;
-            std::complex<double> H(out2[i][0], out2[i][1]);
             std::complex<double> G(out1[i][0], out1[i][1]);
-            std::complex<double> Tx = H / G;
-            tf_file << f << "," << std::abs(Tx) << "\n";
+            std::complex<double> H(out2[i][0], out2[i][1]);
+            Tx[i] = G / H;
+            //std::cout << "Tx[" << i << "]" << Tx[i] << std::endl;
+            tf_file << f << "," << std::abs(Tx[i]) << "\n";
         }
         tf_file.close();
         fftw_destroy_plan(p1);
@@ -195,7 +198,7 @@ int main()
         fftw_free(out1);
         fftw_free(out2);
     }
-
+/*
     // std::cout << "ans: " << ans << std::endl;
     std::cout << "beta1: " << beta1 << std::endl;
     std::cout << "beta2: " << beta2 << std::endl;
@@ -216,7 +219,7 @@ int main()
     std::cout << "Rs: " << Rs << std::endl;
     std::cout << "tau_s: " << tau_s << std::endl;
     std::cout << "Z_0: " << Z_0 << std::endl;
-
+*/
     std::cout << "Simulação banda larga finalizada. Resultados salvos em Cap_02/out/.\n";
     return 0;
 }
