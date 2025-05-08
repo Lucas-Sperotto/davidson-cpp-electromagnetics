@@ -52,7 +52,7 @@ python3 plot_fdtd_results.py
 python3 plot_fdtd_wb_results.py
 ```
 
-## Saídas geradas e suas interpretações
+## Saídas geradas e suas interpretações `fdtd_1D_demo`
 
 As imagens são salvas na pasta `Cap_02/out/`. Veja abaixo algumas delas:
 
@@ -96,17 +96,39 @@ As imagens são salvas na pasta `Cap_02/out/`. Veja abaixo algumas delas:
 
 ---
 
-### 🕒 `wb_time_response.png`
-> Gráfico temporal do pulso aplicado e da resposta na carga (versão wideband).
+## Cálculo wideband `fdtd_1D_WB_demo`
 
-![wb_time_response](/Cap_02/out/wb_time_response.png)
+> No contexto do método FDTD, o cálculo *wideband* consiste em excitar a linha de transmissão (ou outro sistema) com um sinal de banda larga e, a partir da Transformada de Fourier aplicada na resposta temporal, obter a resposta do sistema para diversas frequências em uma única simulação.
+
+---
+
+### 🕒 `wb_time_response.png`
+
+> Gráfico da resposta temporal: tensão do pulso incidente $V_+(t)$ e tensão na carga $V_L(t)$ (simulação *wideband*).
+
+<p align="center">
+  <img src="/Cap_02/out/wb_time_response.png" alt="wb_time_response">
+</p>
 
 ---
 
 ### 📡 `wb_transfer_function.png`
-> Função de transferência $|V_L / V_S|$ em função da frequência, simulada via pulso e FFT.
 
-![wb_transfer_function](/Cap_02/out/wb_transfer_function.png)
+> Função de transferência $|V_L / V_S|$ obtida a partir da Transformada de Fourier dos sinais de entrada e saída.
+
+<p align="center">
+  <img src="/Cap_02/out/wb_transfer_function.png" alt="wb_transfer_function">
+</p>
+
+---
+
+### ⚡ `WB_voltage_simulation.gif`
+
+> Animação da evolução espacial da tensão $V(z,t)$ ao longo da linha de transmissão ao longo do tempo.
+
+<p align="center">
+  <img src="/Cap_02/out/WB_voltage_simulation.gif" alt="WB_voltage_simulation">
+</p>
 
 ## Ligação com README geral
 
