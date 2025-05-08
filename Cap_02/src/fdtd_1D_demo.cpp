@@ -381,15 +381,15 @@ int main()
     // Calcula a norma L2 relativa
     double global_L2_error = std::sqrt(sum_sq_error) / std::sqrt(sum_sq_exact);
 
-    relative_error_file << "Norma_L2_Relativa: " << global_L2_error << "\n";
+    relative_error_file << "Norma_L2_Relativa percentual: " << global_L2_error * 100.0 << "\n";
 
     // Escreve cabeçalho para indicar o conteúdo
-    relative_error_file << "Erro relativo ponto a ponto entre V_exact e V_period_freq\n";
+    relative_error_file << "Erro relativo percentual ponto a ponto entre V_exact e V_period_freq\n";
     relative_error_file << "Index,Erro_relativo\n";
 
     for (size_t i = 0; i < V_exact.size(); ++i)
     {
-        relative_error_file << i << "," << rel_error[i] << "\n";
+        relative_error_file << i << "," << rel_error[i] * 100.0 << "\n";
     }
 
     // Fecha o arquivo para reabrir no modo de inserção no topo

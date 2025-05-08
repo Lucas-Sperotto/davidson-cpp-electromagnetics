@@ -64,7 +64,7 @@ with open(os.path.join(out_dir, 'erro_relativo.csv'), 'r') as f:
 # Cria o gráfico
 plt.figure(figsize=(10, 6))
 plt.plot(df['Index'], df['Erro_relativo'], marker='o')
-plt.title(f'Erro Relativo ponto a ponto\nNorma L2 Relativa: {norma_l2:.6f}') # Adiciona a norma L2 no topo
+plt.title(f'Erro Relativo Percentual Ponto a Ponto\nNorma L2 Relativa: {norma_l2:.6f} (%)') # Adiciona a norma L2 no topo
 plt.xlabel('Index (z)')
 plt.ylabel('Erro Relativo (%)')
 
