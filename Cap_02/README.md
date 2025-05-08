@@ -11,7 +11,6 @@ Cap_02/
 ├── src/
 │   ├── fdtd_1D_demo.cpp             # Simulação FDTD 1D com senoide
 │   ├── fdtd_1D_WB_demo.cpp          # Simulação FDTD 1D banda larga
-│   └── gaussder_norm.hpp           # Função impulso gaussiano derivado normalizado
 ├── scripts/
 │   ├── plot_fdtd_results.py        # Visualização de resultados da senoide
 │   └── plot_fdtd_wb_results.py     # Visualização de resultados banda larga
@@ -122,7 +121,7 @@ python3 plot_fdtd_results.py
 python3 plot_fdtd_wb_results.py
 ```
 
-## Saídas geradas e suas interpretações `fdtd_1D_demo`
+## Saídas geradas e suas interpretações `fdtd_1D_demo` (Senoide)
 
 As imagens são salvas na pasta `Cap_02/out/`. Veja abaixo algumas delas:
 
