@@ -19,6 +19,76 @@ Cap_02/
 └── README.md                       # Este arquivo
 ```
 
+## 📚 Teoria: Linha de Transmissão e Método FDTD
+
+Para introduzir o algoritmo **FDTD (Finite-Difference Time-Domain)**, estudamos o problema de uma **linha de transmissão sem perdas** (lossless transmission line).
+
+Segundo a teoria da linha de transmissão, no modo TEM (Transverse Electromagnetic), há uma correspondência direta entre os campos e as grandezas elétricas:
+
+- Campo elétrico ($E$) ↔ Tensão ($V$)
+- Campo magnético ($H$) ↔ Corrente ($I$)
+
+👉 Portanto, resolver para **$V(z,t)$** e **$I(z,t)$** é equivalente a resolver as **equações de Maxwell** para os campos no modo TEM.
+
+A linha de transmissão pode ser modelada por um circuito equivalente **infinitesimal**, composto por uma indutância **$L$** (por metro) e uma capacitância **$C$** (por metro), como mostra a figura:
+
+<p align="center">
+  <img src="/Cap_02/Img1.png" alt="Trecho infinitesimal de uma linha de transmissão unidimensional">
+</p>
+
+**Figura 2.1:** Trecho infinitesimal de uma linha de transmissão unidimensional.
+---
+
+### 📐 **Equações da Linha de Transmissão**
+
+A tensão e a corrente ao longo da linha são descritas pelas **equações do telegrafista (telegraphist's equations):**
+
+$$
+\frac{\partial V}{\partial z} = -L \frac{\partial I}{\partial t}
+$$
+$$
+\frac{\partial I}{\partial z} = -C \frac{\partial V}{\partial t}
+$$
+
+Essas equações são um **caso especial das equações de Maxwell em uma dimensão.**
+
+---
+
+### 🎯 **Modelagem**
+
+Em vez de desacoplar essas equações para obter a equação de onda (equação diferencial parcial de segunda ordem), aqui trabalhamos **diretamente com o par de equações acopladas de primeira ordem.** Isso permite aplicar o método FDTD de forma natural.
+
+O problema modelado é ilustrado na Figura a seguir e considera os seguintes parâmetros normalizados:
+
+- $L = 1$ H/m
+- $C = 1$ F/m
+- Passo espacial $h = 0.25$ m
+- Resistência da fonte $R_S = 1$ $\Omega$
+- Resistência de carga $R_L = 2$ $\Omega$
+
+<p align="center">
+  <img src="/Cap_02/Img2.png" alt="Modelo do Problema de Linha de Transmissão">
+</p>
+
+**Figura 2.2:** Problema modelado da linha de transmissão.
+
+Com esses valores:
+
+- Impedância característica $Z_0 = \sqrt{\frac{L}{C}} = 1$ $\Omega$
+- Velocidade de propagação $v_p = \frac{1}{\sqrt{LC}} = 1$ m/s
+
+> 🔍 **Nota:** Este é um modelo **normalizado**, frequentemente usado em física para simplificar as equações e interpretação dos resultados.
+
+---
+
+### 💡 **Objetivo**
+
+A partir dessas equações, o método FDTD permite calcular a evolução temporal das tensões e correntes ao longo da linha, gerando:
+
+1. O comportamento no **domínio do tempo** $V(z,t)$ e $I(z,t)$
+2. A **função de transferência** $|V_L / V_S|$ via Transformada de Fourier
+3. Animações da propagação da tensão ao longo da linha
+
 ## Requisitos
 
 - C++17 ou superior
