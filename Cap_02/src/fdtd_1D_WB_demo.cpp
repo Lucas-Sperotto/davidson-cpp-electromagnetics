@@ -40,6 +40,8 @@ int main()
     // Cria o diretório de saída (se não existir)
     fs::create_directories(out_dir);
 
+    std::ofstream voltage_log(out_dir + "/WB_voltage_over_time.csv");
+
     const double C = 1.0;
     const double L = 1.0;
     const double Z_0 = std::sqrt(L / C);
@@ -93,6 +95,12 @@ int main()
     std::vector<double> V_n(Nz, 0.0), I_n(Nz, 0.0);
     std::vector<double> Vs(Nk, 0.0), Vl(Nk, 0.0), time(Nk, 0.0);
 
+    // Cabeçalho: TimeStep, Vn[1], Vn[2], ..., Vn[Nz]
+    voltage_log << "TimeStep";
+    for (size_t i = 0; i < Nz; ++i)
+        voltage_log << ",Vn[" << (i + 1) << "]";
+    voltage_log << "\n";
+
     for (int nn = 1; nn < Nk; ++nn)
     {
         double t = (nn)*delta_t;
@@ -115,6 +123,14 @@ int main()
         for (int kk = 0; kk < Nz - 1; ++kk)
             I_n[kk] = I_nmin1[kk] - delta_t / (L * delta_z) * (V_n[kk + 1] - V_n[kk]);
 
+        voltage_log << nn;
+        for (size_t i = 0; i < Nz; ++i)
+        {
+            double voltage = (delta_t / (C * delta_z)) * V_n[i];
+            voltage_log << "," << voltage;
+        }
+        voltage_log << "\n";
+
         double norm_new = 0.0, norm_old = 0.0;
         for (int i = 0; i < Nz; ++i)
         {
@@ -129,16 +145,19 @@ int main()
         V_nmin1 = V_n;
         I_nmin1 = I_n;
     }
+
     double tau_s = Z_0 / (Rs + Z_0);
+
+    voltage_log.close();
 
     // for (int i = 0; i < Nk; ++i)
     // std::cout << "time[" << i << "]" << time[i] << std::endl;
-     //for (int i = 0; i < Nk; ++i)
-     //std::cout << "Vs[" << i << "]" << Vs[i] << std::endl;
-     //for (int i = 0; i < Nz; ++i)
-     //std::cout << "V_n[" << i << "]" << V_n[i] << std::endl;
-     //for (int i = 0; i < Nk; ++i)
-     //std::cout << "Vl[" << i << "]" << Vl[i] << std::endl;
+    // for (int i = 0; i < Nk; ++i)
+    // std::cout << "Vs[" << i << "]" << Vs[i] << std::endl;
+    // for (int i = 0; i < Nz; ++i)
+    // std::cout << "V_n[" << i << "]" << V_n[i] << std::endl;
+    // for (int i = 0; i < Nk; ++i)
+    // std::cout << "Vl[" << i << "]" << Vl[i] << std::endl;
 
     if (flag)
     {
@@ -187,7 +206,7 @@ int main()
             std::complex<double> G(out1[i][0], out1[i][1]);
             std::complex<double> H(out2[i][0], out2[i][1]);
             Tx[i] = G / H;
-            //std::cout << "Tx[" << i << "]" << Tx[i] << std::endl;
+            // std::cout << "Tx[" << i << "]" << Tx[i] << std::endl;
             tf_file << f << "," << std::abs(Tx[i]) << "\n";
         }
         tf_file.close();
@@ -198,28 +217,28 @@ int main()
         fftw_free(out1);
         fftw_free(out2);
     }
-/*
-    // std::cout << "ans: " << ans << std::endl;
-    std::cout << "beta1: " << beta1 << std::endl;
-    std::cout << "beta2: " << beta2 << std::endl;
-    std::cout << "c: " << c << std::endl;
-    std::cout << "C: " << C << std::endl;
-    std::cout << "const_beta: " << const_beta << std::endl;
-    std::cout << "Courant: " << Courant << std::endl;
-    std::cout << "delta_t: " << delta_t << std::endl;
-    std::cout << "delta_z: " << delta_z << std::endl;
-    std::cout << "flag: " << flag << std::endl;
-    std::cout << "growth: " << growth << std::endl;
-    std::cout << "h: " << h << std::endl;
-    std::cout << "L: " << L << std::endl;
-    std::cout << "ofset: " << offset << std::endl;
-    std::cout << "sigma: " << sigma << std::endl;
-    // std::cout << "r: " << r << std::endl;
-    std::cout << "Rl: " << Rl << std::endl;
-    std::cout << "Rs: " << Rs << std::endl;
-    std::cout << "tau_s: " << tau_s << std::endl;
-    std::cout << "Z_0: " << Z_0 << std::endl;
-*/
+    /*
+        // std::cout << "ans: " << ans << std::endl;
+        std::cout << "beta1: " << beta1 << std::endl;
+        std::cout << "beta2: " << beta2 << std::endl;
+        std::cout << "c: " << c << std::endl;
+        std::cout << "C: " << C << std::endl;
+        std::cout << "const_beta: " << const_beta << std::endl;
+        std::cout << "Courant: " << Courant << std::endl;
+        std::cout << "delta_t: " << delta_t << std::endl;
+        std::cout << "delta_z: " << delta_z << std::endl;
+        std::cout << "flag: " << flag << std::endl;
+        std::cout << "growth: " << growth << std::endl;
+        std::cout << "h: " << h << std::endl;
+        std::cout << "L: " << L << std::endl;
+        std::cout << "ofset: " << offset << std::endl;
+        std::cout << "sigma: " << sigma << std::endl;
+        // std::cout << "r: " << r << std::endl;
+        std::cout << "Rl: " << Rl << std::endl;
+        std::cout << "Rs: " << Rs << std::endl;
+        std::cout << "tau_s: " << tau_s << std::endl;
+        std::cout << "Z_0: " << Z_0 << std::endl;
+    */
     std::cout << "Simulação banda larga finalizada. Resultados salvos em Cap_02/out/.\n";
     return 0;
 }

@@ -1,6 +1,8 @@
 # Cap_02/scripts/plot_fdtd_wb_results.py
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
 import os
 
 out_dir = "../out"
@@ -35,3 +37,31 @@ if os.path.exists(tf_path):
     plt.savefig(os.path.join(out_dir, "wb_transfer_function.png"))
 
 plt.show()
+
+# Lê o arquivo de tensões
+voltage_series = pd.read_csv(os.path.join(out_dir, 'WB_voltage_over_time.csv'))
+
+fig, ax = plt.subplots()
+line, = ax.plot([], [], lw=2)
+ax.set_xlim(1, voltage_series.shape[1]-1)
+ax.set_ylim(-1, 1)
+ax.set_xlabel('Index (z)')
+ax.set_ylabel('Normalized Voltage')
+
+def init():
+    line.set_data([], [])
+    return line,
+
+def update(frame):
+    x = range(1, voltage_series.shape[1])  # posição espacial
+    y = voltage_series.iloc[frame, 1:]     # ignora a coluna TimeStep
+    line.set_data(x, y)
+    ax.set_title(f'Voltage at timestep {voltage_series.iloc[frame, 0]}')
+    return line,
+
+ani = FuncAnimation(fig, update, frames=len(voltage_series), init_func=init, blit=True)
+
+# Salva o vídeo
+ani.save(os.path.join(out_dir, 'WB_voltage_simulation.mp4'), writer='ffmpeg')
+ani.save(os.path.join(out_dir, 'WB_voltage_simulation.gif'), writer='pillow')
+plt.close(fig)  # fecha apenas depois de salvar
