@@ -38,9 +38,9 @@ A linha de transmissão pode ser modelada por um circuito equivalente **infinite
 **Figura 2.1:** Trecho infinitesimal de uma linha de transmissão unidimensional.
 ---
 
-### 📐 **Equações da Linha de Transmissão**
+### 📐 **Equações da Linha de Transmissão** 
 
-A tensão e a corrente ao longo da linha são descritas pelas **equações do telegrafista (telegraphist's equations):** (eq. 2.13 e eq. 2.14)
+A tensão e a corrente ao longo da linha são descritas pelas **[equações do telegrafista](https://pt.wikipedia.org/wiki/Equa%C3%A7%C3%B5es_do_telegrafista) ([telegraphist's equations](https://en.wikipedia.org/wiki/Telegrapher%27s_equations)):** (eq. 2.13 e eq. 2.14)
 
 $$
 \frac{\partial I(z,t)}{\partial z} = -C \frac{\partial V(z,t)}{\partial t}
@@ -88,11 +88,47 @@ A partir dessas equações, o método FDTD permite calcular a evolução tempora
 2. A **função de transferência** $|V_L / V_S|$ via Transformada de Fourier
 3. Animações da propagação da tensão ao longo da linha
 
+---
+
 ## Requisitos
 
+### Compilação C++
 - C++17 ou superior
-- [FFTW3](http://www.fftw.org/) para cálculo da FFT
-- Python 3 com `numpy` e `matplotlib` para visualização
+- [FFTW3](http://www.fftw.org/) (Fastest Fourier Transform in the West)
+- CMake
+- pkg-config
+- Compilador compatível com C++17 (ex.: `g++`, `clang++`)
+
+### Bibliotecas de Desenvolvimento
+Instale os pacotes necessários no Ubuntu/Debian com:
+
+```bash
+sudo apt install build-essential gfortran cmake pkg-config libfftw3-dev
+````
+
+### Python 3 (para visualização de resultados)
+
+Os scripts de visualização requerem as seguintes bibliotecas:
+
+* numpy
+* pandas
+* matplotlib
+* pillow
+* ffmpeg (externo, usado pelo matplotlib)
+
+Instale com:
+
+```bash
+sudo apt install python3 python3-pip python3-numpy python3-matplotlib python3-pandas python3-pil ffmpeg
+```
+
+ou via `pip`:
+
+```bash
+pip install numpy matplotlib pandas pillow
+```
+
+---
 
 ## Compilação (exemplo)
 
