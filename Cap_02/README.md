@@ -133,7 +133,6 @@ pip install numpy matplotlib pandas pillow
 ## Compilação (exemplo)
 
 ```bash
-sudo apt install libfftw3-dev
 cd Cap_02
 mkdir build && cd build
 cmake ..
