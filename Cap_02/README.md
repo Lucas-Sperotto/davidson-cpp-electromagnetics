@@ -183,7 +183,7 @@ As imagens são salvas na pasta `Cap_02/out/`. Veja abaixo algumas delas:
 
 ### 📡 `wb_transfer_function.png`
 
-> Função de transferência $|V_L / V_S|$ obtida a partir da Transformada de Fourier dos sinais de entrada e saída.
+> Função de transferência $|V_L / V_O|$ obtida a partir da Transformada de Fourier dos sinais de entrada e saída.
 
 <p align="center">
   <img src="out/wb_transfer_function.png" alt="wb_transfer_function">
