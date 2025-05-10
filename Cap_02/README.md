@@ -90,6 +90,32 @@ A partir dessas equações, o método FDTD permite calcular a evolução tempora
 
 ---
 
+### 🎯 **Discretização pelo Método FDTD**
+
+<p align="center">
+  <img src="img3.png" alt="The Yee grid">
+</p>
+
+**Figura 2.3:** The Yee grid.
+
+
+<p align="center">
+  <img src="img4.png" alt="The voltage stencil">
+</p>
+
+**Figura 2.4:** The voltage stencil.
+
+
+<p align="center">
+  <img src="img5.png" alt="The current stencil">
+</p>
+
+**Figura 2.5:** The current stencil.
+
+
+
+---
+
 ## Requisitos
 
 ### Compilação C++
