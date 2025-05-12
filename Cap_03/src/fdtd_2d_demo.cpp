@@ -13,7 +13,7 @@ const double eps_0 = 8.854187817E-12;         //[F/m] epsilon_0
 const double mu_0 = 4.0 * M_PI * 1E-7;        //[H/m] mu_0
 const double eta_0 = std::sqrt(mu_0 / eps_0); //[Ohm] Wave impedance of free space
 
-int run_fdtd2d_simulation()
+int main()
 {
     const std::string out_dir = PROJECT_OUT_DIR;
 
@@ -23,8 +23,7 @@ int run_fdtd2d_simulation()
     // Cria o diretório de saída (se não existir)
     std::filesystem::create_directories(out_dir);
 
-
-bool cyl_present = false; // Set to true if you want to include a PEC cylinder
+    bool cyl_present = false; // Set to true if you want to include a PEC cylinder
 
     int refine = 1;
     std::cout << "Factor to refine mesh? 1 standard: ";
@@ -60,12 +59,12 @@ bool cyl_present = false; // Set to true if you want to include a PEC cylinder
     if ((N_centre_x - L) * delta_s <= radius)
     {
         std::cout << "Error in simulation data. Scattered/total field not entirely to the left of target" << std::endl;
-        return 0;
+        return -1;
     }
 
     // Set up material grid (free space to start)
-    std::vector<std::vector<double>> C_Ex(N_x + 1, std::vector<double>(N_y + 1, delta_t / (eps_0 * delta_s)));
-    std::vector<std::vector<double>> C_Ey(N_x + 1, std::vector<double>(N_y + 1, delta_t / (eps_0 * delta_s)));
+    std::vector<std::vector<double>> C_Ex(N_x + 1, std::vector<double>(delta_t / (eps_0 * delta_s)));
+    std::vector<std::vector<double>> C_Ey(N_x + 1, std::vector<double>(delta_t / (eps_0 * delta_s)));
     double D_Hz = delta_t / (mu_0 * delta_s);
     // Now force the electric fields to zero inside (and on the surface of) the PEC
     // Note that the indices of the centre are treated as per usual FDTD
@@ -215,7 +214,7 @@ bool cyl_present = false; // Set to true if you want to include a PEC cylinder
         {
             for (int j = 1; j < N_y; ++j)
             {
-                E_x_n[i][j] += delta_t / (eps_0 * delta_s) * (H_z_n[i][j] - H_z_n[i][j - 1]);
+                E_x_n[i][j] += C_Ex[i][j] * (H_z_n[i][j] - H_z_n[i][j - 1]);
             }
         }
 
@@ -224,16 +223,50 @@ bool cyl_present = false; // Set to true if you want to include a PEC cylinder
         {
             for (int j = 0; j < N_y; ++j)
             {
-                E_y[i][j] -= delta_t / (eps_0 * delta_s) * (H_z[i][j] - H_z[i - 1][j]);
+                E_y_n[i][j] -= C_Ey[i][j] * (H_z_n[i][j] - H_z_n[i - 1][j]);
             }
         }
+        // Special update on scat/tot field boundary (only needed for Ey)
+        // as in Fig. 3.1. The E_y field is the scattered field.
+        std::vector<double> H_z_n_inc(N_y, (Peak / eta_0) * gaussder_norm((m - 0.5) * delta_t - (L - 0.5) * delta_s / c, m_offset, sigma));
+        for (int j = L1; j < N_y - L1; ++j)
+            E_y_n[L][j] = E_y_nmin1[L][j] - C_Ey[L][j] * (H_z_n[L][j] - H_z_n_inc[j] - H_z_n[L - 1][j]);
+
+        // Special update on additional new scat/tot field boundary (only needed for Ey)
+        // on the right hand side of Fig. 3.1, at N_x - L1. Again, the E_y field is the
+        // scattered field.
+        std::vector<double> H_z_n_inc(N_y, (Peak / eta_0) * gaussder_norm((m - 0.5) * delta_t - (N_x - L1 - 0.5) * delta_s / c, m_offset, sigma));
+        for (int j = L1; j < N_y - L1; ++j)
+            E_y_n[N_x - L1 + 1][j] = E_y_nmin1[N_x - L1 + 1][j] - C_Ey[N_x - L1 + 1][j] * (H_z_n[N_x - L1 + 1][j] + H_z_n_inc[j] - H_z_n[N_x - L1][j]);
+        // Special update on additional new scat/tot field boundary (only needed for Ex)
+        // on the upper side of Fig. 3.1, at N_y - L1. This plays the same role as
+        // the ABC at N_x-L1.
+
+        // Re-writing gaussder_norm to handle a vector call would permit this to
+        // be recoded in vector notation. Note that since N_x may not be equal to N_y, we defined a new variable  H_z_n_inc2
+        std::vector<double> H_z_n_inc2(N_y, 0.0);
+        for (int ii = L1; ii < N_y - L1; ++ii)
+            H_z_n_inc2[ii] = (Peak / eta_0) * gaussder_norm((m - 0.5) * delta_t - (ii - 0.5) * delta_s / c, m_offset, sigma);
+
+        // Upper interface
+        // The H_x field above the interface is scattered, that below, total. The
+        // E_x field is the scattered field.
+        for (int i = L - 1; i < N_x - L1; ++i)
+            E_x_n[i][N_y - L1 + 1] = E_x_nmin1[i][N_y - L1 + 1] + C_Ex[i][N_y - L1 + 1] * (H_z_n[i][N_y - L1 + 1] - H_z_n[i][N_y - L1] + H_z_n_inc2[i]);
+        // Lower interface
+        // Now, the H_x field above the interface is total, that below, scattered.
+        // Again, the E_x field is the scattered field.
+        for (int i = L - 1; i < N_x - L1; ++i)
+            E_x_n[i][L1] = E_x_nmin1[i][L1] + C_Ex[i][L1] * (H_z_n[i][L1] - H_z_n_inc2[i] - H_z_n[i][L1 - 1]);
+
+        // ---------------------------- End E field update -----------------------------------------------------------------
 
         // Fonte Gaussiana em E_y
-        double inc = Peak * gaussder_norm((m - 1) * delta_t - (L - 1) * delta_s / c, m_offset, sigma);
-        E_y[L][point1_y] += inc;
+        double inc = Peak * gaussder_norm((m - 0.5) * delta_t - (L - 1) * delta_s / c, m_offset, sigma);
+        E_y_n[L][point1_y] += inc;
 
         // Salvar valor em ponto específico
-        E_y_point1[m] = E_y[point1_x][point1_y];
+        E_y_point1[m] = E_y_n[point1_x][point1_y];
     }
 
     std::cout << "Simulação finalizada. Valores de E_y armazenados." << std::endl;
