@@ -10,7 +10,7 @@
 // Constantes físicas
 const double c = 2.997925e8;
 const double eps_0 = 8.854e-12;
-const double mu_0 = 4 * M_PI * 1e-7;
+const double mu_0 = 4.0 * M_PI * 1E-7;
 const double eta_0 = std::sqrt(mu_0 / eps_0);
 
 void run_fdtd2d_simulation() {
@@ -25,11 +25,11 @@ void run_fdtd2d_simulation() {
     int L = N_x / 2;
     int L1 = 20;
 
-    double delta_s = 0.005 * 2 / refine;
+    double delta_s = 0.005 * 2.0 / refine;
     double R = 1.0;
     double delta_t = R * delta_s / (c * std::sqrt(2.0));
-    double sigma = 1.0e-10;
-    double m_offset = 4 * sigma;
+    double sigma = 1.0E-10;
+    double m_offset = 4.0 * sigma;
     double Peak = 1.0;
 
     std::vector<double> E_y_point1(M);
@@ -40,7 +40,7 @@ void run_fdtd2d_simulation() {
     std::vector<std::vector<double>> E_x(N_x + 1, std::vector<double>(N_y + 1, 0.0));
     std::vector<std::vector<double>> E_y(N_x + 1, std::vector<double>(N_y + 1, 0.0));
 
-    for (int m = 1; m < M; ++m) {
+    for (int m = 0; m < M; ++m) {
         // Campo magnético H_z
         for (int i = 0; i < N_x; ++i) {
             for (int j = 0; j < N_y; ++j) {
