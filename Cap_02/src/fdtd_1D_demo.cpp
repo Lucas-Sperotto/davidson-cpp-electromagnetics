@@ -156,8 +156,10 @@ int main()
         {
             double voltage = (delta_t / (C * delta_z)) * V_n[i];
             voltage_log << "," << voltage;
-            current_log << "," << I_n[i];
         }
+        for (size_t i = 0; i < Nz - 1; ++i)
+            current_log << "," << I_n[i];
+
         voltage_log << "\n";
         current_log << "\n";
 
