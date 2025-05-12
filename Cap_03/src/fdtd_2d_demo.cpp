@@ -51,7 +51,7 @@ int main()
     int N_centre_x = std::round(0.75 * N_x);
     int N_centre_y = std::round(0.5 * N_y);
 
-    std::vector<double> E_y_point1(M);
+    // std::vector<double> E_y_point1(M);
     int point1_x = N_x / 4;
     int point1_y = N_y / 2;
 
@@ -88,10 +88,10 @@ int main()
     // Set up storage for time histories.
     std::vector<double> H_z_point1(M, 0.0);
     std::vector<double> E_y_point1(M, 0.0);
-    int point1_x = N_x / 4;
-    // This is another hack! also remove!!
-    // point1_x = 100;
-    int point1_y = N_y / 2;
+    // int point1_x = N_x / 4;
+    //  This is another hack! also remove!!
+    //  point1_x = 100;
+    // int point1_y = N_y / 2;
     std::vector<double> H_z_point2(M, 0.0);
     std::vector<double> E_y_point2(M, 0.0);
     int point2_x = std::round(static_cast<double>(N_x + L) / 2.0);
@@ -235,7 +235,8 @@ int main()
         // Special update on additional new scat/tot field boundary (only needed for Ey)
         // on the right hand side of Fig. 3.1, at N_x - L1. Again, the E_y field is the
         // scattered field.
-        std::vector<double> H_z_n_inc(N_y, (Peak / eta_0) * gaussder_norm((m - 0.5) * delta_t - (N_x - L1 - 0.5) * delta_s / c, m_offset, sigma));
+        for (int i = 0; i <= N_y; ++i)
+            H_z_n_inc[i] = (Peak / eta_0) * gaussder_norm((m - 0.5) * delta_t - (N_x - L1 - 0.5) * delta_s / c, m_offset, sigma);
         for (int j = L1; j < N_y - L1; ++j)
             E_y_n[N_x - L1 + 1][j] = E_y_nmin1[N_x - L1 + 1][j] - C_Ey[N_x - L1 + 1][j] * (H_z_n[N_x - L1 + 1][j] + H_z_n_inc[j] - H_z_n[N_x - L1][j]);
         // Special update on additional new scat/tot field boundary (only needed for Ex)
@@ -261,13 +262,63 @@ int main()
 
         // ---------------------------- End E field update -----------------------------------------------------------------
 
-        // Fonte Gaussiana em E_y
-        double inc = Peak * gaussder_norm((m - 0.5) * delta_t - (L - 1) * delta_s / c, m_offset, sigma);
-        E_y_n[L][point1_y] += inc;
+        // ---------------------------- ABC exterior treatment -----------------------------------------------------------------
+        // Impose ABC on sides - assumes free space cell on boundary.
+        // Left/right boundaries:
+        for (int j = 0; j <= N_y; ++j)
+            E_y_n[0][j] = E_y_nmin1[0][j] * (1 - c * delta_t / delta_s) + c * delta_t / delta_s * E_y_nmin1[1][j];
 
-        // Salvar valor em ponto específico
+        for (int j = 0; j <= N_y; ++j)
+            E_y_n[N_x + 1][j] = E_y_nmin1[N_x + 1][j] * (1 - c * delta_t / delta_s) + c * delta_t / delta_s * E_y_nmin1[N_x][j];
+
+        // Top/bottom boundaries:
+        for (int i = 0; i <= N_x; ++i)
+            E_x_n[i][0] = E_x_nmin1[i][0] * (1 - c * delta_t / delta_s) + c * delta_t / delta_s * E_x_nmin1[i][1];
+
+        for (int i = 0; i <= N_x; ++i)
+            E_x_n[i][N_y + 1] = E_x_nmin1[i][N_y + 1] * (1 - c * delta_t / delta_s) + c * delta_t / delta_s * E_x_nmin1[i][N_y];
+
+        // ---------------------------- End ABC exterior treatment -----------------------------------------------------------------
+
+        /*
+        // Fix outer values of E_tangential as PEC:
+        //E_y_n(1,:) = 0;
+        //E_y_n(N_x,:) = 0;
+        //E_x_n(:,1) = 0;
+        //E_x_n(:,N_y) = 0;
+        */
+        // Store data
+        // Movie
+        // if mod(m,movie_interval) == 0
+        // mesh(eta_0*H_z_n) // Normalize
+        // title(strcat('\eta_o H_z field at timestep ',num2str(m)))
+        // H_z_Movie(movie_count) = getframe;
+        // mesh(E_x_n)
+        // title(strcat('E_x field at timestep ',num2str(m)))
+        // E_x_Movie(movie_count) = getframe;
+        // mesh(E_y_n)
+        // title(strcat('E_y field at timestep ',num2str(m)))
+        // E_y_Movie(movie_count) = getframe;
+        // movie_count = movie_count +1;
+
+        // Time history
+        H_z_point1[m] = H_z_n[point1_x][point1_y];
+        H_z_point2[m] = H_z_n[point2_x][point2_y];
         E_y_point1[m] = E_y_n[point1_x][point1_y];
+        E_y_point2[m] = E_y_n[point2_x][point2_y];
+
+        // Update for next iteration
+        H_z_nmin1 = H_z_n;
+        E_x_nmin1 = E_x_n;
+        E_y_nmin1 = E_y_n;
+
+        // Output some indication of how far the code is:
+        // disp('.')
+        // if(rem(m,report_time_interval)==0)
+        //   m
     }
+    // End of time stepping
+    //------------------------------------------
 
     std::cout << "Simulação finalizada. Valores de E_y armazenados." << std::endl;
 
