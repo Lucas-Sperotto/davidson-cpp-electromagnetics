@@ -7,6 +7,25 @@ Este diretório contém as versões em C++ dos códigos MATLAB apresentados no *
 🔗 [Acesse o livro na Cambridge University Press](https://www.cambridge.org/br/universitypress/subjects/engineering/rf-and-microwave-engineering/computational-electromagnetics-rf-and-microwave-engineering-2nd-edition?format=HB&isbn=9780521518918)
 
 ---
+### Main Programs
+- `Static2D.cpp` – Computes the quasi-TEM mode in boxed microstrip
+- `Eigen2D.cpp` – Computes TE eigenvalues and eigenmodes of hollow rectangular waveguide
+
+### Support Functions
+- `free_nodes.cpp`, `free_nodes_mstrip.cpp` – Identify free nodes based on PEC boundaries
+- `free_dof.cpp` – Identifies free edge DOFs
+- `find_local_dofs.cpp` – Locates local edge indices per DOF
+- `renumber_dof.cpp`, `renumber_dof_LTQN.cpp` – Renumber DOFs for Whitney and LTQN elements
+- `sandt.cpp`, `s_nodal.cpp`, `sandt_LTQN.cpp` – Compute local stiffness/mass matrices
+- `simplex2D.cpp` – Computes barycentric coordinates
+- `edgemake.cpp` – Builds global edge list from mesh
+- `whitney.cpp` – Whitney 1-form basis functions
+- `LTQN.cpp`, `curl_LTQN.cpp` – LTQN basis functions and their curls
+- `plot_field.cpp` – Evaluates and outputs vector field from DOFs
+- `TEeig_err.cpp` – Evaluates relative error of eigenvalues
+- `trimesh.cpp` – Generates structured triangular mesh
+
+All auxiliary functions are modular and reusable.
 
 ## Arquivos principais
 

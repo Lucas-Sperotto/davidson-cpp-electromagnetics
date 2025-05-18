@@ -10,31 +10,9 @@ These C++ implementations aim to preserve the educational value of the original 
 
 ## 🔍 Chapters
 
-- [`Cap_10/`](Cap_10/) – C++ translations of Chapter 10 codes ([Capítulo 10 README](Cap_10/README.md))
-
-## 📂 Cap_10 – Chapter 10 Files
-
-The files in this folder are C++ translations of the original MATLAB scripts discussed in Chapter 10 of Davidson's book. They include:
-
-### Main Programs
-- `Static2D.cpp` – Computes the quasi-TEM mode in boxed microstrip
-- `Eigen2D.cpp` – Computes TE eigenvalues and eigenmodes of hollow rectangular waveguide
-
-### Support Functions
-- `free_nodes.cpp`, `free_nodes_mstrip.cpp` – Identify free nodes based on PEC boundaries
-- `free_dof.cpp` – Identifies free edge DOFs
-- `find_local_dofs.cpp` – Locates local edge indices per DOF
-- `renumber_dof.cpp`, `renumber_dof_LTQN.cpp` – Renumber DOFs for Whitney and LTQN elements
-- `sandt.cpp`, `s_nodal.cpp`, `sandt_LTQN.cpp` – Compute local stiffness/mass matrices
-- `simplex2D.cpp` – Computes barycentric coordinates
-- `edgemake.cpp` – Builds global edge list from mesh
-- `whitney.cpp` – Whitney 1-form basis functions
-- `LTQN.cpp`, `curl_LTQN.cpp` – LTQN basis functions and their curls
-- `plot_field.cpp` – Evaluates and outputs vector field from DOFs
-- `TEeig_err.cpp` – Evaluates relative error of eigenvalues
-- `trimesh.cpp` – Generates structured triangular mesh
-
-All auxiliary functions are modular and reusable.
+- [`Cap_02/`](Cap_02/) – C++ translations of Chapter 02 codes ([Capítulo 02 README](Cap_02/README.md)). Testado e funcionando.
+- [`Cap_03/`](Cap_03/) – C++ translations of Chapter 03 codes ([Capítulo 03 README](Cap_03/README.md)). Ainda não concluído.
+- [`Cap_10/`](Cap_10/) – C++ translations of Chapter 10 codes ([Capítulo 10 README](Cap_10/README.md)). Ainda não concluído.
 
 ## 📄 Disclaimer
 
