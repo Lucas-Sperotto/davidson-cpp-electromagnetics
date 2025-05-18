@@ -49,6 +49,7 @@ $$
 $$
 
 <sub><strong>Eq. (2.13)</strong></sub>
+
 $$
 \frac{\partial V(z,t)}{\partial z} = -L \frac{\partial I(z,t)}{\partial t}
 $$
