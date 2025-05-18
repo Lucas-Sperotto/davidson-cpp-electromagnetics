@@ -45,12 +45,14 @@ A linha de transmissão pode ser modelada por um circuito equivalente **infinite
 A tensão e a corrente ao longo da linha são descritas pelas **[equações do telegrafista](https://pt.wikipedia.org/wiki/Equa%C3%A7%C3%B5es_do_telegrafista) ([telegraphist's equations](https://en.wikipedia.org/wiki/Telegrapher%27s_equations)):**
 
 <p align="left"><strong>Eq. (2.13)</strong></p>
+
 $$
 \frac{\partial I(z,t)}{\partial z} = -C \frac{\partial V(z,t)}{\partial t}
 $$
 
 
 <p align="left"><strong>Eq. (2.14)</strong></p>
+
 $$
 \frac{\partial V(z,t)}{\partial z} = -L \frac{\partial I(z,t)}{\partial t}
 $$
@@ -124,6 +126,7 @@ A partir dessas equações, o método FDTD permite calcular a evolução tempora
 A mudança de variável aplicada é:
 
 <p align="left"><strong>Eq. (2.60)</strong></p>
+
 $$
 \tilde{V}_k^n = \frac{C \Delta z}{\Delta t} V_k^n
 $$
@@ -135,12 +138,14 @@ As equações atualizadas do algoritmo são:
 Inicializações:
 
 <p align="left"><strong>Eq. (2.61)</strong></p>
+
 $$
 \tilde{V}_k^1 = 0,\quad \text{para } k = 1, \dots, N_z
 $$
 
 
 <p align="left"><strong>Eq. (2.62)</strong></p>
+
 $$
 I_k^1 = 0,\quad \text{para } k = 1, \dots, N_z - 1
 $$
@@ -149,24 +154,28 @@ $$
 Para $n \geq 2$:
 
 <p align="left"><strong>Eq. (2.63)</strong></p>
+
 $$
 \tilde{V}_1^n = (1 - \beta_1) \tilde{V}_1^{n-1} - 2 I_1^{n-1} + \frac{2}{R_S} V_0(t_{n-1})
 $$
 
 
 <p align="left"><strong>Eq. (2.64)</strong></p>
+
 $$
 \tilde{V}_k^n = \tilde{V}_k^{n-1} - (I_k^{n-1} - I_{k-1}^{n-1}), \quad \text{para } k = 2, \dots, N_z - 1
 $$
 
 
 <p align="left"><strong>Eq. (2.65)</strong></p>
+
 $$
 \tilde{V}_{N_z}^n = (1 - \beta_2) \tilde{V}_{N_z}^{n-1} + 2 I_{N_z - 1}^{n-1}
 $$
 
 
 <p align="left"><strong>Eq. (2.66)</strong></p>
+
 $$
 I_k^n = I_k^{n-1} - r (\tilde{V}_{k+1}^n - \tilde{V}_k^n), \quad \text{para } k = 1, \dots, N_z - 1
 $$
@@ -175,18 +184,21 @@ $$
 Parâmetros auxiliares:
 
 <p align="left"><strong>Eq. (2.67)</strong></p>
+
 $$
 \beta_1 = \frac{2 \Delta t}{R_S C \Delta z}
 $$
 
 
 <p align="left"><strong>Eq. (2.68)</strong></p>
+
 $$
 \beta_2 = \frac{2 \Delta t}{R_L C \Delta z}
 $$
 
 
 <p align="left"><strong>Eq. (2.69)</strong></p>
+
 $$
 r = \frac{(\Delta t)^2}{LC (\Delta z)^2}
 $$
