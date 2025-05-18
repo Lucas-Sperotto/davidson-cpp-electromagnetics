@@ -47,10 +47,12 @@ A tensão e a corrente ao longo da linha são descritas pelas **[equações do t
 $$
 \frac{\partial I(z,t)}{\partial z} = -C \frac{\partial V(z,t)}{\partial t}
 $$
+
 <sub><strong>Eq. (2.13)</strong></sub>
 $$
 \frac{\partial V(z,t)}{\partial z} = -L \frac{\partial I(z,t)}{\partial t}
 $$
+
 <sub><strong>Eq. (2.14)</strong></sub>
 
 Esse par de equações diferenciais parciais (EDPs) governam a propagação de sinais na linha de transmissão e possuem estrutura semelhante à das equações hiperbólicas da física clássica, como a equação de ondas.
