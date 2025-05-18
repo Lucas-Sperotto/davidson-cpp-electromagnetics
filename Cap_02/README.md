@@ -45,7 +45,7 @@ A linha de transmissão pode ser modelada por um circuito equivalente **infinite
 A tensão e a corrente ao longo da linha são descritas pelas **[equações do telegrafista](https://pt.wikipedia.org/wiki/Equa%C3%A7%C3%B5es_do_telegrafista) ([telegraphist's equations](https://en.wikipedia.org/wiki/Telegrapher%27s_equations)):**
 
 $$
-\frac{\partial I(z,t)}{\partial z} = -C \frac{\partial V(z,t)}{\partial t}
+\frac{\partial I(z,t)}{\partial z} = -C \frac{\partial V(z,t)}{\partial t}        \text{Eq. (2.13)}
 $$
 <p align="right"><strong>Eq. (2.13)</strong></p>
 
