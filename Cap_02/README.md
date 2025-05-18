@@ -48,7 +48,7 @@ $$
 \frac{\partial I(z,t)}{\partial z} = -C \frac{\partial V(z,t)}{\partial t}
 $$
 
-<sub><strong>Eq. (2.13)</strong></sub>
+<p align="right"><strong>Eq. (2.13)</strong></p>
 
 $$
 \frac{\partial V(z,t)}{\partial z} = -L \frac{\partial I(z,t)}{\partial t}
