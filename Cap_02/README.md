@@ -1,5 +1,7 @@
 # Capítulo 2 - Simulações FDTD 1D
 
+Este repositório apresenta uma implementação em C++ do método FDTD (Finite-Difference Time-Domain) aplicada à modelagem de uma linha de transmissão unidimensional, com base no Capítulo 2 do livro de Davidson. O objetivo é explorar a propagação de ondas eletromagnéticas em estruturas TEM a partir de discretizações explícitas no tempo e no espaço.
+
 Este diretório contém a tradução para C++ dos códigos MATLAB do Capítulo 2 do livro:
 
 > D.B. Davidson, *Computational Electromagnetics for RF and Microwave Engineering*, Cambridge University Press, 2ª edição.
@@ -40,15 +42,16 @@ A linha de transmissão pode ser modelada por um circuito equivalente **infinite
 
 ### 📐 **Equações da Linha de Transmissão** 
 
-A tensão e a corrente ao longo da linha são descritas pelas **[equações do telegrafista](https://pt.wikipedia.org/wiki/Equa%C3%A7%C3%B5es_do_telegrafista) ([telegraphist's equations](https://en.wikipedia.org/wiki/Telegrapher%27s_equations)):** (eq. 2.13 e eq. 2.14)
+A tensão e a corrente ao longo da linha são descritas pelas **[equações do telegrafista](https://pt.wikipedia.org/wiki/Equa%C3%A7%C3%B5es_do_telegrafista) ([telegraphist's equations](https://en.wikipedia.org/wiki/Telegrapher%27s_equations)):**
 
 $$
-\frac{\partial I(z,t)}{\partial z} = -C \frac{\partial V(z,t)}{\partial t}
+\frac{\partial I(z,t)}{\partial z} = -C \frac{\partial V(z,t)}{\partial t} \tag{2.13}
 $$
 $$
-\frac{\partial V(z,t)}{\partial z} = -L \frac{\partial I(z,t)}{\partial t}
+\frac{\partial V(z,t)}{\partial z} = -L \frac{\partial I(z,t)}{\partial t} \tag{2.14}
 $$
 
+Esse par de equações diferenciais parciais (EDPs) governam a propagação de sinais na linha de transmissão e possuem estrutura semelhante à das equações hiperbólicas da física clássica, como a equação de ondas.
 Essas equações são um **caso especial das equações de Maxwell em uma dimensão.**
 
 ---
@@ -113,6 +116,57 @@ A partir dessas equações, o método FDTD permite calcular a evolução tempora
 **Figura 2.5:** The current stencil.
 
 
+A mudança de variável aplicada é:
+
+$$
+\tilde{V}_k^n = \frac{C \, \Delta z}{\Delta t} V_k^n \tag{2.60}
+$$
+
+Essa mudança de variável visa normalizar a tensão de forma a reduzir o número de multiplicações/divisões dentro do laço principal do algoritmo, resultando em menor custo computacional por passo de tempo e maior eficiência, especialmente em simulações de longa duração.
+
+As equações atualizadas do algoritmo são:
+
+Inicializações:
+
+$$
+\tilde{V}_k^1 = 0,\quad \text{para } k = 1, \dots, N_z \tag{2.61}
+$$
+
+$$
+I_k^1 = 0,\quad \text{para } k = 1, \dots, N_z - 1 \tag{2.62}
+$$
+
+Para $n \geq 2$:
+
+$$
+\tilde{V}_1^n = (1 - \beta_1) \tilde{V}_1^{n-1} - 2 I_1^{n-1} + \frac{2}{RS} V_0(t^{n-1}) \tag{2.63}
+$$
+
+$$
+\tilde{V}_k^n = \tilde{V}_k^{n-1} - (I_k^{n-1} - I_{k-1}^{n-1}), \quad \text{para } k = 2, \dots, N_z - 1 \tag{2.64}
+$$
+
+$$
+\tilde{V}_{N_z}^n = (1 - \beta_2) \tilde{V}_{N_z}^{n-1} + 2 I_{N_z - 1}^{n-1} \tag{2.65}
+$$
+
+$$
+I_k^n = I_k^{n-1} - r (\tilde{V}_{k+1}^n - \tilde{V}_k^n), \quad \text{para } k = 1, \dots, N_z - 1 \tag{2.66}
+$$
+
+Parâmetros auxiliares:
+
+$$
+\beta_1 = \frac{2 \, \Delta t}{RS C \, \Delta z} \tag{2.67}
+$$
+
+$$
+\beta_2 = \frac{2 \, \Delta t}{RL C \, \Delta z} \tag{2.68}
+$$
+
+$$
+r = \frac{(\Delta t)^2}{LC (\Delta z)^2} \tag{2.69}
+$$
 
 ---
 
@@ -173,8 +227,9 @@ Execute os binários gerados dentro de `build/`:
 ./fdtd_1D_demo
 ./fdtd_1D_WB_demo
 ```
+As simulações geram arquivos de saída em `Cap_02/out/`. Não exclua esta pasta, pois os scripts Python utilizam esses arquivos para produzir os gráficos e animações.
 
-E visualize os resultados com:
+Visualize os resultados com:
 
 ```bash
 cd ../scripts

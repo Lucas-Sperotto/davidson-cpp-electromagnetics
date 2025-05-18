@@ -106,7 +106,7 @@ int main()
     //  First time step - Initialize.
     std::vector<double> V_nmin1(Nz, 0.0), I_nmin1(Nz, 0.0);
     // Pre-allocation
-    std::vector<double> V_n(Nz, 0.0), I_n(Nz, 0.0);
+    std::vector<double> V_n(Nz, 0.0), I_n(Nz, 0.0);  //Eq. (2.61) e Eq. (2.62)
 
     // std::vector<std::vector<double>> V_time_series;
     std::vector<std::vector<double>> V_period(M, std::vector<double>(Nz, 0.0));
