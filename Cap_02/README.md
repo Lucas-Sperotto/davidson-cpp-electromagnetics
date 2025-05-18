@@ -45,11 +45,13 @@ A linha de transmissão pode ser modelada por um circuito equivalente **infinite
 A tensão e a corrente ao longo da linha são descritas pelas **[equações do telegrafista](https://pt.wikipedia.org/wiki/Equa%C3%A7%C3%B5es_do_telegrafista) ([telegraphist's equations](https://en.wikipedia.org/wiki/Telegrapher%27s_equations)):**
 
 $$
-\frac{\partial I(z,t)}{\partial z} = -C \frac{\partial V(z,t)}{\partial t} \tag{2.13}
+\frac{\partial I(z,t)}{\partial z} = -C \frac{\partial V(z,t)}{\partial t}
 $$
+<sub><strong>Eq. (2.13)</strong></sub>
 $$
-\frac{\partial V(z,t)}{\partial z} = -L \frac{\partial I(z,t)}{\partial t} \tag{2.14}
+\frac{\partial V(z,t)}{\partial z} = -L \frac{\partial I(z,t)}{\partial t}
 $$
+<sub><strong>Eq. (2.14)</strong></sub>
 
 Esse par de equações diferenciais parciais (EDPs) governam a propagação de sinais na linha de transmissão e possuem estrutura semelhante à das equações hiperbólicas da física clássica, como a equação de ondas.
 Essas equações são um **caso especial das equações de Maxwell em uma dimensão.**
@@ -119,8 +121,9 @@ A partir dessas equações, o método FDTD permite calcular a evolução tempora
 A mudança de variável aplicada é:
 
 $$
-\tilde{V}_k^n = \frac{C \, \Delta z}{\Delta t} V_k^n \tag{2.60}
+\tilde{V}_k^n = \frac{C \, \Delta z}{\Delta t} V_k^n
 $$
+<sub><strong>Eq. (2.60)</strong></sub>
 
 Essa mudança de variável visa normalizar a tensão de forma a reduzir o número de multiplicações/divisões dentro do laço principal do algoritmo, resultando em menor custo computacional por passo de tempo e maior eficiência, especialmente em simulações de longa duração.
 
@@ -129,44 +132,53 @@ As equações atualizadas do algoritmo são:
 Inicializações:
 
 $$
-\tilde{V}_k^1 = 0,\quad \text{para } k = 1, \dots, N_z \tag{2.61}
+\tilde{V}_k^1 = 0,\quad \text{para } k = 1, \dots, N_z
 $$
+<sub><strong>Eq. (2.61)</strong></sub>
 
 $$
-I_k^1 = 0,\quad \text{para } k = 1, \dots, N_z - 1 \tag{2.62}
+I_k^1 = 0,\quad \text{para } k = 1, \dots, N_z - 1
 $$
+<sub><strong>Eq. (2.62)</strong></sub>
 
 Para $n \geq 2$:
 
 $$
-\tilde{V}_1^n = (1 - \beta_1) \tilde{V}_1^{n-1} - 2 I_1^{n-1} + \frac{2}{RS} V_0(t^{n-1}) \tag{2.63}
+\tilde{V}_1^n = (1 - \beta_1) \tilde{V}_1^{n-1} - 2 I_1^{n-1} + \frac{2}{RS} V_0(t^{n-1})
 $$
+<sub><strong>Eq. (2.63)</strong></sub>
 
 $$
-\tilde{V}_k^n = \tilde{V}_k^{n-1} - (I_k^{n-1} - I_{k-1}^{n-1}), \quad \text{para } k = 2, \dots, N_z - 1 \tag{2.64}
+\tilde{V}_k^n = \tilde{V}_k^{n-1} - (I_k^{n-1} - I_{k-1}^{n-1}), \quad \text{para } k = 2, \dots, N_z - 1
 $$
+<sub><strong>Eq. (2.64)</strong></sub>
 
 $$
-\tilde{V}_{N_z}^n = (1 - \beta_2) \tilde{V}_{N_z}^{n-1} + 2 I_{N_z - 1}^{n-1} \tag{2.65}
+\tilde{V}_{N_z}^n = (1 - \beta_2) \tilde{V}_{N_z}^{n-1} + 2 I_{N_z - 1}^{n-1}
 $$
+<sub><strong>Eq. (2.65)</strong></sub>
 
 $$
-I_k^n = I_k^{n-1} - r (\tilde{V}_{k+1}^n - \tilde{V}_k^n), \quad \text{para } k = 1, \dots, N_z - 1 \tag{2.66}
+I_k^n = I_k^{n-1} - r (\tilde{V}_{k+1}^n - \tilde{V}_k^n), \quad \text{para } k = 1, \dots, N_z - 1
 $$
+<sub><strong>Eq. (2.66)</strong></sub>
 
 Parâmetros auxiliares:
 
 $$
-\beta_1 = \frac{2 \, \Delta t}{RS C \, \Delta z} \tag{2.67}
+\beta_1 = \frac{2 \, \Delta t}{RS C \, \Delta z}
 $$
+<sub><strong>Eq. (2.67)</strong></sub>
 
 $$
-\beta_2 = \frac{2 \, \Delta t}{RL C \, \Delta z} \tag{2.68}
+\beta_2 = \frac{2 \, \Delta t}{RL C \, \Delta z}
 $$
+<sub><strong>Eq. (2.68)</strong></sub>
 
 $$
-r = \frac{(\Delta t)^2}{LC (\Delta z)^2} \tag{2.69}
+r = \frac{(\Delta t)^2}{LC (\Delta z)^2}
 $$
+<sub><strong>Eq. (2.69)</strong></sub>
 
 ---
 
