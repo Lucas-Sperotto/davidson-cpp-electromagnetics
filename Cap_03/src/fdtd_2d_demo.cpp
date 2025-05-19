@@ -63,9 +63,9 @@ int main()
     }
 
     // Set up material grid (free space to start)
-    std::vector<std::vector<double>> C_Ex(N_x + 1, std::vector<double>(delta_t / (eps_0 * delta_s)));
-    std::vector<std::vector<double>> C_Ey(N_x + 1, std::vector<double>(delta_t / (eps_0 * delta_s)));
-    double D_Hz = delta_t / (mu_0 * delta_s);
+    std::vector<std::vector<double>> C_Ex(N_x + 1, std::vector<double>(delta_t / (eps_0 * delta_s))); // Eq. (3.37)
+    std::vector<std::vector<double>> C_Ey(N_x + 1, std::vector<double>(delta_t / (eps_0 * delta_s))); // Eq. (3.38)
+    double D_Hz = delta_t / (mu_0 * delta_s);                                                         // Eq. (3.39)
     // Now force the electric fields to zero inside (and on the surface of) the PEC
     // Note that the indices of the centre are treated as per usual FDTD
     // indices, i.e. the actual location is:
@@ -141,7 +141,7 @@ int main()
         {
             for (int j = 0; j < N_y; ++j)
             {
-                H_z_n[i][j] += D_Hz * (E_x_nmin1[i][j + 1] - E_x_nmin1[i][j] + E_y_nmin1[i][j] - E_y_nmin1[i + 1][j]);
+                H_z_n[i][j] += D_Hz * (E_x_nmin1[i][j + 1] - E_x_nmin1[i][j] + E_y_nmin1[i][j] - E_y_nmin1[i + 1][j]); // Eq. (3.34)
             }
         }
         // Drive a test line source - used to check basic operation
@@ -214,7 +214,7 @@ int main()
         {
             for (int j = 1; j < N_y; ++j)
             {
-                E_x_n[i][j] += C_Ex[i][j] * (H_z_n[i][j] - H_z_n[i][j - 1]);
+                E_x_n[i][j] += C_Ex[i][j] * (H_z_n[i][j] - H_z_n[i][j - 1]); // Eq. (3.35)
             }
         }
 
@@ -223,7 +223,7 @@ int main()
         {
             for (int j = 0; j < N_y; ++j)
             {
-                E_y_n[i][j] -= C_Ey[i][j] * (H_z_n[i][j] - H_z_n[i - 1][j]);
+                E_y_n[i][j] -= C_Ey[i][j] * (H_z_n[i][j] - H_z_n[i - 1][j]); // Eq. (3.36)
             }
         }
         // Special update on scat/tot field boundary (only needed for Ey)
@@ -269,14 +269,14 @@ int main()
             E_y_n[0][j] = E_y_nmin1[0][j] * (1 - c * delta_t / delta_s) + c * delta_t / delta_s * E_y_nmin1[1][j];
 
         for (int j = 0; j <= N_y; ++j)
-            E_y_n[N_x + 1][j] = E_y_nmin1[N_x + 1][j] * (1 - c * delta_t / delta_s) + c * delta_t / delta_s * E_y_nmin1[N_x][j];
+            E_y_n[N_x][j] = E_y_nmin1[N_x][j] * (1 - c * delta_t / delta_s) + c * delta_t / delta_s * E_y_nmin1[N_x - 1][j];
 
         // Top/bottom boundaries:
         for (int i = 0; i <= N_x; ++i)
             E_x_n[i][0] = E_x_nmin1[i][0] * (1 - c * delta_t / delta_s) + c * delta_t / delta_s * E_x_nmin1[i][1];
 
         for (int i = 0; i <= N_x; ++i)
-            E_x_n[i][N_y + 1] = E_x_nmin1[i][N_y + 1] * (1 - c * delta_t / delta_s) + c * delta_t / delta_s * E_x_nmin1[i][N_y];
+            E_x_n[i][N_y] = E_x_nmin1[i][N_y] * (1 - c * delta_t / delta_s) + c * delta_t / delta_s * E_x_nmin1[i][N_y - 1];
 
         // ---------------------------- End ABC exterior treatment -----------------------------------------------------------------
 
@@ -324,6 +324,9 @@ int main()
 
     // Exportar resultados para CSV
     std::ofstream file(out_dir + "/ey_point1.csv");
+    file.precision(15);
+
+    file << std::scientific;
     file << "tempo_ns,Ey_Vpm\n";
     for (int m = 0; m < M; ++m)
     {
