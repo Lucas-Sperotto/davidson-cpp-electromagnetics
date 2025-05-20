@@ -17,3 +17,6 @@ build/
 .DS_Store
 Thumbs.db
 
+# VS Code files
+.vscode/
+*.code-workspace

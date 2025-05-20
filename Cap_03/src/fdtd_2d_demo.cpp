@@ -67,8 +67,8 @@ int main()
     }
 
     // Set up material grid (free space to start)
-    std::vector<std::vector<double>> C_Ex(N_x + 1, std::vector<double>(delta_t / (eps_0 * delta_s))); // Eq. (3.37)
-    std::vector<std::vector<double>> C_Ey(N_x + 1, std::vector<double>(delta_t / (eps_0 * delta_s))); // Eq. (3.38)
+    std::vector<std::vector<double>> C_Ex(N_x + 1, std::vector<double>(N_y + 1, delta_t / (eps_0 * delta_s))); // Eq. (3.37)
+    std::vector<std::vector<double>> C_Ey(N_x + 1, std::vector<double>(N_y + 1, delta_t / (eps_0 * delta_s))); // Eq. (3.38)
     double D_Hz = delta_t / (mu_0 * delta_s);                                                         // Eq. (3.39)
 
     std::cout << "C_Ex: " << (delta_t / (eps_0 * delta_s)) << std::endl;
@@ -77,7 +77,7 @@ int main()
     // Note that the indices of the centre are treated as per usual FDTD
     // indices, i.e. the actual location is:
     // x_c=(N_centre_x-1))*delta_s ; y_c=(N_centre_x-1))*delta_s
-    if (cyl_present) // Otherwise just leave it as free space
+    if (cyl_present) // Otherwise just leave it as free space REVISAR LAÇO
     {
         for (int ii = 0; ii <= N_x; ++ii)
         {
@@ -95,7 +95,7 @@ int main()
     // Set up storage for time histories.
     std::vector<double> H_z_point1(M, 0.0);
     std::vector<double> E_y_point1(M, 0.0);
-    // int point1_x = N_x / 4;
+    //int point1_x = N_x / 4;
     //  This is another hack! also remove!!
     //  point1_x = 100;
     // int point1_y = N_y / 2;
