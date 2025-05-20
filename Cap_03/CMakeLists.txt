@@ -20,7 +20,6 @@ include_directories(include)
 # Executáveis
 add_executable(fdtd_2d_demo src/fdtd_2d_demo.cpp
     src/gaussder.cpp
-    src/fdtd2d_pml.cpp
 )
 
 #target_compile_definitions(fdtd_2d_demo PRIVATE $<$<BOOL:${RUN_PML}>:RUN_PML>)
