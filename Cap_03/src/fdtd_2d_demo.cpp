@@ -18,8 +18,8 @@ int main()
     const std::string out_dir = PROJECT_OUT_DIR;
 
     // Define a precisão de saída padrão para 15 casas decimais e formato fixo (não científico)
-   // std::cout << std::setprecision(15) << std::scientific << std::fixed;
-std::cout << std::scientific;
+    // std::cout << std::setprecision(15) << std::scientific << std::fixed;
+    std::cout << std::scientific;
 
     // Cria o diretório de saída (se não existir)
     std::filesystem::create_directories(out_dir);
@@ -27,14 +27,14 @@ std::cout << std::scientific;
     bool cyl_present = false; // Set to true if you want to include a PEC cylinder
 
     int refine = 1;
-    std::cout << "Factor to refine mesh? 1 standard: ";
-    std::cin >> refine;
+    //std::cout << "Factor to refine mesh? 1 standard: ";
+    //std::cin >> refine;
 
     double pulse_compress = 1; // 2 % A quick way to shorten the pulse. For Figs 3.11-14, use 2. For 3.15, use 1
 
-    int N_x = refine * 200;                             // refine*400     % number of cells in x-direction
-    int N_y = refine * 100;                             // refine*200            % ditto y.
-    int M = refine * 512;                               // refine*1024      % Number of time steps
+    int N_x = refine * 200;                                 // refine*400     % number of cells in x-direction
+    int N_y = refine * 100;                                 // refine*200            % ditto y.
+    int M = refine * 512;                                   // refine*1024      % Number of time steps
     int L = std::round(static_cast<double>(N_x) / 2.0) - 1; // scat/tot field boundary on left side of Fig. 3.1 as Section 3.2
     int L1 = 20 - 1;                                        // 10              % New scat/tot field boundaries on upper, lower and right side of Fig. 3.1
 
@@ -58,6 +58,7 @@ std::cout << std::scientific;
 
     std::cout << "point1_x: " << point1_x << std::endl;
     std::cout << "point1_y: " << point1_y << std::endl;
+
     // Check that the simulation specification is valid:
     if ((N_centre_x - L) * delta_s <= radius)
     {
@@ -100,10 +101,13 @@ std::cout << std::scientific;
     // int point1_y = N_y / 2;
     std::vector<double> H_z_point2(M, 0.0);
     std::vector<double> E_y_point2(M, 0.0);
+
     int point2_x = (std::round(static_cast<double>(N_x + L) / 2.0)) - 1;
     int point2_y = (N_y / 2) - 1;
+
     std::cout << "point2_x: " << point2_x << std::endl;
     std::cout << "point2_y: " << point2_y << std::endl;
+
     // Produce a simple graphical output, showing the cylinder, scat/tot zone
     // interface and the point at which the scattered field will be computed.
 
@@ -156,8 +160,8 @@ std::cout << std::scientific;
 
         // Special update on scat/tot field boundary
         std::vector<double> E_y_nmin1_inc_front(N_y + 1, Peak * gaussder_norm((m - 1) * delta_t - (L - 1) * delta_s / c, m_offset, sigma));
-        //std::cout << "E_y_nmin1_inc_front: " << E_y_nmin1_inc_front[0] << std::endl;
-        // The H_z field is the total field.
+        // std::cout << "E_y_nmin1_inc_front: " << E_y_nmin1_inc_front[0] << std::endl;
+        //  The H_z field is the total field.
         for (int j = L1 - 1; j < N_y - L1; ++j) // talvez deva ser L-1 o indice e iniciar em L1 - 1
             H_z_n[L][j] = H_z_nmin1[L][j] + H_z_n[L][j] + D_Hz * (E_x_nmin1[L][j + 1] - E_x_nmin1[L][j] + E_y_nmin1[L][j] + E_y_nmin1_inc_front[j] - E_y_nmin1[L + 1][j]);
 
@@ -332,15 +336,16 @@ std::cout << std::scientific;
 
     // Exportar resultados para CSV
     std::ofstream file(out_dir + "/ey_point1.csv");
+    
     file.precision(15);
-
     file << std::scientific;
+
     file << "tempo_ns,Ey_Vpm\n";
     for (int m = 0; m < M; ++m)
     {
         double time_ns = m * delta_t * 1e9;
         file << time_ns << "," << E_y_point1[m] << "\n";
-        //std::cout << "H_z_point1: " << H_z_point1[m] << std::endl;
+        // std::cout << "H_z_point1: " << H_z_point1[m] << std::endl;
         std::cout << "H_z_point2: " << H_z_point2[m] << std::endl;
     }
     file.close();
