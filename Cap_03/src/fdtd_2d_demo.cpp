@@ -18,7 +18,8 @@ int main()
     const std::string out_dir = PROJECT_OUT_DIR;
 
     // Define a precisão de saída padrão para 15 casas decimais e formato fixo (não científico)
-    std::cout << std::setprecision(15) << std::fixed;
+   // std::cout << std::setprecision(15) << std::scientific << std::fixed;
+std::cout << std::scientific;
 
     // Cria o diretório de saída (se não existir)
     std::filesystem::create_directories(out_dir);
@@ -34,8 +35,8 @@ int main()
     int N_x = refine * 200;                             // refine*400     % number of cells in x-direction
     int N_y = refine * 100;                             // refine*200            % ditto y.
     int M = refine * 512;                               // refine*1024      % Number of time steps
-    int L = std::round(static_cast<double>(N_x) / 2.0); // scat/tot field boundary on left side of Fig. 3.1 as Section 3.2
-    int L1 = 20;                                        // 10              % New scat/tot field boundaries on upper, lower and right side of Fig. 3.1
+    int L = std::round(static_cast<double>(N_x) / 2.0) - 1; // scat/tot field boundary on left side of Fig. 3.1 as Section 3.2
+    int L1 = 20 - 1;                                        // 10              % New scat/tot field boundaries on upper, lower and right side of Fig. 3.1
 
     double delta_s = 0.005 * 2.0 / refine;               //[m] spatial step. This generates a physically larger computational volume.
     double R = 1.0;                                      // fraction of Courant limit. Must be <= 1
@@ -48,13 +49,15 @@ int main()
 
     // Set parameters for PEC cylinder
     double radius = 0.03; // [m] radius of cylinder
-    int N_centre_x = std::round(0.75 * N_x);
-    int N_centre_y = std::round(0.5 * N_y);
+    int N_centre_x = std::round(0.75 * N_x) - 1;
+    int N_centre_y = std::round(0.5 * N_y) - 1;
 
     // std::vector<double> E_y_point1(M);
-    int point1_x = N_x / 4;
-    int point1_y = N_y / 2;
+    int point1_x = (N_x / 4) - 1;
+    int point1_y = (N_y / 2) - 1;
 
+    std::cout << "point1_x: " << point1_x << std::endl;
+    std::cout << "point1_y: " << point1_y << std::endl;
     // Check that the simulation specification is valid:
     if ((N_centre_x - L) * delta_s <= radius)
     {
@@ -66,6 +69,9 @@ int main()
     std::vector<std::vector<double>> C_Ex(N_x + 1, std::vector<double>(delta_t / (eps_0 * delta_s))); // Eq. (3.37)
     std::vector<std::vector<double>> C_Ey(N_x + 1, std::vector<double>(delta_t / (eps_0 * delta_s))); // Eq. (3.38)
     double D_Hz = delta_t / (mu_0 * delta_s);                                                         // Eq. (3.39)
+
+    std::cout << "C_Ex: " << (delta_t / (eps_0 * delta_s)) << std::endl;
+    std::cout << "D_Hz: " << (delta_t / (mu_0 * delta_s)) << std::endl;
     // Now force the electric fields to zero inside (and on the surface of) the PEC
     // Note that the indices of the centre are treated as per usual FDTD
     // indices, i.e. the actual location is:
@@ -94,9 +100,10 @@ int main()
     // int point1_y = N_y / 2;
     std::vector<double> H_z_point2(M, 0.0);
     std::vector<double> E_y_point2(M, 0.0);
-    int point2_x = std::round(static_cast<double>(N_x + L) / 2.0);
-    int point2_y = N_y / 2;
-
+    int point2_x = (std::round(static_cast<double>(N_x + L) / 2.0)) - 1;
+    int point2_y = (N_y / 2) - 1;
+    std::cout << "point2_x: " << point2_x << std::endl;
+    std::cout << "point2_y: " << point2_y << std::endl;
     // Produce a simple graphical output, showing the cylinder, scat/tot zone
     // interface and the point at which the scattered field will be computed.
 
@@ -132,7 +139,7 @@ int main()
     std::vector<std::vector<double>> E_y_n(N_x + 1, std::vector<double>(N_y + 1, 0.0));
 
     // Time loop
-    for (int m = 1; m < M; ++m)
+    for (int m = 2; m < M; ++m)
     {
 
         // ---------------------------- H field update -----------------------------------------------------------------
@@ -141,7 +148,7 @@ int main()
         {
             for (int j = 0; j < N_y; ++j)
             {
-                H_z_n[i][j] += D_Hz * (E_x_nmin1[i][j + 1] - E_x_nmin1[i][j] + E_y_nmin1[i][j] - E_y_nmin1[i + 1][j]); // Eq. (3.34)
+                H_z_n[i][j] = H_z_nmin1[i][j] + D_Hz * (E_x_nmin1[i][j + 1] - E_x_nmin1[i][j] + E_y_nmin1[i][j] - E_y_nmin1[i + 1][j]); // Eq. (3.34)
             }
         }
         // Drive a test line source - used to check basic operation
@@ -149,9 +156,10 @@ int main()
 
         // Special update on scat/tot field boundary
         std::vector<double> E_y_nmin1_inc_front(N_y + 1, Peak * gaussder_norm((m - 1) * delta_t - (L - 1) * delta_s / c, m_offset, sigma));
+        //std::cout << "E_y_nmin1_inc_front: " << E_y_nmin1_inc_front[0] << std::endl;
         // The H_z field is the total field.
         for (int j = L1 - 1; j < N_y - L1; ++j) // talvez deva ser L-1 o indice e iniciar em L1 - 1
-            H_z_n[L][j] += H_z_n[L][j] + D_Hz * (E_x_nmin1[L][j + 1] - E_x_nmin1[L][j] + E_y_nmin1[L][j] + E_y_nmin1_inc_front[j] - E_y_nmin1[L + 1][j]);
+            H_z_n[L][j] = H_z_nmin1[L][j] + H_z_n[L][j] + D_Hz * (E_x_nmin1[L][j + 1] - E_x_nmin1[L][j] + E_y_nmin1[L][j] + E_y_nmin1_inc_front[j] - E_y_nmin1[L + 1][j]);
 
         // Special update on additional new scat/tot field boundary (only needed for Ey)
         // on the right hand side of Fig. 3.1, at N_x - L1
@@ -175,7 +183,7 @@ int main()
         // Note: since the incident field is zero, the following code stub has not
         // thus been properly tested.
         for (int i = L - 1; i < N_x - L1; ++i)
-            H_z_n[i][N_y - L1] += D_Hz * (E_x_nmin1[i][N_y - L1 + 1] + E_x_nmin1_inc_top[i] - E_x_nmin1[i][N_y - L1] + E_y_nmin1[i][N_y - L1] - E_y_nmin1[i + 1][N_y - L1]);
+            H_z_n[i][N_y - L1] = H_z_nmin1[i][N_y - L1] + D_Hz * (E_x_nmin1[i][N_y - L1 + 1] + E_x_nmin1_inc_top[i] - E_x_nmin1[i][N_y - L1] + E_y_nmin1[i][N_y - L1] - E_y_nmin1[i + 1][N_y - L1]);
 
         // Ditto at scat/tot field boundary (only needed for Ey)
         // on the lower side of Fig. 3.1, at L1
@@ -214,7 +222,7 @@ int main()
         {
             for (int j = 1; j < N_y; ++j)
             {
-                E_x_n[i][j] += C_Ex[i][j] * (H_z_n[i][j] - H_z_n[i][j - 1]); // Eq. (3.35)
+                E_x_n[i][j] = E_x_nmin1[L][j] + C_Ex[i][j] * (H_z_n[i][j] - H_z_n[i][j - 1]); // Eq. (3.35)
             }
         }
 
@@ -223,7 +231,7 @@ int main()
         {
             for (int j = 0; j < N_y; ++j)
             {
-                E_y_n[i][j] -= C_Ey[i][j] * (H_z_n[i][j] - H_z_n[i - 1][j]); // Eq. (3.36)
+                E_y_n[i][j] = E_y_nmin1[L][j] - C_Ey[i][j] * (H_z_n[i][j] - H_z_n[i - 1][j]); // Eq. (3.36)
             }
         }
         // Special update on scat/tot field boundary (only needed for Ey)
@@ -302,10 +310,10 @@ int main()
         // movie_count = movie_count +1;
 
         // Time history
-        H_z_point1[m] = H_z_n[point1_x][point1_y];
-        H_z_point2[m] = H_z_n[point2_x][point2_y];
-        E_y_point1[m] = E_y_n[point1_x][point1_y];
-        E_y_point2[m] = E_y_n[point2_x][point2_y];
+        H_z_point1[m - 2] = H_z_n[point1_x][point1_y];
+        H_z_point2[m - 2] = H_z_n[point2_x][point2_y];
+        E_y_point1[m - 2] = E_y_n[point1_x][point1_y];
+        E_y_point2[m - 2] = E_y_n[point2_x][point2_y];
 
         // Update for next iteration
         H_z_nmin1 = H_z_n;
@@ -332,6 +340,8 @@ int main()
     {
         double time_ns = m * delta_t * 1e9;
         file << time_ns << "," << E_y_point1[m] << "\n";
+        //std::cout << "H_z_point1: " << H_z_point1[m] << std::endl;
+        std::cout << "H_z_point2: " << H_z_point2[m] << std::endl;
     }
     file.close();
     std::cout << "Arquivo salvo em: " << out_dir << "/ey_point1.csv" << std::endl;
