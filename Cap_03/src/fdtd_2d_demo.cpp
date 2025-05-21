@@ -159,7 +159,7 @@ int main()
         // H_z_n(N_x/2,N_y/2) = gaussder((m-1)*delta_t,m_offset,sigma);
 
         // Special update on scat/tot field boundary
-        std::vector<double> E_y_nmin1_inc_front(N_y + 1, Peak * gaussder_norm((m - 1) * delta_t - (L - 1) * delta_s / c, m_offset, sigma));
+        std::vector<double> E_y_nmin1_inc_front(N_y + 1, Peak * gaussder_norm((m - 1) * delta_t - (L) * delta_s / c, m_offset, sigma));
         // std::cout << "E_y_nmin1_inc_front: " << E_y_nmin1_inc_front[0] << std::endl;
         //  The H_z field is the total field.
         for (int j = L1 - 1; j < N_y - L1; ++j) // talvez deva ser L-1 o indice e iniciar em L1 - 1
@@ -169,7 +169,7 @@ int main()
         // on the right hand side of Fig. 3.1, at N_x - L1
         // Note now the the "far" side of the ABC is now the SCATTERED, not TOTAL,
         // field, so the role of the E_y fields swops around.
-        std::vector<double> E_y_nmin1_inc_back(N_y + 1, Peak * gaussder_norm((m - 1) * delta_t - (N_x - L1 + 1 - 1) * delta_s / c, m_offset, sigma));
+        std::vector<double> E_y_nmin1_inc_back(N_y + 1, Peak * gaussder_norm((m - 1) * delta_t - (N_x - L1 + 1) * delta_s / c, m_offset, sigma));
 
         // E_y_nmin1_inc can be overwritten since it is not used again.   Again,
         // the H_z field is the total field.
@@ -226,7 +226,7 @@ int main()
         {
             for (int j = 1; j < N_y; ++j)
             {
-                E_x_n[i][j] = E_x_nmin1[L][j] + C_Ex[i][j] * (H_z_n[i][j] - H_z_n[i][j - 1]); // Eq. (3.35)
+                E_x_n[i][j] = E_x_nmin1[i][j] + C_Ex[i][j] * (H_z_n[i][j] - H_z_n[i][j - 1]); // Eq. (3.35)
             }
         }
 
@@ -235,12 +235,12 @@ int main()
         {
             for (int j = 0; j < N_y; ++j)
             {
-                E_y_n[i][j] = E_y_nmin1[L][j] - C_Ey[i][j] * (H_z_n[i][j] - H_z_n[i - 1][j]); // Eq. (3.36)
+                E_y_n[i][j] = E_y_nmin1[i][j] - C_Ey[i][j] * (H_z_n[i][j] - H_z_n[i - 1][j]); // Eq. (3.36)
             }
         }
         // Special update on scat/tot field boundary (only needed for Ey)
         // as in Fig. 3.1. The E_y field is the scattered field.
-        std::vector<double> H_z_n_inc(N_y, (Peak / eta_0) * gaussder_norm((m - 0.5) * delta_t - (L - 0.5) * delta_s / c, m_offset, sigma));
+        std::vector<double> H_z_n_inc(N_y, (Peak / eta_0) * gaussder_norm((m - 0.5) * delta_t - (L + 0.5) * delta_s / c, m_offset, sigma));
         for (int j = L1; j < N_y - L1; ++j)
             E_y_n[L][j] = E_y_nmin1[L][j] - C_Ey[L][j] * (H_z_n[L][j] - H_z_n_inc[j] - H_z_n[L - 1][j]);
 
@@ -248,7 +248,7 @@ int main()
         // on the right hand side of Fig. 3.1, at N_x - L1. Again, the E_y field is the
         // scattered field.
         for (int i = 0; i <= N_y; ++i)
-            H_z_n_inc[i] = (Peak / eta_0) * gaussder_norm((m - 0.5) * delta_t - (N_x - L1 - 0.5) * delta_s / c, m_offset, sigma);
+            H_z_n_inc[i] = (Peak / eta_0) * gaussder_norm((m - 0.5) * delta_t - (N_x - L1 + 0.5) * delta_s / c, m_offset, sigma);
         for (int j = L1; j < N_y - L1; ++j)
             E_y_n[N_x - L1 + 1][j] = E_y_nmin1[N_x - L1 + 1][j] - C_Ey[N_x - L1 + 1][j] * (H_z_n[N_x - L1 + 1][j] + H_z_n_inc[j] - H_z_n[N_x - L1][j]);
         // Special update on additional new scat/tot field boundary (only needed for Ex)
@@ -278,17 +278,17 @@ int main()
         // Impose ABC on sides - assumes free space cell on boundary.
         // Left/right boundaries:
         for (int j = 0; j <= N_y; ++j)
-            E_y_n[0][j] = E_y_nmin1[0][j] * (1 - c * delta_t / delta_s) + c * delta_t / delta_s * E_y_nmin1[1][j];
+            E_y_n[0][j] = E_y_nmin1[0][j] * (1 - c * delta_t / delta_s) + (c * delta_t / delta_s) * E_y_nmin1[1][j];
 
         for (int j = 0; j <= N_y; ++j)
-            E_y_n[N_x][j] = E_y_nmin1[N_x][j] * (1 - c * delta_t / delta_s) + c * delta_t / delta_s * E_y_nmin1[N_x - 1][j];
+            E_y_n[N_x][j] = E_y_nmin1[N_x][j] * (1 - c * delta_t / delta_s) + (c * delta_t / delta_s) * E_y_nmin1[N_x - 1][j];
 
         // Top/bottom boundaries:
         for (int i = 0; i <= N_x; ++i)
-            E_x_n[i][0] = E_x_nmin1[i][0] * (1 - c * delta_t / delta_s) + c * delta_t / delta_s * E_x_nmin1[i][1];
+            E_x_n[i][0] = E_x_nmin1[i][0] * (1 - c * delta_t / delta_s) + (c * delta_t / delta_s) * E_x_nmin1[i][1];
 
         for (int i = 0; i <= N_x; ++i)
-            E_x_n[i][N_y] = E_x_nmin1[i][N_y] * (1 - c * delta_t / delta_s) + c * delta_t / delta_s * E_x_nmin1[i][N_y - 1];
+            E_x_n[i][N_y] = E_x_nmin1[i][N_y] * (1 - c * delta_t / delta_s) + (c * delta_t / delta_s) * E_x_nmin1[i][N_y - 1];
 
         // ---------------------------- End ABC exterior treatment -----------------------------------------------------------------
 
@@ -346,7 +346,8 @@ int main()
         double time_ns = m * delta_t * 1e9;
         file << time_ns << "," << E_y_point1[m] << "\n";
         // std::cout << "H_z_point1: " << H_z_point1[m] << std::endl;
-        std::cout << "H_z_point2: " << H_z_point2[m] << std::endl;
+       // std::cout << "H_z_point2: " << H_z_point2[m] << std::endl;
+        std::cout << "time_ns: " << time_ns << "    E_y_point1: " << E_y_point1[m] << std::endl;
     }
     file.close();
     std::cout << "Arquivo salvo em: " << out_dir << "/ey_point1.csv" << std::endl;
