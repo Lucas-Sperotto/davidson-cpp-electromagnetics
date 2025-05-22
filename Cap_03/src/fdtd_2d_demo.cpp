@@ -27,8 +27,8 @@ int main()
     bool cyl_present = false; // Set to true if you want to include a PEC cylinder
 
     int refine = 1;
-    //std::cout << "Factor to refine mesh? 1 standard: ";
-    //std::cin >> refine;
+    // std::cout << "Factor to refine mesh? 1 standard: ";
+    // std::cin >> refine;
 
     double pulse_compress = 1; // 2 % A quick way to shorten the pulse. For Figs 3.11-14, use 2. For 3.15, use 1
 
@@ -69,7 +69,7 @@ int main()
     // Set up material grid (free space to start)
     std::vector<std::vector<double>> C_Ex(N_x + 1, std::vector<double>(N_y + 1, delta_t / (eps_0 * delta_s))); // Eq. (3.37)
     std::vector<std::vector<double>> C_Ey(N_x + 1, std::vector<double>(N_y + 1, delta_t / (eps_0 * delta_s))); // Eq. (3.38)
-    double D_Hz = delta_t / (mu_0 * delta_s);                                                         // Eq. (3.39)
+    double D_Hz = delta_t / (mu_0 * delta_s);                                                                  // Eq. (3.39)
 
     std::cout << "C_Ex: " << (delta_t / (eps_0 * delta_s)) << std::endl;
     std::cout << "D_Hz: " << (delta_t / (mu_0 * delta_s)) << std::endl;
@@ -95,10 +95,10 @@ int main()
     // Set up storage for time histories.
     std::vector<double> H_z_point1(M, 0.0);
     std::vector<double> E_y_point1(M, 0.0);
-    //int point1_x = N_x / 4;
-    //  This is another hack! also remove!!
-    //  point1_x = 100;
-    // int point1_y = N_y / 2;
+    // int point1_x = N_x / 4;
+    //   This is another hack! also remove!!
+    //   point1_x = 100;
+    //  int point1_y = N_y / 2;
     std::vector<double> H_z_point2(M, 0.0);
     std::vector<double> E_y_point2(M, 0.0);
 
@@ -142,6 +142,13 @@ int main()
     std::vector<std::vector<double>> E_x_n(N_x + 1, std::vector<double>(N_y + 1, 0.0));
     std::vector<std::vector<double>> E_y_n(N_x + 1, std::vector<double>(N_y + 1, 0.0));
 
+    std::vector<double> E_y_nmin1_inc_front(N_y + 1, 0.0);
+    std::vector<double> E_y_nmin1_inc_back(N_y + 1, 0.0);
+    std::vector<double> E_x_nmin1_inc_top(N_y + 1, 0.0);    // For this specific polarization (Ey,Hz) the incident x-field is zero
+    std::vector<double> E_x_nmin1_inc_bottom(N_x + 1, 0.0); // Again, for this specific polarization (Ey,Hz) the incident x-field is zero
+    std::vector<double> H_z_n_inc(N_y, 0.0);
+    std::vector<double> H_z_n_inc2(N_y, 0.0);
+
     // Time loop
     for (int m = 2; m < M; ++m)
     {
@@ -159,17 +166,19 @@ int main()
         // H_z_n(N_x/2,N_y/2) = gaussder((m-1)*delta_t,m_offset,sigma);
 
         // Special update on scat/tot field boundary
-        std::vector<double> E_y_nmin1_inc_front(N_y + 1, Peak * gaussder_norm((m - 1) * delta_t - (L) * delta_s / c, m_offset, sigma));
+        for (int j = 0; j <= N_y; ++j)
+            E_y_nmin1_inc_front[j] = (Peak * gaussder_norm((m - 1) * delta_t - (L) * delta_s / c, m_offset, sigma));
         // std::cout << "E_y_nmin1_inc_front: " << E_y_nmin1_inc_front[0] << std::endl;
         //  The H_z field is the total field.
-        for (int j = L1 - 1; j < N_y - L1; ++j) // talvez deva ser L-1 o indice e iniciar em L1 - 1
-            H_z_n[L][j] = H_z_nmin1[L][j] + H_z_n[L][j] + D_Hz * (E_x_nmin1[L][j + 1] - E_x_nmin1[L][j] + E_y_nmin1[L][j] + E_y_nmin1_inc_front[j] - E_y_nmin1[L + 1][j]);
+        for (int j = L1; j < N_y - L1; ++j) // talvez deva ser L-1 o indice e iniciar em L1 - 1
+            H_z_n[L][j] = H_z_nmin1[L][j] + D_Hz * (E_x_nmin1[L][j + 1] - E_x_nmin1[L][j] + E_y_nmin1[L][j] + E_y_nmin1_inc_front[j] - E_y_nmin1[L + 1][j]);
 
         // Special update on additional new scat/tot field boundary (only needed for Ey)
         // on the right hand side of Fig. 3.1, at N_x - L1
         // Note now the the "far" side of the ABC is now the SCATTERED, not TOTAL,
         // field, so the role of the E_y fields swops around.
-        std::vector<double> E_y_nmin1_inc_back(N_y + 1, Peak * gaussder_norm((m - 1) * delta_t - (N_x - L1 + 1) * delta_s / c, m_offset, sigma));
+        for (int j = 0; j <= N_y; ++j)
+            E_y_nmin1_inc_back[j] = (Peak * gaussder_norm((m - 1) * delta_t - (N_x - L1 + 1) * delta_s / c, m_offset, sigma));
 
         // E_y_nmin1_inc can be overwritten since it is not used again.   Again,
         // the H_z field is the total field.
@@ -180,7 +189,8 @@ int main()
         // Special update on additional new scat/tot field boundary (only needed for Ey)
         // on the upper side of Fig. 3.1, at N_y - L1. This plays the same role as
         // the ABC at N_x-L1.
-        std::vector<double> E_x_nmin1_inc_top(N_y + 1, 0.0); // For this specific polarization (Ey,Hz) the incident x-field is zero
+        for (int j = 0; j <= N_y; ++j)
+            E_x_nmin1_inc_top[j] = (0.0); // For this specific polarization (Ey,Hz) the incident x-field is zero
 
         // The H_z field that follows is the total field. The E_x field above the interface is the scattered field, that
         // below, the total field.
@@ -191,7 +201,8 @@ int main()
 
         // Ditto at scat/tot field boundary (only needed for Ey)
         // on the lower side of Fig. 3.1, at L1
-        std::vector<double> E_x_nmin1_inc_bottom(N_x + 1, 0.0); // Again, for this specific polarization (Ey,Hz) the incident x-field is zero
+        for (int i = 0; i < N_x; ++i)
+            E_x_nmin1_inc_bottom[i] = (0.0); // Again, for this specific polarization (Ey,Hz) the incident x-field is zero
         // Note: same caution as above. Also note that role of E_x fields swops
         // around - E_x field above interface is now total field.
 
@@ -240,7 +251,8 @@ int main()
         }
         // Special update on scat/tot field boundary (only needed for Ey)
         // as in Fig. 3.1. The E_y field is the scattered field.
-        std::vector<double> H_z_n_inc(N_y, (Peak / eta_0) * gaussder_norm((m - 0.5) * delta_t - (L + 0.5) * delta_s / c, m_offset, sigma));
+        for (int j = 0; j < N_y; ++j)
+            H_z_n_inc[j] = ((Peak / eta_0) * gaussder_norm((m - 0.5) * delta_t - (L + 0.5) * delta_s / c, m_offset, sigma));
         for (int j = L1; j < N_y - L1; ++j)
             E_y_n[L][j] = E_y_nmin1[L][j] - C_Ey[L][j] * (H_z_n[L][j] - H_z_n_inc[j] - H_z_n[L - 1][j]);
 
@@ -257,7 +269,8 @@ int main()
 
         // Re-writing gaussder_norm to handle a vector call would permit this to
         // be recoded in vector notation. Note that since N_x may not be equal to N_y, we defined a new variable  H_z_n_inc2
-        std::vector<double> H_z_n_inc2(N_y, 0.0);
+        for (int i = 0; i < N_y; ++i)
+            H_z_n_inc2[i] = (0.0);
         for (int ii = L1; ii < N_y - L1; ++ii)
             H_z_n_inc2[ii] = (Peak / eta_0) * gaussder_norm((m - 0.5) * delta_t - (ii - 0.5) * delta_s / c, m_offset, sigma);
 
@@ -336,7 +349,7 @@ int main()
 
     // Exportar resultados para CSV
     std::ofstream file(out_dir + "/ey_point1.csv");
-    
+
     file.precision(15);
     file << std::scientific;
 
@@ -346,7 +359,7 @@ int main()
         double time_ns = m * delta_t * 1e9;
         file << time_ns << "," << E_y_point1[m] << "\n";
         // std::cout << "H_z_point1: " << H_z_point1[m] << std::endl;
-       // std::cout << "H_z_point2: " << H_z_point2[m] << std::endl;
+        // std::cout << "H_z_point2: " << H_z_point2[m] << std::endl;
         std::cout << "time_ns: " << time_ns << "    E_y_point1: " << E_y_point1[m] << std::endl;
     }
     file.close();
