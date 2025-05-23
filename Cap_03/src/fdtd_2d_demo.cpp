@@ -167,7 +167,7 @@ int main()
 
         // Special update on scat/tot field boundary
         for (int j = 0; j <= N_y; ++j)
-            E_y_nmin1_inc_front[j] = (Peak * gaussder_norm((m - 1) * delta_t - (L) * delta_s / c, m_offset, sigma));
+            E_y_nmin1_inc_front[j] = (Peak * gaussder_norm((static_cast<double>(m) - 1.0) * delta_t - (L) * delta_s / c, m_offset, sigma));
         // std::cout << "E_y_nmin1_inc_front: " << E_y_nmin1_inc_front[0] << std::endl;
         //  The H_z field is the total field.
         for (int j = L1; j < N_y - L1; ++j) // talvez deva ser L-1 o indice e iniciar em L1 - 1
@@ -178,7 +178,7 @@ int main()
         // Note now the the "far" side of the ABC is now the SCATTERED, not TOTAL,
         // field, so the role of the E_y fields swops around.
         for (int j = 0; j <= N_y; ++j)
-            E_y_nmin1_inc_back[j] = (Peak * gaussder_norm((m - 1) * delta_t - (N_x - L1 + 1) * delta_s / c, m_offset, sigma));
+            E_y_nmin1_inc_back[j] = (Peak * gaussder_norm((static_cast<double>(m) - 1.0) * delta_t - (N_x - L1 + 1) * delta_s / c, m_offset, sigma));
 
         // E_y_nmin1_inc can be overwritten since it is not used again.   Again,
         // the H_z field is the total field.
@@ -252,15 +252,15 @@ int main()
         // Special update on scat/tot field boundary (only needed for Ey)
         // as in Fig. 3.1. The E_y field is the scattered field.
         for (int j = 0; j < N_y; ++j)
-            H_z_n_inc[j] = ((Peak / eta_0) * gaussder_norm((m - 0.5) * delta_t - (L + 0.5) * delta_s / c, m_offset, sigma));
+            H_z_n_inc[j] = ((Peak / eta_0) * gaussder_norm((static_cast<double>(m) - 0.5) * delta_t - (L + 0.5) * delta_s / c, m_offset, sigma));
         for (int j = L1; j < N_y - L1; ++j)
             E_y_n[L][j] = E_y_nmin1[L][j] - C_Ey[L][j] * (H_z_n[L][j] - H_z_n_inc[j] - H_z_n[L - 1][j]);
 
         // Special update on additional new scat/tot field boundary (only needed for Ey)
         // on the right hand side of Fig. 3.1, at N_x - L1. Again, the E_y field is the
         // scattered field.
-        for (int i = 0; i <= N_y; ++i)
-            H_z_n_inc[i] = (Peak / eta_0) * gaussder_norm((m - 0.5) * delta_t - (N_x - L1 + 0.5) * delta_s / c, m_offset, sigma);
+        for (int i = 0; i < N_y; ++i)
+            H_z_n_inc[i] = (Peak / eta_0) * gaussder_norm((static_cast<double>(m) - 0.5) * delta_t - (N_x - L1 - 1.5) * delta_s / c, m_offset, sigma); //Alterado para N_x - L1 - 1.5
         for (int j = L1; j < N_y - L1; ++j)
             E_y_n[N_x - L1 + 1][j] = E_y_nmin1[N_x - L1 + 1][j] - C_Ey[N_x - L1 + 1][j] * (H_z_n[N_x - L1 + 1][j] + H_z_n_inc[j] - H_z_n[N_x - L1][j]);
         // Special update on additional new scat/tot field boundary (only needed for Ex)
@@ -272,17 +272,17 @@ int main()
         //for (int i = 0; i < N_y; ++i)
         //    H_z_n_inc2[i] = (0.0);
         for (int ii = 0; ii < N_x; ++ii)
-            H_z_n_inc2[ii] = (Peak / eta_0) * gaussder_norm((m - 0.5) * delta_t - (ii - 0.5) * delta_s / c, m_offset, sigma);
+            H_z_n_inc2[ii] = (Peak / eta_0) * gaussder_norm((static_cast<double>(m) - 0.5) * delta_t - (ii - 0.5) * delta_s / c, m_offset, sigma);
 
         // Upper interface
         // The H_x field above the interface is scattered, that below, total. The
         // E_x field is the scattered field.
-        for (int i = L - 1; i < N_x - L1; ++i)
+        for (int i = L; i < N_x - L1; ++i)
             E_x_n[i][N_y - L1 + 1] = E_x_nmin1[i][N_y - L1 + 1] + C_Ex[i][N_y - L1 + 1] * (H_z_n[i][N_y - L1 + 1] - H_z_n[i][N_y - L1] + H_z_n_inc2[i]);
         // Lower interface
         // Now, the H_x field above the interface is total, that below, scattered.
         // Again, the E_x field is the scattered field.
-        for (int i = L - 1; i < N_x - L1; ++i)
+        for (int i = L; i < N_x - L1; ++i)
             E_x_n[i][L1] = E_x_nmin1[i][L1] + C_Ex[i][L1] * (H_z_n[i][L1] - H_z_n_inc2[i] - H_z_n[i][L1 - 1]);
 
         // ---------------------------- End E field update -----------------------------------------------------------------
@@ -291,17 +291,17 @@ int main()
         // Impose ABC on sides - assumes free space cell on boundary.
         // Left/right boundaries:
         for (int j = 0; j <= N_y; ++j)
-            E_y_n[0][j] = E_y_nmin1[0][j] * (1 - c * delta_t / delta_s) + (c * delta_t / delta_s) * E_y_nmin1[1][j];
+            E_y_n[0][j] = E_y_nmin1[0][j] * (1.0 - c * delta_t / delta_s) + (c * delta_t / delta_s) * E_y_nmin1[1][j];
 
         for (int j = 0; j <= N_y; ++j)
-            E_y_n[N_x][j] = E_y_nmin1[N_x][j] * (1 - c * delta_t / delta_s) + (c * delta_t / delta_s) * E_y_nmin1[N_x - 1][j];
+            E_y_n[N_x][j] = E_y_nmin1[N_x][j] * (1.0 - c * delta_t / delta_s) + (c * delta_t / delta_s) * E_y_nmin1[N_x - 1][j];
 
         // Top/bottom boundaries:
         for (int i = 0; i <= N_x; ++i)
-            E_x_n[i][0] = E_x_nmin1[i][0] * (1 - c * delta_t / delta_s) + (c * delta_t / delta_s) * E_x_nmin1[i][1];
+            E_x_n[i][0] = E_x_nmin1[i][0] * (1.0 - c * delta_t / delta_s) + (c * delta_t / delta_s) * E_x_nmin1[i][1];
 
         for (int i = 0; i <= N_x; ++i)
-            E_x_n[i][N_y] = E_x_nmin1[i][N_y] * (1 - c * delta_t / delta_s) + (c * delta_t / delta_s) * E_x_nmin1[i][N_y - 1];
+            E_x_n[i][N_y] = E_x_nmin1[i][N_y] * (1.0 - c * delta_t / delta_s) + (c * delta_t / delta_s) * E_x_nmin1[i][N_y - 1];
 
         // ---------------------------- End ABC exterior treatment -----------------------------------------------------------------
 
