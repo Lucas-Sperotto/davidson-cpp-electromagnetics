@@ -147,10 +147,10 @@ int main()
     std::vector<double> E_x_nmin1_inc_top(N_y + 1, 0.0);    // For this specific polarization (Ey,Hz) the incident x-field is zero
     std::vector<double> E_x_nmin1_inc_bottom(N_x + 1, 0.0); // Again, for this specific polarization (Ey,Hz) the incident x-field is zero
     std::vector<double> H_z_n_inc(N_y, 0.0);
-    std::vector<double> H_z_n_inc2(N_y, 0.0);
+    std::vector<double> H_z_n_inc2(N_x, 0.0);
 
     // Time loop
-    for (int m = 2; m < M; ++m)
+    for (int m = 2; m <= M; ++m)
     {
 
         // ---------------------------- H field update -----------------------------------------------------------------
@@ -269,9 +269,9 @@ int main()
 
         // Re-writing gaussder_norm to handle a vector call would permit this to
         // be recoded in vector notation. Note that since N_x may not be equal to N_y, we defined a new variable  H_z_n_inc2
-        for (int i = 0; i < N_y; ++i)
-            H_z_n_inc2[i] = (0.0);
-        for (int ii = L1; ii < N_y - L1; ++ii)
+        //for (int i = 0; i < N_y; ++i)
+        //    H_z_n_inc2[i] = (0.0);
+        for (int ii = 0; ii < N_x; ++ii)
             H_z_n_inc2[ii] = (Peak / eta_0) * gaussder_norm((m - 0.5) * delta_t - (ii - 0.5) * delta_s / c, m_offset, sigma);
 
         // Upper interface
@@ -327,10 +327,10 @@ int main()
         // movie_count = movie_count +1;
 
         // Time history
-        H_z_point1[m - 2] = H_z_n[point1_x][point1_y];
-        H_z_point2[m - 2] = H_z_n[point2_x][point2_y];
-        E_y_point1[m - 2] = E_y_n[point1_x][point1_y];
-        E_y_point2[m - 2] = E_y_n[point2_x][point2_y];
+        H_z_point1[m - 1] = H_z_n[point1_x][point1_y];
+        H_z_point2[m - 1] = H_z_n[point2_x][point2_y];
+        E_y_point1[m - 1] = E_y_n[point1_x][point1_y];
+        E_y_point2[m - 1] = E_y_n[point2_x][point2_y];
 
         // Update for next iteration
         H_z_nmin1 = H_z_n;
@@ -341,6 +341,7 @@ int main()
         // disp('.')
         // if(rem(m,report_time_interval)==0)
         //   m
+        //std::cout << "m: " << m << std::endl;
     }
     // End of time stepping
     //------------------------------------------
@@ -360,7 +361,7 @@ int main()
         file << time_ns << "," << E_y_point1[m] << "\n";
         // std::cout << "H_z_point1: " << H_z_point1[m] << std::endl;
         // std::cout << "H_z_point2: " << H_z_point2[m] << std::endl;
-        std::cout << "time_ns: " << time_ns << "    E_y_point1: " << E_y_point1[m] << std::endl;
+        //std::cout << "time_ns: " << time_ns << "    E_y_point1: " << E_y_point1[m] << std::endl;
     }
     file.close();
     std::cout << "Arquivo salvo em: " << out_dir << "/ey_point1.csv" << std::endl;
