@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Otimizações e flags específicas
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native -ffast-math")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")#-O3 -march=native -ffast-math -funroll-loops -flto")
 
 # Diretórios
 include_directories(${CMAKE_SOURCE_DIR}/src)
