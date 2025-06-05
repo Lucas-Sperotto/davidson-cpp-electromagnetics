@@ -38,6 +38,7 @@ A linha de transmissão pode ser modelada por um circuito equivalente **infinite
 </p>
 
 **Figura 2.1:** Trecho infinitesimal de uma linha de transmissão unidimensional.
+
 ---
 
 ### 📐 **Equações da Linha de Transmissão** 
@@ -209,6 +210,7 @@ $$
 ## Requisitos
 
 ### Compilação C++
+
 - C++17 ou superior
 - [FFTW3](http://www.fftw.org/) (Fastest Fourier Transform in the West)
 - CMake
@@ -216,21 +218,22 @@ $$
 - Compilador compatível com C++17 (ex.: `g++`, `clang++`)
 
 ### Bibliotecas de Desenvolvimento
+
 Instale os pacotes necessários no Ubuntu/Debian com:
 
 ```bash
 sudo apt install build-essential gfortran cmake pkg-config libfftw3-dev
-````
+```
 
 ### Python 3 (para visualização de resultados)
 
 Os scripts de visualização requerem as seguintes bibliotecas:
 
-* numpy
-* pandas
-* matplotlib
-* pillow
-* ffmpeg (externo, usado pelo matplotlib)
+- numpy
+- pandas
+- matplotlib
+- pillow
+- ffmpeg (externo, usado pelo matplotlib)
 
 Instale com:
 
@@ -263,6 +266,7 @@ Execute os binários gerados dentro de `build/`:
 ./fdtd_1D_demo
 ./fdtd_1D_WB_demo
 ```
+
 As simulações geram arquivos de saída em `Cap_02/out/`. Não exclua esta pasta, pois os scripts Python utilizam esses arquivos para produzir os gráficos e animações.
 
 Visualize os resultados com:
