@@ -160,7 +160,7 @@ $$
 $$
 
 
-<p align="left"><strong>Eq. (2.64)</strong></p>
+**Eq. (2.64)**
 
 $$
 \tilde{V}_k^n = \tilde{V}_k^{n-1} - (I_k^{n-1} - I_{k-1}^{n-1}), \quad \text{para } k = 2, \dots, N_z - 1
