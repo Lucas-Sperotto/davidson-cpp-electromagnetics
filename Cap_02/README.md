@@ -129,7 +129,7 @@ A mudança de variável aplicada é:
 <p align="left"><strong>Eq. (2.60)</strong></p>
 
 $$
-\tilde{V}_k^n = \frac{C \Delta z}{\Delta t} V_k^n
+\tilde{V}\_k^n = \frac{C \Delta z}{\Delta t} V\_k^n
 $$
 
 Essa mudança de variável visa normalizar a tensão de forma a reduzir o número de multiplicações/divisões dentro do laço principal do algoritmo, resultando em menor custo computacional por passo de tempo e maior eficiência, especialmente em simulações de longa duração.
@@ -141,14 +141,14 @@ Inicializações:
 <p align="left"><strong>Eq. (2.61)</strong></p>
 
 $$
-\tilde{V}_k^1 = 0,\quad \text{para } k = 1, \dots, N_z
+\tilde{V}\_k^1 = 0,\quad \text{para } k = 1, \dots, N_z
 $$
 
 
 <p align="left"><strong>Eq. (2.62)</strong></p>
 
 $$
-I_k^1 = 0,\quad \text{para } k = 1, \dots, N_z - 1
+I\_k^1 = 0,\quad \text{para } k = 1, \dots, N_z - 1
 $$
 
 
@@ -159,27 +159,27 @@ Para $n \geq 2$:
 <!-- força quebra de bloco -->
 
 $$
-\tilde{V}_1^n = (1 - \beta_1) \tilde{V}_1^{n-1} - 2 I_1^{n-1} + \frac{2}{R_S} V_0(t_{n-1})
+\tilde{V}\_1^n = (1 - \beta_1) \tilde{V}\_1^{n-1} - 2 I\_1^{n-1} + \frac{2}{R\_S} V\_0(t\_{n-1})
 $$
 
 **Eq. (2.64)**
 
 $$
-\tilde{V}_k^n = \tilde{V}_k^{n-1} - (I_k^{n-1} - I_{k-1}^{n-1}), \quad \text{para } k = 2, \dots, N_z - 1
+\tilde{V}\_k^n = \tilde{V}\_k^{n-1} - (I\_k^{n-1} - I\_{k-1}^{n-1}), \quad \text{para } k = 2, \dots, N_z - 1
 $$
 
 
 <p align="left"><strong>Eq. (2.65)</strong></p>
 
 $$
-\tilde{V}_{N_z}^n = (1 - \beta_2) \tilde{V}_{N_z}^{n-1} + 2 I_{N_z - 1}^{n-1}
+\tilde{V}\_{N\_z}^n = (1 - \beta_2) \tilde{V}\_{N\_z}^{n-1} + 2 I\_{N\_z - 1}^{n-1}
 $$
 
 
 <p align="left"><strong>Eq. (2.66)</strong></p>
 
 $$
-I_k^n = I_k^{n-1} - r (\tilde{V}_{k+1}^n - \tilde{V}_k^n), \quad \text{para } k = 1, \dots, N_z - 1
+I\_k^n = I\_k^{n-1} - r (\tilde{V}\_{k+1}^n - \tilde{V}\_k^n), \quad \text{para } k = 1, \dots, N_z - 1
 $$
 
 
@@ -188,14 +188,14 @@ Parâmetros auxiliares:
 <p align="left"><strong>Eq. (2.67)</strong></p>
 
 $$
-\beta_1 = \frac{2 \Delta t}{R_S C \Delta z}
+\beta\_1 = \frac{2 \Delta t}{R\_S C \Delta z}
 $$
 
 
 <p align="left"><strong>Eq. (2.68)</strong></p>
 
 $$
-\beta_2 = \frac{2 \Delta t}{R_L C \Delta z}
+\beta\_2 = \frac{2 \Delta t}{R\_L C \Delta z}
 $$
 
 
