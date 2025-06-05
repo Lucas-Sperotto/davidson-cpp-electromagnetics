@@ -154,12 +154,11 @@ $$
 
 Para $n \geq 2$:
 
-<p align="left"><strong>Eq. (2.63)</strong></p>
+**Eq. (2.63)**
 
 $$
 \tilde{V}_1^n = (1 - \beta_1) \tilde{V}_1^{n-1} - 2 I_1^{n-1} + \frac{2}{R_S} V_0(t_{n-1})
 $$
-
 
 **Eq. (2.64)**
 
