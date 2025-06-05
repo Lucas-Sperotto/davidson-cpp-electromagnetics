@@ -8,7 +8,7 @@ Este diretório contém a tradução para C++ dos códigos MATLAB do Capítulo 2
 
 ## Estrutura
 
-```
+```text
 Cap_02/
 ├── src/
 │   ├── fdtd_1D_demo.cpp             # Simulação FDTD 1D com senoide
