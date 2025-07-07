@@ -23,5 +23,5 @@
         "xtr1common": "cpp",
         "xutility": "cpp"
     },
-    "cmake.sourceDirectory": "C:/Projects/davidson-cpp-electromagnetics/Cap_02"
+    "cmake.sourceDirectory": "/home/sperotto/davidson-cpp-electromagnetics/Cap_02"
 }
