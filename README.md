@@ -27,3 +27,4 @@ matplotlib sudo apt install python3-matplotlib -y
 pandas sudo apt install python3-pandas -y
 pillow sudo apt install python3-pil
 ffmpeg sudo apt install ffmpeg
+sudo apt install libeigen3-dev

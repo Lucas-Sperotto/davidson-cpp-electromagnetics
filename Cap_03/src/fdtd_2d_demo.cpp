@@ -40,7 +40,7 @@ int main()
 
     double delta_s = 0.005 * 2.0 / refine;               //[m] spatial step. This generates a physically larger computational volume.
     double R = 1.0;                                      // fraction of Courant limit. Must be <= 1
-    double delta_t = R * delta_s / (c * std::sqrt(2.0)); //[s] Time step size
+    double delta_t = R * delta_s / (c * std::sqrt(2.0)); //[s] Time step size Eq. (3.21)
     double sigma = 1.0E-10 / pulse_compress;             // Controls spectral content of Gaussian derivative pulse equals 1/omega_max
 
     double f_max = (1.0 / sigma) / (2.0 * M_PI); // Freq of largest significant spectral component, in Hz. Information only
@@ -150,7 +150,7 @@ int main()
     std::vector<double> H_z_n_inc2(N_x, 0.0);
 
     // Time loop
-    for (int m = 2; m <= M; ++m)
+    for (int m = 1; m <  M; ++m)
     {
 
         // ---------------------------- H field update -----------------------------------------------------------------
@@ -167,10 +167,10 @@ int main()
 
         // Special update on scat/tot field boundary
         for (int j = 0; j <= N_y; ++j)
-            E_y_nmin1_inc_front[j] = (Peak * gaussder_norm((static_cast<double>(m) - 1.0) * delta_t - (L) * delta_s / c, m_offset, sigma));
+            E_y_nmin1_inc_front[j] = (Peak * gaussder_norm((static_cast<double>(m) - 1.0) * delta_t - (L - 1) * delta_s / c, m_offset, sigma));
         // std::cout << "E_y_nmin1_inc_front: " << E_y_nmin1_inc_front[0] << std::endl;
         //  The H_z field is the total field.
-        for (int j = L1; j < N_y - L1; ++j) // talvez deva ser L-1 o indice e iniciar em L1 - 1
+        for (int j = L1; j <= N_y - L1; ++j) // talvez deva ser L-1 o indice e iniciar em L1 - 1
             H_z_n[L][j] = H_z_nmin1[L][j] + D_Hz * (E_x_nmin1[L][j + 1] - E_x_nmin1[L][j] + E_y_nmin1[L][j] + E_y_nmin1_inc_front[j] - E_y_nmin1[L + 1][j]);
 
         // Special update on additional new scat/tot field boundary (only needed for Ey)
