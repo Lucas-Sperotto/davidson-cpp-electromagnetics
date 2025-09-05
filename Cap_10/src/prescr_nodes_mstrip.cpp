@@ -15,7 +15,7 @@ void prescr_nodes_mstrip(double a, double b, double h, double w,
         double x = NODE_COORD[inode][0];
         double y = NODE_COORD[inode][1];
 
-        if (std::abs(y - h) < eps && std::abs(x) <= w / 2.0)
+        if (std::abs(y - h) < eps && std::abs(x) <= (w / 2.0))
             node_flag[inode] = 1;
     }
 

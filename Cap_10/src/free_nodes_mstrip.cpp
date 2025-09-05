@@ -19,7 +19,7 @@ void free_nodes_mstrip(double a, double b, double h, double w,
             node_flag[inode] = 0;
 
         // PEC: x = a/2
-        if (std::abs(x - a / 2.0) < eps)
+        if (std::abs(x - (a / 2.0)) < eps)
             node_flag[inode] = 0;
 
         // PEC: y = b
@@ -27,7 +27,7 @@ void free_nodes_mstrip(double a, double b, double h, double w,
             node_flag[inode] = 0;
 
         // Centro condutor (inhomogeneamente prescrito): y = h, |x| <= w/2
-        if (std::abs(y - h) < eps && std::abs(x) <= w / 2.0)
+        if (std::abs(y - h) < eps && std::abs(x) <= (w / 2.0))
             node_flag[inode] = 0;
     }
 

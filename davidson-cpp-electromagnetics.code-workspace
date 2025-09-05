@@ -81,7 +81,12 @@
 			"numeric": "cpp",
 			"random": "cpp",
 			"string_view": "cpp",
-			"numbers": "cpp"
+			"numbers": "cpp",
+			"set": "cpp",
+			"semaphore": "cpp",
+			"stop_token": "cpp",
+			"thread": "cpp",
+			"core": "cpp"
 		}
 	}
 }
