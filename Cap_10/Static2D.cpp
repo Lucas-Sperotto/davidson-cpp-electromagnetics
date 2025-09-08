@@ -298,7 +298,7 @@ int main()
         }
 
         // (3) Salva campo + potencial em CSV
-        std::ofstream f("field_map.csv");
+        std::ofstream f("../out/field_map.csv");
         f << "x,y,phi,Ex,Ey\n";
         f.setf(std::ios::scientific);
         f << std::setprecision(10);
@@ -319,7 +319,7 @@ int main()
         f.close();
 
         // (4) Exporta nós do microstrip (prescritos a V) para desenhar o condutor
-        std::ofstream g("strip_nodes.csv");
+        std::ofstream g("../out/strip_nodes.csv");
         g << "x,y\n";
         g.setf(std::ios::scientific);
         g << std::setprecision(10);
@@ -333,7 +333,7 @@ int main()
         g.close();
 
         // (5) Opcional: salva parâmetros para o Python ler (facilita manter coerência)
-        std::ofstream p("geom_params.csv");
+        std::ofstream p("../out/geom_params.csv");
         p << "a_half,b,h,w,Nx,Ny\n";
         p.setf(std::ios::scientific);
         p << std::setprecision(10);

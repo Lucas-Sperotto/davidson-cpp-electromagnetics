@@ -63,7 +63,7 @@ void plot_field(const std::vector<double> &dofs,
                         for (int k = 0; k < 3; ++k)
                         {
                             int global_dof = dof_e1[edges[k]];
-                            if (global_dof > 0)
+                            if (global_dof >= 0)
                                 dofs_tri[k] = dofs[global_dof];
                         }
 

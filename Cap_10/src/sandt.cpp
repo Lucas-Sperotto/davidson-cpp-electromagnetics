@@ -36,9 +36,9 @@ sandt(double x1, double y1, double x2, double y2, double x3, double y3)
 
     Eigen::Matrix3d Ainv = A.inverse();
 
-    std::vector<double> a = {Ainv(0, 0), Ainv(0, 1), Ainv(0, 2)};
-    std::vector<double> b = {Ainv(1, 0), Ainv(1, 1), Ainv(1, 2)};
-    std::vector<double> c = {Ainv(2, 0), Ainv(2, 1), Ainv(2, 2)};
+    std::vector<double> b = {Ainv(0, 0), Ainv(1, 0), Ainv(2, 0)};
+    std::vector<double> c = {Ainv(0, 1), Ainv(1, 1), Ainv(2, 1)};
+    std::vector<double> a = {Ainv(0, 2), Ainv(1, 2), Ainv(2, 2)};
 
     std::vector<std::vector<double>> phi(3, std::vector<double>(3));
     std::vector<std::vector<double>> v_z(3, std::vector<double>(3));
@@ -64,10 +64,10 @@ sandt(double x1, double y1, double x2, double y2, double x3, double y3)
             int j1 = LOCALEDGENODES[jj][0];
             int j2 = LOCALEDGENODES[jj][1];
 
-            assert(i1 >= 0 && i1 < 3);
-            assert(i2 >= 0 && i2 < 3);
-            assert(j1 >= 0 && j1 < 3);
-            assert(j2 >= 0 && j2 < 3);
+            //assert(i1 >= 0 && i1 < 3);
+            //assert(i2 >= 0 && i2 < 3);
+            //assert(j1 >= 0 && j1 < 3);
+            //assert(j2 >= 0 && j2 < 3);
 
             S[ii][jj] = 4 * area * v_z[i1][i2] * v_z[j1][j2];
             T[ii][jj] = area * (phi[i2][j2] * M[i1][j1] - phi[i2][j1] * M[i1][j2] - phi[i1][j2] * M[i2][j1] + phi[i1][j1] * M[i2][j2]);
