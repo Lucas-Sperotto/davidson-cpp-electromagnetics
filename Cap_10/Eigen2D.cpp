@@ -34,8 +34,8 @@ void Eigen2D()
     std::vector<std::vector<double>> x_nodes, y_nodes;
     trimesh(a, b, 8, 4, x_nodes, y_nodes); // também preenche ELEMENTS e NODE_COORD
 
-    //for (int i = 0; i < NUM_NODES; ++i)
-    //    std::cout << "Node " << i << ": (" << NODE_COORD[i][0] << ", " << NODE_COORD[i][1] << ")\n";
+    // for (int i = 0; i < NUM_NODES; ++i)
+    //     std::cout << "Node " << i << ": (" << NODE_COORD[i][0] << ", " << NODE_COORD[i][1] << ")\n";
 
     for (int e = 0; e < NUM_ELEMENTS; ++e)
     {
@@ -62,9 +62,8 @@ void Eigen2D()
     // Renumera apenas os DOFs livres
     std::vector<int> dof_e1 = renumber_dof(dof_e1_free_flag); // também atualiza NUM_DOFS
 
-    //for (int j = 0; j < dof_e1.size(); ++j)
-    //    std::cout << "dof_e1[" << j << "] = " << dof_e1[j] << "\n";
-    
+    // for (int j = 0; j < dof_e1.size(); ++j)
+    //     std::cout << "dof_e1[" << j << "] = " << dof_e1[j] << "\n";
 
     // Inicializa matrizes globais
     std::vector<std::vector<double>> S(NUM_DOFS, std::vector<double>(NUM_DOFS, 0.0));
@@ -165,7 +164,11 @@ void Eigen2D()
     GeneralizedSelfAdjointEigenSolver<MatrixXd> solver(S_mat, T_mat);
     VectorXd eigvals = solver.eigenvalues();
     MatrixXd eigvecs = solver.eigenvectors();
-
+MatrixXd V = eigvecs;                 // cópia
+for (int i = 0; i < V.cols(); ++i) {
+    double nB = std::sqrt(V.col(i).transpose() * T_mat * V.col(i));
+    if (nB > 0) V.col(i) /= nB;
+}
     // for (int i = 0; i < eigvals.size(); ++i)
     //     std::cout << "Autovalor[" << i << "]: " << eigvals[i] << std::endl;
     // for (int i = 0; i < eigvals.size(); ++i)
@@ -190,7 +193,7 @@ void Eigen2D()
 
     int start_idx = num_free_nodes;
     int num_plot_modes = 6;
-
+    std::cout << "num_free_nodes: " << num_free_nodes << std::endl;
     // Geração da grade de avaliação
     std::vector<double> XX, YY;
     int NX = 21, NY = 11;
@@ -202,13 +205,15 @@ void Eigen2D()
     for (int ii = 0; ii < num_plot_modes; ++ii)
     {
         int idx = indexed_kc[start_idx + ii].second;
-        //std::cout << "idx: " << idx << std::endl;
+
+        // std::cout << "idx: " << idx << std::endl;
         VectorXd eigmode = eigvecs.col(idx);
         std::vector<double> dofs(eigmode.data(), eigmode.data() + eigmode.size());
 
         plot_field(dofs, dof_e1, XX, YY, 3, 2, ii + 1, indexed_kc[start_idx + ii].first);
     }
-
+    for (int i = 0; i < V.col(start_idx).size(); ++i)
+        std::cout << "eigvecs: " << V.col(start_idx)[i] << std::endl;
     // Também plota modos espúrios (primeiros modos antes de free_nodes)
     // for (int ii = 0; ii < num_plot_modes; ++ii)
     // {
@@ -224,24 +229,24 @@ int main()
 {
     Eigen2D(); // Chama sua função principal que faz toda a lógica
 
+    /*
+        // Definir malha
+        NODE_COORD = {{0.0,0.0}, {1.0,0.0}, {0.0,1.0}};
+        ELEMENTS   = {{0,1,2}}; // em C++ começa do 0
 
-    // Definir malha
-    NODE_COORD = {{0.0,0.0}, {1.0,0.0}, {0.0,1.0}};
-    ELEMENTS   = {{0,1,2}}; // em C++ começa do 0
+        double xp = 0.2, yp = 0.3;
 
-    double xp = 0.2, yp = 0.3;
+        auto [lambda, area] = simplex2D(0, xp, yp);
+        std::cout << "Lambda em C++:\n";
+        for (double l : lambda) std::cout << l << " ";
+        std::cout << "\nÁrea = " << area << "\n";
 
-    auto [lambda, area] = simplex2D(0, xp, yp);
-    std::cout << "Lambda em C++:\n";
-    for (double l : lambda) std::cout << l << " ";
-    std::cout << "\nÁrea = " << area << "\n";
+        auto W = whitney(0, xp, yp);
+        std::cout << "Whitney em C++:\n";
+        for (auto &row : W) {
+            std::cout << row[0] << "\t" << row[1] << "\n";
+        }
 
-    auto W = whitney(0, xp, yp);
-    std::cout << "Whitney em C++:\n";
-    for (auto &row : W) {
-        std::cout << row[0] << "\t" << row[1] << "\n";
-    }
-
-
+    */
     return 0;
 }

@@ -25,6 +25,7 @@ def plot_field_from_csv(filepath, save_dir):
     # Cria figura
     plt.figure(figsize=(8, 6))
     plt.quiver(X, Y, U, V, scale=1, scale_units='xy', angles='xy')
+    #plt.quiver(x, y, Ex, Ey, scale=1, scale_units='xy', angles='xy')
     plt.xlabel("x")
     plt.ylabel("y")
     plt.title(f"Campo vetorial: {name}")

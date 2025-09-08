@@ -118,4 +118,23 @@ void plot_field(const std::vector<double> &dofs,
     std::cout << "Campo avaliado e salvo em: " << filename.str() << "\n";
 
     std::cout << "Campo avaliado para k_c = " << eigvalue << "\n";
+
+    for (int ii = 0; ii < Nx; ++ii)
+    {
+        for (int jj = 0; jj < Ny; ++jj)
+        {
+
+            std::cout << vec_field[ii][jj][0] << "\t";
+        }
+        std::cout << "\n";
+    }
+    for (int ii = 0; ii < Nx; ++ii)
+    {
+        for (int jj = 0; jj < Ny; ++jj)
+        {
+
+            std::cout << vec_field[ii][jj][1] << "\t";
+        }
+        std::cout << "\n";
+    }
 }
