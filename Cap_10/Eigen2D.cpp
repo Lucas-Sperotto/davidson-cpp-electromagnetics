@@ -6,6 +6,9 @@
 #include <Eigen/Eigenvalues>
 #include <fstream>
 #include <algorithm>
+#include <fstream>
+#include <iomanip>
+#include <string>
 
 #include "trimesh.h"
 #include "edgemake.h"
@@ -25,6 +28,34 @@ const double eps_0 = 8.854e-12;
 const double mu_0 = 4.0 * M_PI * 1e-7;
 const double eps_r = 1.0;
 const double mu_r = 1.0;
+
+void write_csv(const std::string &path, const Eigen::MatrixXd &M)
+{
+    std::ofstream f(path);
+    f.setf(std::ios::scientific);
+    f << std::setprecision(17);
+    for (int i = 0; i < M.rows(); ++i)
+    {
+        for (int j = 0; j < M.cols(); ++j)
+        {
+            if (j)
+                f << ',';
+            f << M(i, j);
+        }
+        f << '\n';
+    }
+}
+
+void write_csv(const std::string &path, const Eigen::VectorXd &V)
+{
+    std::ofstream f(path);
+    f.setf(std::ios::scientific);
+    f << std::setprecision(17);
+    for (int i = 0; i < V.size(); ++i)
+    {
+            f << V(i) << '\n';
+    }
+}
 
 void Eigen2D()
 {
@@ -125,11 +156,11 @@ void Eigen2D()
     {
         for (int j = 0; j < NUM_DOFS; ++j)
         {
-            //  std::cout << S[i][j] << "\t";
+            std::cout << T[i][j] << "\t";
             S_mat(i, j) = S[i][j] / mu_r;
             T_mat(i, j) = T[i][j] * eps_r;
         }
-        // std::cout << std::endl;
+        std::cout << std::endl;
     }
     // std::cout << "S_mat dimensions: " << S_mat.rows() << " x " << S_mat.cols() << std::endl;
     /*
@@ -162,17 +193,24 @@ void Eigen2D()
         */
 
     GeneralizedSelfAdjointEigenSolver<MatrixXd> solver(S_mat, T_mat);
+    write_csv("cpp_S_mat.csv", S_mat);
+    write_csv("cpp_T_mat.csv", T_mat);
+
     VectorXd eigvals = solver.eigenvalues();
     MatrixXd eigvecs = solver.eigenvectors();
-MatrixXd V = eigvecs;                 // cópia
-for (int i = 0; i < V.cols(); ++i) {
-    double nB = std::sqrt(V.col(i).transpose() * T_mat * V.col(i));
-    if (nB > 0) V.col(i) /= nB;
-}
-    // for (int i = 0; i < eigvals.size(); ++i)
-    //     std::cout << "Autovalor[" << i << "]: " << eigvals[i] << std::endl;
-    // for (int i = 0; i < eigvals.size(); ++i)
-    //    std::cout << "eig[" << i << "]: " << eigvals[i] << std::endl;
+
+    write_csv("cpp_eigvals.csv", eigvals);
+    write_csv("cpp_eigvecs.csv", eigvecs);
+
+    MatrixXd V = eigvecs; // cópia
+                          // for (int i = 0; i < V.cols(); ++i) {
+    //     double nB = std::sqrt(V.col(i).transpose() * T_mat * V.col(i));
+    //     if (nB > 0) V.col(i) /= nB;
+    // }
+    //  for (int i = 0; i < eigvals.size(); ++i)
+    //      std::cout << "Autovalor[" << i << "]: " << eigvals[i] << std::endl;
+    //  for (int i = 0; i < eigvals.size(); ++i)
+    //     std::cout << "eig[" << i << "]: " << eigvals[i] << std::endl;
 
     for (int i = 0; i < eigvals.size(); ++i)
         std::cout << "kc[" << i << "]: " << std::sqrt(eigvals[i]) << std::endl;
@@ -206,20 +244,33 @@ for (int i = 0; i < V.cols(); ++i) {
     {
         int idx = indexed_kc[start_idx + ii].second;
 
-        // std::cout << "idx: " << idx << std::endl;
+        std::cout << "idx: " << idx << std::endl;
         VectorXd eigmode = eigvecs.col(idx);
+       // double maximo = 0.0;
+       // for (int j = 0; j < eigmode.size(); ++j)
+        //if(maximo < eigmode[j])
+        //maximo = eigmode[j];
+
+//for (int j = 0; j < eigmode.size(); ++j)
+       // eigmode[j] /= maximo;
+
+
+        for (int j = 0; j < eigmode.size(); ++j)
+        std::cout << "eigmode["<< j <<"]: " << eigmode[j] << std::endl;
+        
         std::vector<double> dofs(eigmode.data(), eigmode.data() + eigmode.size());
 
         plot_field(dofs, dof_e1, XX, YY, 3, 2, ii + 1, indexed_kc[start_idx + ii].first);
     }
-    for (int i = 0; i < V.col(start_idx).size(); ++i)
-        std::cout << "eigvecs: " << V.col(start_idx)[i] << std::endl;
-    // Também plota modos espúrios (primeiros modos antes de free_nodes)
-    // for (int ii = 0; ii < num_plot_modes; ++ii)
-    // {
-    //    int idx = indexed_kc[ii].second;
-    //   VectorXd eigmode = eigvecs.col(idx);
-    //    std::vector<double> dofs(eigmode.data(), eigmode.data() + eigmode.size());
+
+    // for (int i = 0; i < V.col(start_idx).size(); ++i)
+    //     std::cout << "eigvecs: " << V.col(start_idx)[i] << std::endl;
+    //  Também plota modos espúrios (primeiros modos antes de free_nodes)
+    //  for (int ii = 0; ii < num_plot_modes; ++ii)
+    //  {
+    //     int idx = indexed_kc[ii].second;
+    //    VectorXd eigmode = eigvecs.col(idx);
+    //     std::vector<double> dofs(eigmode.data(), eigmode.data() + eigmode.size());
 
     //    plot_field(dofs, dof_e1, XX, YY, 3, 2, ii + 1, indexed_kc[ii].first);
     // }

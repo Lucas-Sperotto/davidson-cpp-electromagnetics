@@ -12,12 +12,16 @@ def plot_field_from_csv(filepath, save_dir):
     Ex = df["Ex"].values
     Ey = df["Ey"].values
 
-    x_unique = np.unique(x)
-    y_unique = np.unique(y)
+    #x_unique = np.unique(x)
+    #y_unique = np.unique(y)
 
-    X, Y = np.meshgrid(x_unique, y_unique)
-    U = Ex.reshape(len(x_unique), len(y_unique)).T
-    V = Ey.reshape(len(x_unique), len(y_unique)).T
+    #X, Y = np.meshgrid(x_unique, y_unique)
+    X, Y = np.meshgrid(x, y)
+    #U = Ex.reshape(len(x_unique), len(y_unique)).T
+    #V = Ey.reshape(len(x_unique), len(y_unique)).T
+
+    U = Ex.T
+    V = Ey.T
 
     # Nome base
     name = os.path.splitext(os.path.basename(filepath))[0]
