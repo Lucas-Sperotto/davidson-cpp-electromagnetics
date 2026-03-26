@@ -23,6 +23,7 @@ https://www.cambridge.org/br/universitypress/subjects/engineering/rf-and-microwa
 | `Cap_07` | Integrais de Sommerfeld / dipolo impresso | Sim | Traduzido e funcional | Boa base, pode aprofundar |
 | `Cap_09` | FEM 1D | Sim | Traduzido e funcional | Boa, mas pode padronizar |
 | `Cap_10` | FEM 2D / modos / microstrip | Sim | Conjunto principal traduzido e funcional | Precisa aprofundar |
+| `Cap_11` | FEM vetorial 3D / cavidades / LTQN | Sim | Traduzido e funcional | Boa base, pode aprofundar |
 
 ## Estrutura
 
@@ -32,6 +33,7 @@ https://www.cambridge.org/br/universitypress/subjects/engineering/rf-and-microwa
 - [`Cap_07/`](Cap_07/) - capítulo 7 em C++ com integrais de Sommerfeld e dipolo impresso.
 - [`Cap_09/`](Cap_09/) - capítulo 9 em C++ com solver FEM 1D.
 - [`Cap_10/`](Cap_10/) - capítulo 10 em C++ com elementos de Whitney e LTQN.
+- [`Cap_11/`](Cap_11/) - capítulo 11 em C++ com cavidades 3D, CTLN e LTQN.
 - `original_matlab/` - base local de comparação com os scripts originais do livro.
 
 Observação: `original_matlab/` é usado apenas como referência local para validação e continuidade da tradução.
@@ -73,6 +75,7 @@ sudo apt install python3 python3-pip python3-numpy python3-matplotlib python3-pi
 - [`Cap_07/README.md`](Cap_07/README.md) - integrais de Sommerfeld e dipolo impresso.
 - [`Cap_09/README.md`](Cap_09/README.md) - solver FEM 1D.
 - [`Cap_10/README.md`](Cap_10/README.md) - estrutura e status do capítulo 10.
+- [`Cap_11/README.md`](Cap_11/README.md) - FEM vetorial 3D com cavidades e LTQN.
 - [`TRANSLATION_MATRIX.md`](TRANSLATION_MATRIX.md) - mapa atual entre arquivos MATLAB e equivalentes C++.
 - [`ROADMAP.md`](ROADMAP.md) - plano de adequação, padronização e continuidade.
 

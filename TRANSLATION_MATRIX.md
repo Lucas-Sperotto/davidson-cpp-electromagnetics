@@ -91,6 +91,34 @@ Legenda de status:
 | `nodal_1st.m` | `Cap_10/src/nodal_1st.cpp` | Traduzido | Base nodal |
 | `s_nodal.m` | `Cap_10/src/s_nodal.cpp` | Traduzido | Matriz nodal |
 
+## Capítulo 11
+
+| MATLAB original | Equivalente atual | Status | Observação |
+| --- | --- | --- | --- |
+| `Eigen3D_v0.m` | `Cap_11/Eigen3D_v0.cpp` | Traduzido com adaptação | Geração interna de tetraedros feita por divisão determinística do brick |
+| `Eigen3D_CTLN.m` | `Cap_11/Eigen3D_CTLN.cpp` | Traduzido com adaptação | Suporta malha interna e leitura Gmsh |
+| `Eigen3D_LTQN.m` | `Cap_11/Eigen3D_LTQN.cpp` | Traduzido com adaptação | CLI substitui prompts e suporta ordem 1 e 2 |
+| `FETD_FDTD.m` | `Cap_11/FETD_FDTD.cpp` | Traduzido com adaptação | Saída em CSV no lugar do plot direto |
+| `LTQN3D.m` | `Cap_11/src/LTQN3D.cpp` | Traduzido | Base LTQN 3D |
+| `TE_cavity_modes3D.m` | `Cap_11/src/TE_cavity_modes3D.cpp` | Traduzido | Modos TE analíticos |
+| `avg_mesh_length.m` | `Cap_11/src/avg_mesh_length.cpp` | Traduzido | Métrica média da malha |
+| `brick_mesh.m` | `Cap_11/src/brick_mesh.cpp` | Traduzido | Geração da malha hexaédrica regular |
+| `cavity_modes3D.m` | `Cap_11/src/cavity_modes3D.cpp` | Traduzido | Mantém o estado incompleto do original |
+| `curl_LTQN3D.m` | `Cap_11/src/curl_LTQN3D.cpp` | Traduzido | Rotacional LTQN 3D |
+| `edgemake3D.m` | `Cap_11/src/edgemake3D.cpp` | Traduzido | Geração de arestas 3D |
+| `eig_err3D.m` | `Cap_11/src/eig_err3D.cpp` | Traduzido | Erro dos autovalores |
+| `facemake3D.m` | `Cap_11/src/facemake3D.cpp` | Traduzido | Geração de faces 3D |
+| `free_dof3D.m` | `Cap_11/src/free_dof3D.cpp` | Traduzido | Contorno CTLN |
+| `free_dof3D_LTQN.m` | `Cap_11/src/free_dof3D_LTQN.cpp` | Traduzido | Contorno LTQN |
+| `free_nodes3D.m` | `Cap_11/src/free_nodes3D.cpp` | Traduzido | Nós livres para o núcleo nulo |
+| `read_gmsh2.m` | `Cap_11/src/read_gmsh2.cpp` | Traduzido | Leitor Gmsh v2 ASCII |
+| `renumber_dof.m` | `Cap_11/src/renumber_dof3D.cpp` | Traduzido | Renumeração CTLN |
+| `renumber_dof_LTQN.m` | `Cap_11/src/renumber_dof3D_LTQN.cpp` | Traduzido | Renumeração LTQN |
+| `sandt3D.m` | `Cap_11/src/sandt3D.cpp` | Traduzido | Matrizes locais 3D de Whitney |
+| `sandt3D_LTQN.m` | `Cap_11/src/sandt3D_LTQN.cpp` | Traduzido | Matrizes locais 3D LTQN |
+| `test_tet_quad.m` | `Cap_11/test_tet_quad.cpp` | Traduzido com adaptação | Resultado exportado em CSV |
+| `tet_quad.m` | `Cap_11/src/tet_quad.cpp` | Traduzido | Regra de quadratura tetraédrica |
+
 ## Uso Prático da Matriz
 
 Próximo uso recomendado desta matriz:
