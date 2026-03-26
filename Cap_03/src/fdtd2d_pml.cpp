@@ -24,6 +24,32 @@ Matrix make_matrix(int nx, int ny, double value = 0.0)
 {
     return Matrix(nx, std::vector<double>(ny, value));
 }
+
+void write_matrix_csv(const std::filesystem::path &path, const Matrix &matrix)
+{
+    std::ofstream file(path);
+    file.precision(17);
+    file << std::scientific;
+    for (std::size_t i = 0; i < matrix.size(); ++i)
+    {
+        for (std::size_t j = 0; j < matrix[i].size(); ++j)
+        {
+            if (j)
+                file << ',';
+            file << matrix[i][j];
+        }
+        file << '\n';
+    }
+}
+
+void write_vector_csv(const std::filesystem::path &path, const std::vector<double> &values)
+{
+    std::ofstream file(path);
+    file.precision(17);
+    file << std::scientific;
+    for (double value : values)
+        file << value << '\n';
+}
 } // namespace
 
 void run_fdtd2d_pml_simulation(const Fdtd2DPmlConfig &config)
@@ -45,6 +71,9 @@ void run_fdtd2d_pml_simulation(const Fdtd2DPmlConfig &config)
     const int refine = config.refine;
     const int d_cell = config.d_cell;
     const int poly_m = config.poly_m;
+    const bool snapshot_requested = config.snapshot_step > 0;
+    const std::string snapshot_prefix =
+        config.snapshot_prefix.empty() ? "fdtd2d_pml_snapshot" : config.snapshot_prefix;
 
     const int N_x = refine * 200;
     const int N_y = refine * 200;
@@ -213,6 +242,8 @@ void run_fdtd2d_pml_simulation(const Fdtd2DPmlConfig &config)
     Matrix H_z_n = make_matrix(N_x, N_y);
     Matrix E_x_n = make_matrix(N_x, N_y);
     Matrix E_y_n = make_matrix(N_x, N_y);
+    std::vector<double> E_y_nmin1_inc_profile(N_y, 0.0);
+    std::vector<double> H_z_n_inc_profile(N_y, 0.0);
 
     for (int m_mat = 2; m_mat <= M; ++m_mat)
     {
@@ -243,6 +274,7 @@ void run_fdtd2d_pml_simulation(const Fdtd2DPmlConfig &config)
             const double incident_ey =
                 peak * gaussder_norm((m_mat - 1.0) * delta_t - (L_mat - 1.0) * delta_s / c,
                                      m_offset, sigma);
+            std::fill(E_y_nmin1_inc_profile.begin(), E_y_nmin1_inc_profile.end(), incident_ey);
 
             for (int j = 0; j < N_y; ++j)
             {
@@ -286,6 +318,7 @@ void run_fdtd2d_pml_simulation(const Fdtd2DPmlConfig &config)
                 (peak / eta_0) *
                 gaussder_norm((m_mat - 0.5) * delta_t - (L_mat - 0.5) * delta_s / c,
                               m_offset, sigma);
+            std::fill(H_z_n_inc_profile.begin(), H_z_n_inc_profile.end(), incident_h);
 
             for (int j = 1; j < N_y; ++j)
             {
@@ -293,6 +326,11 @@ void run_fdtd2d_pml_simulation(const Fdtd2DPmlConfig &config)
                     C_aEy[L_idx][j] * E_y_nmin1[L_idx][j] -
                     C_bEy[L_idx][j] * (H_z_n[L_idx][j] - incident_h - H_z_n[L_idx - 1][j]);
             }
+        }
+        else
+        {
+            std::fill(E_y_nmin1_inc_profile.begin(), E_y_nmin1_inc_profile.end(), 0.0);
+            std::fill(H_z_n_inc_profile.begin(), H_z_n_inc_profile.end(), 0.0);
         }
 
         for (int j = 0; j < N_y; ++j)
@@ -310,6 +348,21 @@ void run_fdtd2d_pml_simulation(const Fdtd2DPmlConfig &config)
         H_z_point2[m_idx] = H_z_n[point2_x_idx][point2_y_idx];
         E_y_point1[m_idx] = E_y_n[point1_x_idx][point1_y_idx];
         E_y_point2[m_idx] = E_y_n[point2_x_idx][point2_y_idx];
+
+        if (snapshot_requested && m_mat == config.snapshot_step)
+        {
+            write_matrix_csv(out_dir / (snapshot_prefix + "_H_zx_n.csv"), H_zx_n);
+            write_matrix_csv(out_dir / (snapshot_prefix + "_H_zy_n.csv"), H_zy_n);
+            write_matrix_csv(out_dir / (snapshot_prefix + "_H_z_n.csv"), H_z_n);
+            write_matrix_csv(out_dir / (snapshot_prefix + "_E_x_n.csv"), E_x_n);
+            write_matrix_csv(out_dir / (snapshot_prefix + "_E_y_n.csv"), E_y_n);
+            write_matrix_csv(out_dir / (snapshot_prefix + "_H_zx_nmin1.csv"), H_zx_nmin1);
+            write_matrix_csv(out_dir / (snapshot_prefix + "_H_zy_nmin1.csv"), H_zy_nmin1);
+            write_matrix_csv(out_dir / (snapshot_prefix + "_E_x_nmin1.csv"), E_x_nmin1);
+            write_matrix_csv(out_dir / (snapshot_prefix + "_E_y_nmin1.csv"), E_y_nmin1);
+            write_vector_csv(out_dir / (snapshot_prefix + "_E_y_nmin1_inc.csv"), E_y_nmin1_inc_profile);
+            write_vector_csv(out_dir / (snapshot_prefix + "_H_z_n_inc.csv"), H_z_n_inc_profile);
+        }
 
         H_zx_nmin1 = H_zx_n;
         H_zy_nmin1 = H_zy_n;
@@ -351,6 +404,7 @@ void run_fdtd2d_pml_simulation(const Fdtd2DPmlConfig &config)
     meta << "point1_y_mat," << point1_y_mat << "\n";
     meta << "point2_x_mat," << point2_x_mat << "\n";
     meta << "point2_y_mat," << point2_y_mat << "\n";
+    meta << "snapshot_step," << config.snapshot_step << "\n";
     meta.close();
 
     std::cout << "Simulacao 2D com PML finalizada. Resultados em "

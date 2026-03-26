@@ -20,6 +20,8 @@ O núcleo numérico do capítulo já está funcional. As principais adaptações
 - gravação padronizada de CSVs em `Cap_11/out/`;
 - geração de figuras por script Python, em vez de `plot(...)` e `tetramesh(...)` do MATLAB.
 
+O conjunto principal do capítulo já foi validado diretamente contra o MATLAB original.
+
 ## Teoria
 
 O capítulo estende a formulação vetorial do Capítulo 10 para 3D. A cavidade retangular PEC é discretizada com tetraedros, e o problema de autovalores generalizado é montado a partir das matrizes:
@@ -176,20 +178,21 @@ Figuras geradas:
 - `out/eigen3d_ltqn_modes.png`
 - `out/eigen3d_ltqn_modes_relerr.png`
 
-## Resultados de Referência
+## Resultados de Referência e Validação MATLAB
 
-Na validação inicial desta tradução:
+Na validação recente desta tradução:
 
-- `Eigen3D_CTLN` com malha interna padrão (`2 x 1 x 2` bricks) gerou `24` tetraedros e `9` DOFs livres;
-- `Eigen3D_LTQN --element-order 2 --nx 2 --ny 1 --nz 2` gerou `82` DOFs e apresentou os primeiros modos físicos próximos de `5.2495`, `7.0475`, `7.4577`, `7.5660`;
 - `test_tet_quad` confirmou a regra de 11 pontos com erros relativos numéricos da ordem de máquina;
-- `Eigen3D_CTLN --internal-mesh 0 --mesh-file "../original_matlab/Chapter 11/Gmsh files/box_20.msh"` rodou com sucesso, validando também a leitura do caminho Gmsh.
+- `FETD_FDTD` coincidiu com o MATLAB em precisão de máquina nas curvas `we1`, `we2` e `we1_dot_we2`;
+- `Eigen3D_CTLN --internal-mesh 0 --mesh-file "../original_matlab/Chapter 11/Gmsh files/box_20.msh"` coincidiu com o MATLAB com erro máximo de aproximadamente `3.35e-10` nos `k_c`;
+- `Eigen3D_LTQN --element-order 2 --internal-mesh 0 --mesh-file "../original_matlab/Chapter 11/Gmsh files/box_20.msh"` coincidiu com o MATLAB com erro máximo de aproximadamente `2.05e-07` nos `k_c`;
+- `Eigen3D_v0 --nx 2 --ny 1 --nz 2` coincidiu com o helper compatível MATLAB com erro máximo de aproximadamente `4.36e-10` nos `k_c` e `4.92e-12` nos erros relativos.
 
 ## Limitações e Observações
 
 - A geração interna da malha foi adaptada: em vez de `delaunay3`, cada brick é dividido deterministicamente em seis tetraedros. Isso mantém a ideia do capítulo, mas não reproduz exatamente a conectividade do MATLAB em todos os casos.
 - O arquivo `cavity_modes3D.m` original já está marcado como incompleto, e a tradução preserva esse estado.
-- O `Eigen3D_v0` mantém os defaults originais de malha mais densa, mas a validação prática aqui foi feita em malha reduzida para manter o custo razoável.
+- O `Eigen3D_v0` mantém os defaults originais de malha mais densa, mas a validação prática aqui foi feita em malha reduzida para manter o custo razoável, usando a mesma decomposição determinística em seis tetraedros adotada no C++.
 
 ## Ligação com o Repositório
 

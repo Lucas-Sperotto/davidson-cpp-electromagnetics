@@ -16,6 +16,8 @@ O núcleo numérico está fiel ao fluxo MATLAB original. As principais adaptaç�
 - gravação padronizada de resultados em `Cap_09/out/`;
 - geração explícita de CSVs de perfis, convergência, nós e metadados de execução.
 
+O capítulo já foi validado diretamente contra o MATLAB original.
+
 ## Teoria
 
 O problema modelado é uma linha de transmissão uniforme, com parâmetros distribuídos `L` e `C`, excitada em uma extremidade e terminada em circuito aberto na outra. O capítulo usa a analogia entre a linha TEM e a equação de onda 1D para mostrar como o método dos elementos finitos pode ser aplicado em um caso simples e bem controlado.
@@ -138,6 +140,14 @@ Arquivos gerados:
 - `fem_profile_stage_#.png` mostra como a solução interpolada por elementos finitos acompanha a solução analítica usada no exemplo do livro.
 - `fem_convergence.csv` e `convergence.png` mostram a queda do erro RMS conforme a malha é refinada.
 - `fem_run_metadata.csv` ajuda a documentar a rodada e a guardar a inclinação observada da curva de convergência.
+
+## Validação MATLAB
+
+Na validação recente desta tradução:
+
+- a curva de convergência coincidiu com o MATLAB com erro máximo de aproximadamente `4.00e-11`;
+- os perfis interpolados por estágio coincidiram com o MATLAB com erro máximo na faixa de `5e-11`;
+- o capítulo ficou, portanto, validado tanto na solução nodal quanto na métrica de erro por refinamento.
 
 ## Limitações e Observações
 

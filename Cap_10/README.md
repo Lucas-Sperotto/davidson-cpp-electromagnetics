@@ -14,8 +14,8 @@ Estado atual do capítulo:
 - `Static2D`, `Eigen2D` e `Eigen2D_LTQN` compilam e rodam;
 - os defaults do `Static2D` foram realinhados com o MATLAB original;
 - o capítulo agora gera saídas e resumos numéricos mais explícitos em `out/`;
-- a formulação LTQN foi validada diretamente contra o MATLAB original;
-- a documentação ainda pode crescer em teoria e validação formal dos demais executáveis.
+- `Static2D`, `Eigen2D` e `Eigen2D_LTQN` foram validados diretamente contra o MATLAB original;
+- a documentação ainda pode crescer em teoria e apresentação didática dos resultados.
 
 ## Arquivos MATLAB de Referência
 
@@ -161,12 +161,11 @@ python3 scripts/plot_all_fields.py
 
 ## Validação MATLAB
 
-Validação local recente do ramo LTQN:
+Validação local recente do capítulo:
 
-- `tri_quad(6)` foi realinhado com a regra simétrica de 6 pontos do MATLAB;
-- as matrizes globais LTQN `S` e `T` passaram a coincidir com o MATLAB com erro máximo de aproximadamente `1.46e-10` e `2.22e-16`, respectivamente;
-- os autovalores úteis `k_c` de `Eigen2D_LTQN` passaram a coincidir com o MATLAB até erro numérico de arredondamento;
-- a comparação foi feita usando exports instrumentados do MATLAB e os CSVs `cpp_S_ltqn_mat.csv`, `cpp_T_ltqn_mat.csv` e `cpp_eigvals_ltqn.csv`.
+- `Static2D`: capacitância coincidente com diferença de aproximadamente `2.61e-17`, `phi_mat` com erro máximo de aproximadamente `4.35e-11`, e campos `Ex/Ey` coincidentes após aplicar a mesma convenção física `E = -grad(phi)` usada no C++;
+- `Eigen2D`: matrizes globais `S` e `T` coincidentes com o MATLAB com erros máximos de aproximadamente `5.12e-9` e `3.22e-15`, respectivamente; autovalores físicos `k_c` com erro máximo de aproximadamente `4.72e-8`;
+- `Eigen2D_LTQN`: `tri_quad(6)` foi realinhado com a regra simétrica de 6 pontos do MATLAB; as matrizes globais LTQN `S` e `T` passaram a coincidir com o MATLAB com erro máximo de aproximadamente `1.46e-10` e `2.22e-16`, respectivamente; os autovalores úteis `k_c` passaram a coincidir com o MATLAB até erro numérico de arredondamento.
 
 ## Observações Técnicas
 
@@ -178,5 +177,5 @@ Validação local recente do ramo LTQN:
 ## Próximos Passos Naturais
 
 - documentar a teoria do capítulo em maior profundidade;
-- registrar uma validação numérica C++ versus MATLAB para `Eigen2D` com Whitney e para `Static2D`;
+- transformar a validação já concluída em material mais didático, com figuras e comparação reproduzível;
 - reduzir gradualmente a dependência de estado global sem perder a legibilidade da tradução.

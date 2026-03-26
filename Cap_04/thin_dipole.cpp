@@ -55,6 +55,18 @@ Eigen::MatrixXcd toeplitz_from_first_row(const Eigen::VectorXcd &row)
     }
     return matrix;
 }
+
+std::vector<double> linspace(double start, double stop, int count)
+{
+    std::vector<double> values(count, start);
+    if (count <= 1)
+        return values;
+
+    const double step = (stop - start) / static_cast<double>(count - 1);
+    for (int i = 0; i < count; ++i)
+        values[i] = start + step * static_cast<double>(i);
+    return values;
+}
 } // namespace
 
 int main(int argc, char **argv)
@@ -147,10 +159,11 @@ int main(int argc, char **argv)
     std::ofstream current(out_dir / "thin_dipole_current.csv");
     current << "z_over_lambda,abs_i_delta_gap,abs_i_mag_frill,re_i_delta_gap,im_i_delta_gap,re_i_mag_frill,im_i_mag_frill\n";
     current << std::scientific << std::setprecision(10);
+    const std::vector<double> length_axis =
+        linspace(-config.length_lambda / 2.0 + dz / 2.0, config.length_lambda / 2.0 - dz / 2.0, N);
     for (int i = 0; i < N; ++i)
     {
-        const double z = -config.length_lambda / 2.0 + dz / 2.0 + i * dz;
-        current << z << ","
+        current << length_axis[i] << ","
                 << std::abs(I_delta_gap(i)) << ","
                 << std::abs(I_mag_frill(i)) << ","
                 << I_delta_gap(i).real() << ","

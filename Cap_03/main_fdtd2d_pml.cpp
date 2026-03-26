@@ -23,6 +23,8 @@ void print_help()
         << "  --pulse-compress X      compressao do pulso gaussiano\n"
         << "  --d-cell N              espessura da PML em celulas\n"
         << "  --poly-m N              ordem do perfil polinomial da PML\n"
+        << "  --snapshot-step N       salva estados internos no passo N\n"
+        << "  --snapshot-prefix ARQ   prefixo dos CSVs de snapshot em out/\n"
         << "  --output ARQ            nome do CSV de saida em out/\n"
         << "  --meta ARQ              nome do CSV de metadados em out/\n";
 }
@@ -53,6 +55,10 @@ int main(int argc, char **argv) {
                 config.d_cell = std::stoi(require_value(i, argc, argv));
             else if (arg == "--poly-m")
                 config.poly_m = std::stoi(require_value(i, argc, argv));
+            else if (arg == "--snapshot-step")
+                config.snapshot_step = std::stoi(require_value(i, argc, argv));
+            else if (arg == "--snapshot-prefix")
+                config.snapshot_prefix = require_value(i, argc, argv);
             else if (arg == "--output")
                 config.output_filename = require_value(i, argc, argv);
             else if (arg == "--meta")

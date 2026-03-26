@@ -11,13 +11,13 @@ Este diretório reúne a tradução para C++ dos demos FDTD do Capítulo 3 do li
 Estado atual do capítulo:
 
 - `fdtd_2d_demo.m` -> traduzido em `fdtd_2d_demo.cpp` e validado numericamente contra o MATLAB;
-- `fdtd_2d_pml_demo.m` -> traduzido em `fdtd2d_pml.cpp`, com formulacao scat/tot alinhada ao script MATLAB e validacao inicial concluida;
+- `fdtd_2d_pml_demo.m` -> traduzido em `fdtd2d_pml.cpp`, com formulacao scat/tot alinhada ao script MATLAB e validado numericamente contra o MATLAB;
 - `fdtd_3D_demo.m` -> traduzido em `fdtd3d.cpp`;
 - `gaussder_norm.m` -> incorporado em `gaussder.cpp`;
 - `PMLperformance.m` -> traduzido em `scripts/pml_performance.py`;
 - `cyl_test.m` -> traduzido em `scripts/cyl_test.py`.
 
-Os demos principais já compilam e rodam, e os scripts auxiliares principais de comparação já possuem equivalente. O caso 2D com ABC agora já passou por comparação direta com o MATLAB em histórico temporal e snapshots internos; o caso PML ainda precisa de consolidação documental do comportamento tardio.
+Os demos principais já compilam e rodam, e os scripts auxiliares principais de comparação já possuem equivalente. Os casos 2D com ABC e com PML já passaram por comparação direta com o MATLAB em histórico temporal e snapshots internos.
 
 ## Estrutura Atual
 
@@ -125,7 +125,9 @@ Validação local recente feita contra versões instrumentadas dos scripts MATLA
 - `fdtd_2d_demo.cpp`: histórico `E_y_point1` coincidente com erro máximo de aproximadamente `5.05e-16`;
 - `fdtd_2d_demo.cpp`: snapshots internos de `H_z`, `E_x` e `E_y` entre `m = 100` e `m = 450` coincidentes com erros máximos na faixa de `1e-15`;
 - os termos incidentes e a malha material do caso ABC também foram confrontados diretamente, confirmando a fidelidade da tradução;
-- `fdtd2d_pml.cpp`: a formulação literal da interface scat/tot nas componentes split de `H_z` foi restaurada e o transiente inicial passou a coincidir com o MATLAB.
+- `fdtd2d_pml.cpp`: a formulação literal da interface scat/tot nas componentes split de `H_z` foi restaurada e o histórico `E_y_point1` passou a coincidir com o MATLAB;
+- `fdtd2d_pml.cpp`: snapshots internos entre `m = 260` e `m = 320` coincidiram com erro normalizado máximo na faixa de `3e-12`, inclusive para `H_zx`, `H_zy`, `H_z`, `E_x`, `E_y` e estados `n-1`;
+- o crescimento tardio do caso PML também foi observado no MATLAB original, então esse comportamento foi caracterizado como herdado do script de referência, e não como regressão da tradução.
 
 Ferramentas locais usadas nessa validação:
 
@@ -136,11 +138,11 @@ Ferramentas locais usadas nessa validação:
 ## Limitações Atuais
 
 - O demo 2D com ABC preserva as mesmas cautelas do original MATLAB: os cantos traseiros da interface campo total/campo espalhado continuam comentados por injetarem sinal espúrio, exatamente como no script de referência.
-- O demo PML já reproduz a formulação principal do original, mas ainda falta consolidar em Markdown a análise do comportamento tardio herdado do próprio script MATLAB.
+- O demo PML já reproduz a formulação principal do original, inclusive no regime tardio instável herdado do próprio script MATLAB.
 - Os scripts auxiliares já foram portados, mas ainda vale ampliar o conjunto de rodadas de referência documentadas.
 
 ## Próximos Passos Naturais
 
 - documentar formalmente no capítulo a validação MATLAB já concluída para `fdtd_2d_demo.cpp`;
-- consolidar a validação tardia de `fdtd2d_pml.cpp` em texto, figuras e comparação reproduzível;
+- transformar a validação MATLAB já concluída em material mais didático, com figuras e comparação reproduzível;
 - documentar a teoria do capítulo com o mesmo nível didático do `Cap_02`.

@@ -17,14 +17,16 @@ https://www.cambridge.org/br/universitypress/subjects/engineering/rf-and-microwa
 
 | Capítulo | Tema | Originais disponíveis | Status da tradução | Documentação |
 | --- | --- | --- | --- | --- |
-| `Cap_02` | FDTD 1D | Sim | Traduzido e funcional | Mais completa |
-| `Cap_03` | FDTD 2D/3D | Sim | Demos principais traduzidos; caso ABC validado contra MATLAB | Boa base, PML ainda precisa consolidar validacao tardia |
-| `Cap_04` | MoM 2D / eletrostática / dipolo fino | Sim | Traduzido e funcional | Boa base, pode aprofundar |
-| `Cap_06` | MoM 3D / RWG / RCS de esfera | Sim | Traduzido e funcional | Boa base, pode aprofundar |
-| `Cap_07` | Integrais de Sommerfeld / dipolo impresso | Sim | Traduzido e funcional | Boa base, pode aprofundar |
-| `Cap_09` | FEM 1D | Sim | Traduzido e funcional | Boa, mas pode padronizar |
-| `Cap_10` | FEM 2D / modos / microstrip | Sim | Conjunto principal traduzido; LTQN validado contra MATLAB | Boa base, pode aprofundar |
-| `Cap_11` | FEM vetorial 3D / cavidades / LTQN | Sim | Traduzido e funcional | Boa base, pode aprofundar |
+| `Cap_02` | FDTD 1D | Sim | Traduzido, funcional e validado contra MATLAB | Mais completa |
+| `Cap_03` | FDTD 2D/3D | Sim | Demos principais traduzidos e validados contra MATLAB | Boa base; teoria ainda pode crescer |
+| `Cap_04` | MoM 2D / eletrostática / dipolo fino | Sim | Traduzido e validado contra MATLAB | Boa base; sweep RCS tem pequena ressalva de bookkeeping |
+| `Cap_06` | MoM 3D / RWG / RCS de esfera | Sim | Traduzido e validado contra MATLAB | Boa base, pode aprofundar |
+| `Cap_07` | Integrais de Sommerfeld / dipolo impresso | Sim | Traduzido e validado contra MATLAB | Boa base, pode aprofundar |
+| `Cap_09` | FEM 1D | Sim | Traduzido e validado contra MATLAB | Boa, mas pode aprofundar a teoria |
+| `Cap_10` | FEM 2D / modos / microstrip | Sim | Conjunto principal traduzido e validado contra MATLAB | Boa base, pode aprofundar |
+| `Cap_11` | FEM vetorial 3D / cavidades / LTQN | Sim | Conjunto principal traduzido e validado contra MATLAB | Boa base, pode aprofundar |
+
+A campanha recente de validação cobriu todos os capítulos já traduzidos. As ressalvas remanescentes são pontuais: no `Cap_04`, o sweep de RCS ainda tem pequenas diferenças em colunas auxiliares de bookkeeping; no `Cap_07`, o primeiro ponto exportado da `region3` continua ligeiramente deslocado por decisão numérica explícita para evitar a singularidade.
 
 ## Estrutura
 

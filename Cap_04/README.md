@@ -22,6 +22,8 @@ O núcleo numérico do capítulo já está funcional. As principais adaptações
 - gravação padronizada de resultados em `Cap_04/out/`;
 - geração de CSVs e figuras em vez de depender apenas dos `plot(...)` interativos do MATLAB.
 
+Os casos principais do capítulo já passaram por comparação direta com o MATLAB original.
+
 ## Teoria
 
 O capítulo introduz o método dos momentos como uma forma de transformar equações integrais em sistemas lineares.
@@ -169,13 +171,17 @@ Figuras geradas:
 - `out/static_mom_charge.png`
 - `out/thin_dipole_current.png`
 
-## Resultados de Referência
+## Resultados de Referência e Validação MATLAB
 
-Na validação inicial desta tradução:
+Na validação recente desta tradução:
 
 - `MoM_2D_TM --analysis-type current` gerou números de condição próximos de `7.40476` e `7.72303` para as montagens single-point e quadrature;
 - `thin_dipole` com `--n-seg 80 --length 0.48 --radius 0.005` produziu `Zin_mag_frill ≈ 82.5003 + j22.1967` e `Zin_delta_gap ≈ 85.9360 + j16.1577`;
 - `static_mom` com os defaults do script original gerou a distribuição de carga correspondente ao caso `L = 1 m`, `a = 0.001 m` e `N = 5`.
+- `MoM_2D_TM` no ramo de corrente coincidiu com o MATLAB com erro máximo global de aproximadamente `4.24e-11`;
+- `static_mom` coincidiu com o MATLAB com erro máximo global de aproximadamente `4.61e-11`;
+- `thin_dipole` teve as correntes validadas contra o MATLAB, e o eixo `z` foi realinhado ao `linspace(...)` do original;
+- no sweep de `RCS`, a curva física ficou muito próxima do MATLAB, embora algumas colunas auxiliares de bookkeeping, como `segments` e `cond_quad`, ainda apresentem pequenas diferenças.
 
 ## Limitações e Observações
 

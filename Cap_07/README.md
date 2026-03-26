@@ -19,6 +19,8 @@ O núcleo numérico do capítulo já está funcional. As principais adaptações
 - geração de gráficos por script Python, em vez de `plot(...)` interativo;
 - uso de formas assintóticas estáveis para `coth`, `sech` e `csch` quando a integração empurra `lambda` para valores altos.
 
+Os quatro programas principais do capítulo já foram confrontados diretamente com o MATLAB original.
+
 ## Teoria
 
 O capítulo parte da representação espectral do potencial escalar sobre um substrato dielétrico aterrado. A variável espectral `lambda` separa o comportamento em três regiões:
@@ -178,13 +180,17 @@ Figuras geradas:
 - `out/mom_som_impedance.png`
 - `out/mom_som_currents.png`
 
-## Resultados de Referência
+## Resultados de Referência e Validação MATLAB
 
-Na validação inicial desta tradução:
+Na validação recente desta tradução:
 
 - `scalar_pot` localizou `lambda_p ≈ 270.076` para o caso base do script;
 - `V_pot_eps` e `V_pot_height` rodaram com os defaults completos sem gerar `NaN` nos CSVs;
 - `MoM_Som --max-mode-index 4 --num-int 12 --freq-start-scale 0.9 --freq-stop-scale 1.0 --freq-step-scale 0.05` gerou impedâncias aproximadas de `51.73 + j232.93 ohm`, `72.17 + j287.74 ohm` e `101.43 + j350.47 ohm` para `9.0`, `9.5` e `10.0 GHz`.
+- `scalar_pot` coincidiu com o MATLAB com erros típicos entre `1e-12` e `1e-8`, com a única ressalva intencional de o primeiro ponto exportado da `region3` começar ligeiramente acima da singularidade;
+- `V_pot_eps` coincidiu com o MATLAB com erro máximo de aproximadamente `3.09e-2` em `|V|`;
+- `V_pot_height` coincidiu com o MATLAB com erro máximo de aproximadamente `1.05e-2` em `|V|` e `0.313` grau na fase;
+- `MoM_Som` coincidiu com o MATLAB com erro máximo de aproximadamente `0.0036` na parte real de `Zin` e `0.0093` na parte imaginária.
 
 ## Limitações e Observações
 

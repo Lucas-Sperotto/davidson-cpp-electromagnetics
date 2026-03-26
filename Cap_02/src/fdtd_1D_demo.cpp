@@ -53,7 +53,7 @@ int main()
     const double c = 1.0 / std::sqrt(L * C); // Velocidade de propagação na linha (v = 1/sqrt(LC))
     const double Z_0 = std::sqrt(L / C);     // Impedância característica da linha de transmissão
     const double Rs = 1.0;                   // Resistência da fonte [Ohm]
-    const double epsilon = 1E-9;             // 1E-12;            // 0.002    // Tolerância para o erro relativo (critério de convergência)
+    const double epsilon = 0.002;            // Criterio de convergencia do script MATLAB original
 
     double Rl;
     // std::cout << "Load resistance? (Z_0 = 1 Ohm) Default: 2 -> ";
@@ -64,7 +64,7 @@ int main()
     const double V0 = 1.0; // Amplitude of source voltage [V]
     // const double Rl = 1;
     const double freq = 4.0; // freq of applied sinusoid [Hz]
-    const int Nz = 26;
+    const int Nz = 11;
     const double delta_z = h / (Nz - 1); // Number of points
 
     // Nk = 400; // Number of time steps for 0.25
@@ -97,9 +97,9 @@ int main()
         voltage_log << ",V[" << (i + 1) << "]";
     voltage_log << "\n";
 
-    // Cabeçalho: TimeStep, I[1], I[2], ..., I[Nz]
+    // Cabeçalho: TimeStep, I[1], I[2], ..., I[Nz-1]
     current_log << "TimeStep";
-    for (size_t i = 0; i < Nz; ++i)
+    for (size_t i = 0; i < Nz - 1; ++i)
         current_log << ",I[" << (i + 1) << "]";
     current_log << "\n";
 
@@ -116,9 +116,8 @@ int main()
     // std::cout << "1" << std::endl;
     double Vo_nmin1;
     //  Time loop
-    for (int nn = 1; nn <= Nk; ++nn) // true; ++nn) // nn <= Nk; ++nn)
+    for (int nn = 2; nn <= Nk; ++nn)
     {
-        // std::cout << "nn: " << nn << std::endl;
         Vo_nmin1 = V0 * std::cos(2.0 * M_PI * freq * (nn - 2) * delta_t);               // Source.
         V_n[0] = (1.0 - beta1) * V_nmin1[0] - 2.0 * I_nmin1[0] + (2.0 / Rs) * Vo_nmin1; // Eq. (2.63)
 
@@ -149,7 +148,6 @@ int main()
         I_nmin1 = I_n;
         // V_time_series.push_back(V_n);
 
-        // Dentro do laço:
         voltage_log << nn;
         current_log << nn;
         for (size_t i = 0; i < Nz; ++i)
@@ -358,24 +356,24 @@ int main()
     // Inicializa variáveis para calcular norma L2
     double sum_sq_error = 0.0;        // Soma dos quadrados dos erros
     double sum_sq_exact = 0.0;        // Soma dos quadrados dos valores exatos
-    double rel_error[V_exact.size()]; // Erro relativo para cada ponto
-    // Vamos supor que você tem M pontos (mesmo tamanho que V_exact)
-    for (size_t i = 0; i < V_exact.size(); ++i)
+    std::vector<std::complex<double>> V_exact_fdtd(N_fdtd);
+    for (size_t i = 0; i < N_fdtd; ++i)
     {
-        // Diferença complexa entre solução exata e simulada
-        std::complex<double> diff = V_exact[i] - V_period_freq[k][i];
+        double phase_shift = beta * (z[i] - h);
+        std::complex<double> term1 = std::exp(std::complex<double>(0.0, -phase_shift));
+        std::complex<double> term2 = Gamma * std::exp(std::complex<double>(0.0, phase_shift));
+        V_exact_fdtd[i] = V_plus * (term1 + term2);
+    }
 
-        // Norma (módulo) da diferença
+    std::vector<double> rel_error(N_fdtd, 0.0); // Erro relativo para os nos FDTD
+    for (size_t i = 0; i < N_fdtd; ++i)
+    {
+        std::complex<double> diff = V_exact_fdtd[i] - V_period_freq[k][i];
+
         double abs_error = std::abs(diff);
+        double abs_exact = std::abs(V_exact_fdtd[i]);
 
-        // Norma (módulo) do valor exato
-        double abs_exact = std::abs(V_exact[i]);
-
-        // Erro relativo: |erro| / |exato| (com proteção contra divisão por zero)
         rel_error[i] = (abs_exact > 1e-12) ? (abs_error / abs_exact) : 0.0;
-
-        // std::cout << "Erro[" << i << "]" << rel_error[i] << " %" << std::endl;
-        //  Acumula para norma L2
         sum_sq_error += abs_error * abs_error;
         sum_sq_exact += abs_exact * abs_exact;
     }
@@ -389,7 +387,7 @@ int main()
     relative_error_file << "Erro relativo percentual ponto a ponto entre V_exact e V_period_freq\n";
     relative_error_file << "Index,Erro_relativo\n";
 
-    for (size_t i = 0; i < V_exact.size(); ++i)
+    for (size_t i = 0; i < N_fdtd; ++i)
     {
         relative_error_file << i << "," << rel_error[i] * 100.0 << "\n";
     }

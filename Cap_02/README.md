@@ -358,6 +358,14 @@ As imagens são salvas na pasta `Cap_02/out/`. Veja abaixo algumas delas:
   <img src="out/WB_voltage_simulation.gif" alt="WB_voltage_simulation">
 </p>
 
+## Validação MATLAB
+
+Na validação recente desta tradução:
+
+- `fdtd_1D_demo` foi realinhado ao MATLAB original, inclusive com `Nz = 11` e critério de parada `epsilon = 0.002`, e a solução final coincidiu com erro máximo na ordem de `1e-7`;
+- `fdtd_1D_WB_demo` coincidiu com o MATLAB no domínio do tempo com erro máximo de aproximadamente `4.5e-7` nas tensões de fonte e carga;
+- a função de transferência do caso wideband coincidiu com o MATLAB com erro máximo de aproximadamente `4.94e-6`.
+
 ## Ligação com README geral
 
 Este é o módulo correspondente ao **Capítulo 2** do livro. Consulte o [README principal](../README.md) para acessar os demais capítulos.

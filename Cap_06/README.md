@@ -21,6 +21,8 @@ As principais adaptações desta versão em C++ são:
 - geração das figuras por script Python, em vez de `plot(...)` e `semilogy(...)` diretos;
 - exportação explícita de malha, correntes e cortes para facilitar validação.
 
+O capítulo já passou por validação numérica direta contra o MATLAB original.
+
 ## Teoria
 
 Na parte analítica, `sphereRCS` implementa a série modal da RCS monostática de uma esfera PEC. O script `converge_sphereRCS` repete a avaliação para vários truncamentos `N` e reproduz a ideia da Fig. 6.5 do livro.
@@ -142,6 +144,14 @@ Figuras geradas:
 
 - `out/sphere_rcs_convergence.png`
 - `out/mom3d_cuts.png`
+
+## Validação MATLAB
+
+Na validação recente desta tradução:
+
+- `converge_sphereRCS` reproduziu as curvas MATLAB com erro máximo por curva na ordem de `5e-6`;
+- `MoM3D_demo` reproduziu as correntes do MATLAB com erro máximo de aproximadamente `2.51e-7` em módulo;
+- as diferenças entre as montagens por aresta e por face permaneceram no mesmo nível numérico já observado no original, confirmando a fidelidade da tradução.
 
 ## Limitações e Observações
 
