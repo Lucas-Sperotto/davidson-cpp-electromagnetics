@@ -27,6 +27,16 @@ Legenda de status:
 | `FDTD_2D/PMLperformance.m` | `Cap_03/scripts/pml_performance.py` | Traduzido com adaptação | Traduzido como script Python para comparação entre rodadas |
 | `FDTD_2D/cyl_test.m` | `Cap_03/scripts/cyl_test.py` | Traduzido com adaptação | Traduzido como script Python de comparação temporal |
 
+## Capítulo 4
+
+| MATLAB original | Equivalente atual | Status | Observação |
+| --- | --- | --- | --- |
+| `MoM_2D_TM.m` | `Cap_04/MoM_2D_TM.cpp` | Traduzido com adaptação | Interface interativa substituída por CLI e saídas CSV |
+| `MoM_TM_solver.m` | `Cap_04/src/mom_tm_solver.cpp` / `Cap_04/include/mom_tm_solver.hpp` | Traduzido | Solver principal do espalhamento TM |
+| `cyl_TM_echo_width.m` | `Cap_04/src/cyl_tm_echo_width.cpp` / `Cap_04/include/cyl_tm_echo_width.hpp` | Traduzido | Solução analítica para eco TM de cilindro PEC |
+| `static_mom.m` | `Cap_04/static_mom.cpp` | Traduzido com adaptação | Script convertido para executável com saída CSV |
+| `thin_dipole.m` | `Cap_04/thin_dipole.cpp` | Traduzido com adaptação | Entradas interativas convertidas para CLI e saídas CSV |
+
 ## Capítulo 9
 
 | MATLAB original | Equivalente atual | Status | Observação |

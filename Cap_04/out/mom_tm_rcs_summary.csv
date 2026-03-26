@@ -1,0 +1,10 @@
+key,value
+radius,0.03
+phi_inc,3.14159
+e0,1
+n_per_lambda,10
+n_bessel,25
+k_start_over_a,0.1
+k_stop_over_a,0.5
+k_step_over_a,0.2
+toeplitz,1
