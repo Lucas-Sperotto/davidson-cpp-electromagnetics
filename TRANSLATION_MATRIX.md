@@ -37,6 +37,32 @@ Legenda de status:
 | `static_mom.m` | `Cap_04/static_mom.cpp` | Traduzido com adaptação | Script convertido para executável com saída CSV |
 | `thin_dipole.m` | `Cap_04/thin_dipole.cpp` | Traduzido com adaptação | Entradas interativas convertidas para CLI e saídas CSV |
 
+## Capítulo 6
+
+| MATLAB original | Equivalente atual | Status | Observação |
+| --- | --- | --- | --- |
+| `Mixed Potential EFIE RWG/MoM3D_demo.m` | `Cap_06/MoM3D_demo.cpp` | Traduzido com adaptação | Prompt interativo substituído por CLI e saídas CSV |
+| `Mixed Potential EFIE RWG/ComputeRho_c.m` | `Cap_06/src/ComputeRho_c.cpp` | Traduzido | Vetores `rho_c^+` e `rho_c^-` |
+| `Mixed Potential EFIE RWG/FillVVector.m` | `Cap_06/src/FillVVector.cpp` | Traduzido | Montagem do vetor de excitação |
+| `Mixed Potential EFIE RWG/FillZMatrixByEdge.m` | `Cap_06/src/FillZMatrixByEdge.cpp` | Traduzido | Montagem por par de arestas |
+| `Mixed Potential EFIE RWG/FillZMatrixByFace.m` | `Cap_06/src/FillZMatrixByFace.cpp` | Traduzido | Montagem por par de faces |
+| `Mixed Potential EFIE RWG/GL_quad_rule.m` | `Cap_06/src/GL_quad_rule.cpp` | Traduzido | Quadratura de Gauss-Legendre em linha |
+| `Mixed Potential EFIE RWG/Int_pq.m` | `Cap_06/src/Int_pq.cpp` | Traduzido | Integrais sobre triângulo fonte |
+| `Mixed Potential EFIE RWG/PostProcMoM.m` | `Cap_06/src/PostProcMoM.cpp` | Traduzido com adaptação | Pós-processamento exportado em CSV |
+| `Mixed Potential EFIE RWG/edge_conx_elem.m` | `Cap_06/src/edge_conx_elem.cpp` | Traduzido | Conectividade aresta-elemento |
+| `Mixed Potential EFIE RWG/edgemake_MoM.m` | `Cap_06/src/edgemake_MoM.cpp` | Traduzido | Geração das arestas globais |
+| `Mixed Potential EFIE RWG/find_local_dofs.m` | `Cap_06/src/find_local_dofs.cpp` | Traduzido | Numeração local das arestas por DOF |
+| `Mixed Potential EFIE RWG/hat.m` | `Cap_06/src/hat.cpp` | Traduzido | Vetor unitário |
+| `Mixed Potential EFIE RWG/intg_sing_SGF.m` | `Cap_06/src/intg_sing_SGF.cpp` | Traduzido | Integração singular por transformação |
+| `Mixed Potential EFIE RWG/outside_edge.m` | `Cap_06/src/outside_edge.cpp` | Traduzido | Marca arestas de contorno |
+| `Mixed Potential EFIE RWG/renumber_RWG.m` | `Cap_06/src/renumber_RWG.cpp` | Traduzido | Renumeração dos DOFs RWG |
+| `Mixed Potential EFIE RWG/simplex_area.m` | `Cap_06/src/simplex_area.cpp` | Traduzido | Coordenadas simplex |
+| `Mixed Potential EFIE RWG/tri_area3D.m` | `Cap_06/src/tri_area3D.cpp` | Traduzido | Área de triângulo 3D |
+| `Mixed Potential EFIE RWG/tri_quad.m` | `Cap_06/src/tri_quad.cpp` | Traduzido | Quadratura de Dunavant |
+| `Mixed Potential EFIE RWG/trimesh3D.m` | `Cap_06/src/trimesh3D.cpp` | Traduzido | Malha triangular da placa PEC |
+| `Sphere RCS/converge_sphereRCS.m` | `Cap_06/converge_sphereRCS.cpp` | Traduzido com adaptação | Script convertido para executável com saída CSV |
+| `Sphere RCS/sphereRCS.m` | `Cap_06/src/sphereRCS.cpp` | Traduzido | Solução analítica modal da RCS |
+
 ## Capítulo 7
 
 | MATLAB original | Equivalente atual | Status | Observação |
