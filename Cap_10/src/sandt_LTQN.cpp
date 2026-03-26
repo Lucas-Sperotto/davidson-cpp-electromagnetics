@@ -26,8 +26,8 @@ sandt_LTQN(double x1, double y1, double x2, double y2, double x3, double y3) {
 
     std::vector<std::vector<double>> nabla_lambda(3, std::vector<double>(2));
     for (int i = 0; i < 3; ++i) {
-        nabla_lambda[i][0] = Ainv(1, i); // ∂λ/∂x
-        nabla_lambda[i][1] = Ainv(2, i); // ∂λ/∂y
+        nabla_lambda[i][0] = Ainv(i, 0); // ∂λ_i/∂x
+        nabla_lambda[i][1] = Ainv(i, 1); // ∂λ_i/∂y
     }
 
     // Quadratura de ordem 6

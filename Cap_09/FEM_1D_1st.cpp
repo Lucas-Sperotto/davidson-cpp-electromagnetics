@@ -3,9 +3,15 @@
 #include <fstream>
 #include <iomanip>
 #include <vector>
-#include <numbers> // aqui está o std::numbers::pi
+#include <numbers>
+#include <filesystem>
+#include <sstream>
+#include <string>
+#include <stdexcept>
 #include "FEM_1D_solver.h"
 #include "FEM_pp.h"
+
+namespace fs = std::filesystem;
 
 // Salva CSV genérico
 static void save_csv(const std::string &filename,
@@ -39,33 +45,106 @@ static void save_csv(const std::string &filename,
     }
 }
 
+namespace
+{
+std::string require_value(int &index, int argc, char **argv)
+{
+    if (index + 1 >= argc)
+        throw std::runtime_error(std::string("Falta valor para ") + argv[index]);
+    return argv[++index];
+}
+
+void print_help()
+{
+    std::cout
+        << "Uso: ./build/fem_tl [opcoes]\n"
+        << "  --n-elem-init N    numero inicial de elementos (padrao 2)\n"
+        << "  --num-meshes N     numero de refinamentos (padrao 1)\n"
+        << "  --freq F           frequencia em Hz (padrao 1.0)\n"
+        << "  --inductance L     indutancia por unidade de comprimento (padrao 1.0)\n"
+        << "  --capacitance C    capacitancia por unidade de comprimento (padrao 1.0)\n"
+        << "  --vin V            tensao prescrita no ultimo no (padrao 1.0)\n"
+        << "  --help             mostra esta ajuda\n"
+        << "\n"
+        << "Compatibilidade: tambem aceita a forma legada posicional\n"
+        << "  ./build/fem_tl [N_elem_init] [num_meshes] [f] [L] [C] [V_in]\n";
+}
+} // namespace
+
 int main(int argc, char **argv)
 {
-    // Parâmetros padrão
+    const fs::path out_dir = PROJECT_OUT_DIR;
+    fs::create_directories(out_dir);
+
+    // Parametros padrao
     int N_elem_init = 2;
     int num_meshes = 1;
     double f = 1.0; // Hz
     double L = 1.0;
     double C = 1.0;
-    double V_in = 1.0; // Voltage at source end of tx line.
+    double V_in = 1.0;
 
-    // Leitura de argumentos opcionais:
-    // ./fem_tl [N_elem_init] [num_meshes] [f] [L] [C] [V_in]
-    if (argc >= 2)
-        N_elem_init = std::max(1, std::atoi(argv[1]));
-    if (argc >= 3)
-        num_meshes = std::max(1, std::atoi(argv[2]));
-    if (argc >= 4)
-        f = std::atof(argv[3]);
-    if (argc >= 5)
-        L = std::atof(argv[4]);
-    if (argc >= 6)
-        C = std::atof(argv[5]);
-    if (argc >= 7)
-        V_in = std::atof(argv[6]);
+    try
+    {
+        const bool legacy_positional =
+            argc > 1 && std::string(argv[1]).rfind("--", 0) != 0;
+
+        if (legacy_positional)
+        {
+            if (argc >= 2)
+                N_elem_init = std::max(1, std::atoi(argv[1]));
+            if (argc >= 3)
+                num_meshes = std::max(1, std::atoi(argv[2]));
+            if (argc >= 4)
+                f = std::atof(argv[3]);
+            if (argc >= 5)
+                L = std::atof(argv[4]);
+            if (argc >= 6)
+                C = std::atof(argv[5]);
+            if (argc >= 7)
+                V_in = std::atof(argv[6]);
+        }
+        else
+        {
+            for (int i = 1; i < argc; ++i)
+            {
+                const std::string arg = argv[i];
+                if (arg == "--help" || arg == "-h")
+                {
+                    print_help();
+                    return 0;
+                }
+                if (arg == "--n-elem-init")
+                    N_elem_init = std::max(1, std::stoi(require_value(i, argc, argv)));
+                else if (arg == "--num-meshes")
+                    num_meshes = std::max(1, std::stoi(require_value(i, argc, argv)));
+                else if (arg == "--freq")
+                    f = std::stod(require_value(i, argc, argv));
+                else if (arg == "--inductance")
+                    L = std::stod(require_value(i, argc, argv));
+                else if (arg == "--capacitance")
+                    C = std::stod(require_value(i, argc, argv));
+                else if (arg == "--vin")
+                    V_in = std::stod(require_value(i, argc, argv));
+                else
+                    throw std::runtime_error("Opcao desconhecida: " + arg);
+            }
+        }
+    }
+    catch (const std::exception &ex)
+    {
+        std::cerr << "Erro: " << ex.what() << "\n";
+        print_help();
+        return 1;
+    }
+
+    if (f <= 0.0 || L <= 0.0 || C <= 0.0)
+    {
+        std::cerr << "Erro: freq, L e C devem ser positivos.\n";
+        return 1;
+    }
 
     // Constantes e grandezas derivadas
-    // const double pi = 3.14159265358979323846;
     double c = 1.0 / std::sqrt(L * C);
     double omega = 2.0 * std::numbers::pi * f;
     double lambda = c / f;
@@ -77,7 +156,8 @@ int main(int argc, char **argv)
               << ", c=" << c << " m/s, lambda=" << lambda
               << ", ell=lambda/2=" << ell << ", V_in=" << V_in << "\n"
               << "  N_elem_init=" << N_elem_init
-              << ", num_meshes=" << num_meshes << "\n";
+              << ", num_meshes=" << num_meshes << "\n"
+              << "  out_dir=" << out_dir << "\n";
 
     std::vector<double> conv_h_over_lambda;
     std::vector<double> conv_rms_err;
@@ -116,19 +196,19 @@ int main(int argc, char **argv)
         {
             std::ostringstream name;
             name << "fem_profile_stage_" << stage << ".csv";
-            save_csv(name.str(),
+            save_csv((out_dir / name.str()).string(),
                      {z, V_fem, V_anl},
                      {"z", "V_fem", "V_analitico"});
         }
 
-        // (Opcional) salvar valores nos nós
+        // Salva valores nos nos
         {
             std::ostringstream name;
             name << "fem_nodes_stage_" << stage << ".csv";
             std::vector<double> zn(V.size());
             for (size_t k = 0; k < V.size(); ++k)
                 zn[k] = h * k;
-            save_csv(name.str(),
+            save_csv((out_dir / name.str()).string(),
                      {zn, V},
                      {"z_node", "V_node"});
         }
@@ -141,14 +221,58 @@ int main(int argc, char **argv)
         N_elem *= 2;
     }
 
-    // Salva curva de convergência
-    save_csv("fem_convergence.csv",
+    save_csv((out_dir / "fem_convergence.csv").string(),
              {conv_h_over_lambda, conv_rms_err},
              {"h_over_lambda", "rms_err"});
 
+    {
+        std::ofstream meta(out_dir / "fem_run_metadata.csv");
+        meta << std::setprecision(10) << std::fixed;
+        meta << "key,value\n";
+        meta << "N_elem_init," << N_elem_init << "\n";
+        meta << "num_meshes," << num_meshes << "\n";
+        meta << "freq_hz," << f << "\n";
+        meta << "L," << L << "\n";
+        meta << "C," << C << "\n";
+        meta << "c," << c << "\n";
+        meta << "lambda," << lambda << "\n";
+        meta << "ell," << ell << "\n";
+        meta << "V_in," << V_in << "\n";
+        if (conv_h_over_lambda.size() > 1)
+        {
+            std::vector<double> log_h(conv_h_over_lambda.size());
+            std::vector<double> log_err(conv_rms_err.size());
+            for (size_t i = 0; i < conv_h_over_lambda.size(); ++i)
+            {
+                log_h[i] = std::log(conv_h_over_lambda[i]);
+                log_err[i] = std::log(conv_rms_err[i]);
+            }
+
+            double sum_x = 0.0;
+            double sum_y = 0.0;
+            double sum_xx = 0.0;
+            double sum_xy = 0.0;
+            for (size_t i = 0; i < log_h.size(); ++i)
+            {
+                sum_x += log_h[i];
+                sum_y += log_err[i];
+                sum_xx += log_h[i] * log_h[i];
+                sum_xy += log_h[i] * log_err[i];
+            }
+            const double n = static_cast<double>(log_h.size());
+            const double denom = n * sum_xx - sum_x * sum_x;
+            if (std::abs(denom) > 1e-14)
+            {
+                const double slope = (n * sum_xy - sum_x * sum_y) / denom;
+                meta << "loglog_slope," << slope << "\n";
+            }
+        }
+    }
+
     std::cout << "Arquivos gerados:\n"
-              << "  fem_profile_stage_#.csv (z, V_fem, V_analitico)\n"
-              << "  fem_nodes_stage_#.csv   (z_node, V_node)\n"
-              << "  fem_convergence.csv     (h_over_lambda, rms_err)\n";
+              << "  " << (out_dir / "fem_profile_stage_#.csv") << " (z, V_fem, V_analitico)\n"
+              << "  " << (out_dir / "fem_nodes_stage_#.csv") << "   (z_node, V_node)\n"
+              << "  " << (out_dir / "fem_convergence.csv") << "     (h_over_lambda, rms_err)\n"
+              << "  " << (out_dir / "fem_run_metadata.csv") << "    (metadados da rodada)\n";
     return 0;
 }

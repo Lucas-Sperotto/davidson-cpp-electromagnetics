@@ -17,10 +17,16 @@ std::vector<double> TEeig_err(double a, double b,
     }
 
     std::sort(k_c.begin(), k_c.end());
-    std::vector<double> TEexact(k_c.begin(), k_c.begin() + N);
+    int available_eigs = static_cast<int>(TEeigvalues.size()) - num_zero_eig;
+    int usable = std::min<int>(N, std::min<int>(static_cast<int>(k_c.size()), available_eigs));
+    if (usable <= 0) {
+        return {};
+    }
 
-    std::vector<double> rel_err(N);
-    for (int i = 0; i < N; ++i) {
+    std::vector<double> TEexact(k_c.begin(), k_c.begin() + usable);
+
+    std::vector<double> rel_err(usable);
+    for (int i = 0; i < usable; ++i) {
         rel_err[i] = std::abs((TEexact[i] - TEeigvalues[num_zero_eig + i]) / TEexact[i]);
     }
 

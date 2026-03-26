@@ -1,0 +1,10 @@
+key,value
+a,0.02286
+b,0.01016
+x_mesh,4
+y_mesh,2
+num_nodes,15
+num_elements,16
+num_edges,30
+num_dofs,68
+num_zero_eigvals,21

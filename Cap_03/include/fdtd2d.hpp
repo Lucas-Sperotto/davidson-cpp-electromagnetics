@@ -2,6 +2,17 @@
 #ifndef FDTD2D_HPP
 #define FDTD2D_HPP
 
-void run_fdtd2d_simulation();
+#include <string>
+
+struct Fdtd2DConfig
+{
+    bool cyl_present = false;
+    int refine = 1;
+    double pulse_compress = 1.0;
+    std::string output_filename = "ey_point1.csv";
+    std::string metadata_filename = "ey_point1_meta.csv";
+};
+
+void run_fdtd2d_simulation(const Fdtd2DConfig &config = {});
 
 #endif // FDTD2D_HPP

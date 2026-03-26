@@ -6,18 +6,22 @@
 #include <fstream>
 #include <complex>
 #include <filesystem>
+#include <random>
+#include <stdexcept>
 
 const double eps_0 = 8.854e-12;
 const double mu_0 = 4 * M_PI * 1e-7;
 const double c = 1.0 / std::sqrt(eps_0 * mu_0);
 
-void run_fdtd3d_simulation() {
+void run_fdtd3d_simulation(const Fdtd3DConfig &config) {
+    if (config.refine <= 0)
+        throw std::invalid_argument("refine deve ser maior que zero.");
 
-    const std::string out_dir = PROJECT_OUT_DIR;
+    const std::filesystem::path out_dir = PROJECT_OUT_DIR;
     std::filesystem::create_directories(out_dir);
 
 
-    int refine = 2;
+    int refine = config.refine;
     int N_x = 8 * refine;
     int N_y = 4 * refine;
     int N_z = 6 * refine;
@@ -42,10 +46,12 @@ void run_fdtd3d_simulation() {
     std::vector<std::vector<std::vector<double>>> H_y(N_x, std::vector<std::vector<double>>(N_y + 1, std::vector<double>(N_z, 0.0)));
     std::vector<std::vector<std::vector<double>>> H_z(N_x, std::vector<std::vector<double>>(N_y, std::vector<double>(N_z + 1, 0.0)));
 
+    std::mt19937 rng(config.random_seed);
+    std::uniform_real_distribution<double> dist(-0.5, 0.5);
     for (int i = 0; i < N_x; ++i)
         for (int j = 0; j < N_y; ++j)
             for (int k = 0; k < N_z + 1; ++k)
-                H_z[i][j][k] = ((double) rand() / RAND_MAX) - 0.5;
+                H_z[i][j][k] = dist(rng);
 
     std::vector<double> t(N_t);
     std::vector<double> H_z_t(N_t);
@@ -97,7 +103,14 @@ void run_fdtd3d_simulation() {
                         (i < N_x ? H_x[i][j][k] - H_x[i][j - 1][k] : 0.0) / dy);
     }
 
-    std::ofstream file(out_dir + "/hz_center_fft.csv");
+    std::ofstream time_file(out_dir / config.time_output_filename);
+    time_file << "tempo_ns,Hz\n";
+    for (int n = 0; n < N_t; ++n) {
+        time_file << t[n] * 1e9 << "," << H_z_t[n] << "\n";
+    }
+    time_file.close();
+
+    std::ofstream file(out_dir / config.fft_output_filename);
     file << "freq_Hz,abs_Hz\n";
     double delta_f = 1.0 / (N_t * delta_t);
     for (int k = 1; k < N_t / 2; ++k) {
@@ -109,5 +122,21 @@ void run_fdtd3d_simulation() {
         file << k * delta_f << "," << std::abs(sum) << "\n";
     }
     file.close();
-    std::cout << "FFT de H_z salva em: " << out_dir << "/hz_center_fft.csv" << std::endl;
+
+    std::ofstream meta(out_dir / config.metadata_filename);
+    meta << "key,value\n";
+    meta << "refine," << refine << "\n";
+    meta << "random_seed," << config.random_seed << "\n";
+    meta << "N_x," << N_x << "\n";
+    meta << "N_y," << N_y << "\n";
+    meta << "N_z," << N_z << "\n";
+    meta << "N_t," << N_t << "\n";
+    meta << "delta_s," << delta_s << "\n";
+    meta << "delta_t," << delta_t << "\n";
+    meta << "L_x," << L_x << "\n";
+    meta << "L_y," << L_y << "\n";
+    meta << "L_z," << L_z << "\n";
+    meta.close();
+
+    std::cout << "FFT de H_z salva em: " << (out_dir / config.fft_output_filename) << std::endl;
 }

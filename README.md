@@ -1,30 +1,75 @@
 # Davidson C++ Electromagnetics
 
-This repository contains C++ translations of selected MATLAB scripts by Prof. D. B. Davidson, as described in his book:
+Repositório de tradução dos códigos MATLAB do livro de D. B. Davidson para C++, com três objetivos principais:
 
-**"Computational Electromagnetics for RF and Microwave Engineering"**, 2nd Edition, Cambridge University Press.
+- preservar a fidelidade numérica e algorítmica dos scripts originais;
+- tornar cada capítulo mais didático, com teoria e instruções de uso em Markdown;
+- deixar os resultados reproduzíveis com build, execução e pós-processamento claros.
 
-🔗 [View book on Cambridge University Press](https://www.cambridge.org/br/universitypress/subjects/engineering/rf-and-microwave-engineering/computational-electromagnetics-rf-and-microwave-engineering-2nd-edition?format=HB&isbn=9780521518918)
+Referência principal:
 
-These C++ implementations aim to preserve the educational value of the original MATLAB versions while providing an accessible path for those working in C++ environments.
+**D. B. Davidson, _Computational Electromagnetics for RF and Microwave Engineering_, 2nd Edition, Cambridge University Press.**
 
-## 🔍 Chapters
+Link da editora:
+https://www.cambridge.org/br/universitypress/subjects/engineering/rf-and-microwave-engineering/computational-electromagnetics-rf-and-microwave-engineering-2nd-edition?format=HB&isbn=9780521518918
 
-- [`Cap_02/`](Cap_02/) – C++ translations of Chapter 02 codes ([Capítulo 02 README](Cap_02/README.md)). Testado e funcionando.
-- [`Cap_03/`](Cap_03/) – C++ translations of Chapter 03 codes ([Capítulo 03 README](Cap_03/README.md)). Ainda não concluído.
-- [`Cap_10/`](Cap_10/) – C++ translations of Chapter 10 codes ([Capítulo 10 README](Cap_10/README.md)). Ainda não concluído.
+## Estado Atual
 
-## 📄 Disclaimer
+| Capítulo | Tema | Originais disponíveis | Status da tradução | Documentação |
+| --- | --- | --- | --- | --- |
+| `Cap_02` | FDTD 1D | Sim | Traduzido e funcional | Mais completa |
+| `Cap_03` | FDTD 2D/3D | Sim | Demos principais e scripts auxiliares principais traduzidos | Precisa validacao fina |
+| `Cap_09` | FEM 1D | Sim | Traduzido e funcional | Boa, mas pode padronizar |
+| `Cap_10` | FEM 2D / modos / microstrip | Sim | Conjunto principal traduzido e funcional | Precisa aprofundar |
 
-This project is unofficial and is not affiliated with Prof. D. B. Davidson or Cambridge University Press. The translations are provided for educational and research purposes only.
+## Estrutura
 
-Dependências: C++ sudo apt install build-essential gfortran -y
-Cmake sudo apt install cmake -y
-pkg-config sudo apt install pkg-config -y
-python sudo apt install python3 python3-pip -y
-numpy sudo apt install python3-numpy -y
-matplotlib sudo apt install python3-matplotlib -y
-pandas sudo apt install python3-pandas -y
-pillow sudo apt install python3-pil
-ffmpeg sudo apt install ffmpeg
-sudo apt install libeigen3-dev
+- [`Cap_02/`](Cap_02/) - capítulo 2 em C++ com scripts Python de visualização.
+- [`Cap_03/`](Cap_03/) - capítulo 3 em C++ com demos 2D, PML e 3D.
+- [`Cap_09/`](Cap_09/) - capítulo 9 em C++ com solver FEM 1D.
+- [`Cap_10/`](Cap_10/) - capítulo 10 em C++ com elementos de Whitney e LTQN.
+- `original_matlab/` - base local de comparação com os scripts originais do livro.
+
+Observação: `original_matlab/` é usado apenas como referência local para validação e continuidade da tradução.
+
+## Fluxo de Uso
+
+Cada capítulo possui build, executáveis, scripts e saídas próprios.
+
+Exemplo geral:
+
+```bash
+cd Cap_03
+cmake -S . -B build
+cmake --build build -j$(nproc)
+./build/fdtd_2d_demo
+```
+
+Os detalhes de cada capítulo estão nos respectivos `README.md`.
+
+## Dependências
+
+Pacotes C++/build:
+
+```bash
+sudo apt install build-essential gfortran cmake pkg-config libeigen3-dev libfftw3-dev
+```
+
+Pacotes Python para visualização:
+
+```bash
+sudo apt install python3 python3-pip python3-numpy python3-matplotlib python3-pandas python3-pil ffmpeg
+```
+
+## Documentação e Roadmap
+
+- [`Cap_02/README.md`](Cap_02/README.md) - referência mais completa hoje para o padrão didático desejado.
+- [`Cap_03/README.md`](Cap_03/README.md) - estado atual do capítulo 3 e limitações conhecidas.
+- [`Cap_09/README.md`](Cap_09/README.md) - solver FEM 1D.
+- [`Cap_10/README.md`](Cap_10/README.md) - estrutura e status do capítulo 10.
+- [`TRANSLATION_MATRIX.md`](TRANSLATION_MATRIX.md) - mapa atual entre arquivos MATLAB e equivalentes C++.
+- [`ROADMAP.md`](ROADMAP.md) - plano de adequação, padronização e continuidade.
+
+## Disclaimer
+
+Este projeto é não oficial e não possui afiliação com o autor ou com a editora. As traduções são mantidas para fins educacionais, de estudo e de pesquisa.

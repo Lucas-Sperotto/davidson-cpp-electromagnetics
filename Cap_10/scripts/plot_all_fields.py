@@ -1,56 +1,56 @@
-import os
-import numpy as np
+from pathlib import Path
+
 import matplotlib.pyplot as plt
-import pandas as pd
+import numpy as np
 
-def plot_field_from_csv(filepath, save_dir):
-    # Lê os dados
-    df = pd.read_csv(filepath)
 
-    x = df["x"].values
-    y = df["y"].values
-    Ex = df["Ex"].values
-    Ey = df["Ey"].values
+BASE_DIR = Path(__file__).resolve().parents[1]
+OUT_DIR = BASE_DIR / "out"
+IMG_DIR = OUT_DIR / "img"
 
-    #x_unique = np.unique(x)
-    #y_unique = np.unique(y)
 
-    #X, Y = np.meshgrid(x_unique, y_unique)
-    X, Y = np.meshgrid(x, y)
-    #U = Ex.reshape(len(x_unique), len(y_unique)).T
-    #V = Ey.reshape(len(x_unique), len(y_unique)).T
+def load_field(filepath: Path):
+    data = np.genfromtxt(filepath, delimiter=",", names=True)
+    x = data["x"]
+    y = data["y"]
+    ex = data["Ex"]
+    ey = data["Ey"]
 
-    U = Ex.T
-    V = Ey.T
+    x_unique = np.unique(x)
+    y_unique = np.unique(y)
+    nx = len(x_unique)
+    ny = len(y_unique)
 
-    # Nome base
-    name = os.path.splitext(os.path.basename(filepath))[0]
+    x_grid = x.reshape(nx, ny).T
+    y_grid = y.reshape(nx, ny).T
+    ex_grid = ex.reshape(nx, ny).T
+    ey_grid = ey.reshape(nx, ny).T
+    return x_grid, y_grid, ex_grid, ey_grid
 
-    # Cria figura
+
+def render_field(filepath: Path, output: Path):
+    x_grid, y_grid, ex_grid, ey_grid = load_field(filepath)
+
     plt.figure(figsize=(8, 6))
-    plt.quiver(X, Y, U, V, scale=1, scale_units='xy', angles='xy')
-    #plt.quiver(x, y, Ex, Ey, scale=1, scale_units='xy', angles='xy')
+    plt.quiver(x_grid, y_grid, ex_grid, ey_grid, scale=1, scale_units="xy", angles="xy")
     plt.xlabel("x")
     plt.ylabel("y")
-    plt.title(f"Campo vetorial: {name}")
+    plt.title(filepath.stem)
     plt.axis("equal")
     plt.grid(True)
     plt.tight_layout()
-
-    # Salva como imagem
-    out_file = os.path.join(save_dir, name + ".png")
-    plt.savefig(out_file)
+    plt.savefig(output, dpi=200)
     plt.close()
-    print(f"Imagem salva: {out_file}")
+    print(f"Imagem salva: {output}")
 
 
 if __name__ == "__main__":
-    data_dir = "../out"
-    save_dir = "../out/img"
+    IMG_DIR.mkdir(parents=True, exist_ok=True)
 
-    os.makedirs(save_dir, exist_ok=True)
+    patterns = ["field_kc_*.csv", "spur_field*_kc_*.csv"]
+    files = []
+    for pattern in patterns:
+        files.extend(sorted(OUT_DIR.glob(pattern)))
 
-    for file in os.listdir(data_dir):
-        if file.endswith(".csv") and file.startswith("field_kc_"):
-            filepath = os.path.join(data_dir, file)
-            plot_field_from_csv(filepath, save_dir)
+    for filepath in files:
+        render_field(filepath, IMG_DIR / f"{filepath.stem}.png")

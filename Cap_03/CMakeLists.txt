@@ -17,12 +17,22 @@ add_compile_definitions(PROJECT_OUT_DIR="${CMAKE_SOURCE_DIR}/out")
 
 include_directories(include)
 
-# Executáveis
-add_executable(fdtd_2d_demo src/fdtd_2d_demo.cpp
+add_library(fdtd_common
     src/gaussder.cpp
 )
 
-#target_compile_definitions(fdtd_2d_demo PRIVATE $<$<BOOL:${RUN_PML}>:RUN_PML>)
+# Executáveis
+add_executable(fdtd_2d_demo
+    main_fdtd2d.cpp
+    src/fdtd_2d_demo.cpp
+)
+target_link_libraries(fdtd_2d_demo PRIVATE fdtd_common)
+
+add_executable(fdtd2d_pml
+    main_fdtd2d_pml.cpp
+    src/fdtd2d_pml.cpp
+)
+target_link_libraries(fdtd2d_pml PRIVATE fdtd_common)
 
 add_executable(fdtd3d
     main_fdtd3d.cpp

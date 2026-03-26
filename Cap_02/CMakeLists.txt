@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native -ffast-math")
 
 # Diretórios
-include_directories(${CMAKE_SOURCE_DIR}/src)
+include_directories(${CMAKE_SOURCE_DIR}/include)
 file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/out)
 
 # Define macro para diretório de saída
@@ -21,12 +21,17 @@ pkg_check_modules(FFTW REQUIRED fftw3)
 include_directories(${FFTW_INCLUDE_DIRS})
 link_directories(${FFTW_LIBRARY_DIRS})
 
+# Biblioteca comum
+add_library(fdtd_1d_common STATIC
+    src/gaussder.cpp
+)
+
 # Executáveis
 add_executable(fdtd_1D_demo src/fdtd_1D_demo.cpp)
-target_link_libraries(fdtd_1D_demo ${FFTW_LIBRARIES} m)
+target_link_libraries(fdtd_1D_demo fdtd_1d_common ${FFTW_LIBRARIES} m)
 
 add_executable(fdtd_1D_WB_demo src/fdtd_1D_WB_demo.cpp)
-target_link_libraries(fdtd_1D_WB_demo ${FFTW_LIBRARIES} m)
+target_link_libraries(fdtd_1D_WB_demo fdtd_1d_common ${FFTW_LIBRARIES} m)
 
 # Mensagem final
 message(STATUS "")

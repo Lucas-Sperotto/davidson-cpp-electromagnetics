@@ -1,108 +1,125 @@
-# Capítulo 3 – FDTD 2D e 3D (Tradução para C++)
+# Capítulo 3 - FDTD 2D e 3D
 
-Este diretório implementa em C++ os códigos do Capítulo 3 do livro:
+Este diretório reúne a tradução para C++ dos demos FDTD do Capítulo 3 do livro de Davidson, com foco em:
 
-**D.B. Davidson**, *Computational Electromagnetics for RF and Microwave Engineering*, Cambridge University Press, 2ª ed., 2010.
+- espalhamento 2D com fronteira campo total/campo espalhado;
+- absorção por PML em 2D;
+- análise modal de cavidade 3D via FDTD e FFT.
 
----
+## Status
 
-## 📁 Estrutura atual
+Estado atual do capítulo:
 
-```
+- `fdtd_2d_demo.m` -> traduzido em `fdtd_2d_demo.cpp`;
+- `fdtd_2d_pml_demo.m` -> traduzido em `fdtd2d_pml.cpp` com adaptacao controlada na injecao scat/tot do PML;
+- `fdtd_3D_demo.m` -> traduzido em `fdtd3d.cpp`;
+- `gaussder_norm.m` -> incorporado em `gaussder.cpp`;
+- `PMLperformance.m` -> traduzido em `scripts/pml_performance.py`;
+- `cyl_test.m` -> traduzido em `scripts/cyl_test.py`.
+
+Os demos principais já compilam e rodam, e os scripts auxiliares principais de comparação já possuem equivalente. O capítulo agora entra numa fase de validação fina e refinamento didático.
+
+## Estrutura Atual
+
+```text
 Cap_03/
 ├── include/
 │   ├── fdtd2d.hpp
 │   ├── fdtd2d_pml.hpp
 │   └── fdtd3d.hpp
 ├── src/
-│   ├── fdtd2d.cpp
+│   ├── fdtd_2d_demo.cpp
 │   ├── fdtd2d_pml.cpp
 │   ├── fdtd3d.cpp
 │   └── gaussder.cpp
-├── plots/
+├── scripts/
 │   ├── plot_fdtd_ey.py
-│   └── plot_fdtd3d_fft.py
+│   ├── plot_fdtd3d_fft.py
+│   ├── pml_performance.py
+│   └── cyl_test.py
 ├── out/
 │   ├── ey_point1.csv
+│   ├── ey_point1_meta.csv
 │   ├── ey_point1_pml.csv
+│   ├── ey_point1_pml_meta.csv
 │   ├── hz_center_fft.csv
+│   ├── hz_center_time.csv
+│   ├── hz_center_meta.csv
+│   ├── ey_point1_comparison.png
 │   └── hz_center_fft_plot.png
-├── main.cpp
+├── main_fdtd2d.cpp
+├── main_fdtd2d_pml.cpp
+├── main_fdtd3d.cpp
 ├── CMakeLists.txt
 └── README.md
 ```
 
----
-
-## 🚀 Compilação e Execução
+## Compilação
 
 ```bash
-mkdir build && cd build
-cmake ..
-make
+cd Cap_03
+cmake -S . -B build
+cmake --build build -j$(nproc)
 ```
 
-### Executáveis:
+## Executáveis
 
-- `./fdtd2d` — Simulação 2D com campo total/disperso e fronteiras ABC
-- `./fdtd2d_pml` — Simulação 2D com camada absorvente PML
-- `./fdtd3d` — Simulação 3D com cavidade retangular PEC e análise espectral
+- `./build/fdtd_2d_demo` - demo 2D com fronteiras ABC.
+- `./build/fdtd2d_pml` - demo 2D com PML.
+- `./build/fdtd3d` - demo 3D para cavidade retangular PEC.
 
----
+Os executáveis agora aceitam parâmetros por linha de comando.
 
-## 📊 Visualizações
-
-- `plot_fdtd_ey.py`: compara os campos \( E_y \) com e sem PML
-- `plot_fdtd3d_fft.py`: plota o espectro da FFT do \( H_z \) no centro da cavidade
-
-Para rodar os gráficos:
+Exemplos:
 
 ```bash
-python3 plots/plot_fdtd_ey.py
-python3 plots/plot_fdtd3d_fft.py
+./build/fdtd_2d_demo --cyl-present --refine 1 --pulse-compress 2
+./build/fdtd2d_pml --refine 1 --d-cell 10 --poly-m 3
+./build/fdtd3d --refine 2 --seed 12345
 ```
 
----
+## Scripts Originais de Referência
 
-## 📌 Descrição dos Experimentos
+Arquivos MATLAB usados como base local:
 
-### 🔹 `fdtd2d`
-- Espalhamento de pulso TE por cilindro PEC
-- Fonte Gaussiana derivada
-- Condições de contorno ABC (absorventes)
+- `original_matlab/Chapter 3/FDTD_2D/fdtd_2d_demo.m`
+- `original_matlab/Chapter 3/FDTD_2D/fdtd_2d_pml_demo.m`
+- `original_matlab/Chapter 3/FDTD_2D/PMLperformance.m`
+- `original_matlab/Chapter 3/FDTD_2D/cyl_test.m`
+- `original_matlab/Chapter 3/FDTD_3D/fdtd_3D_demo.m`
 
-### 🔸 `fdtd2d_pml`
-- Mesmo cenário do anterior, com implementação de PML (Perfectly Matched Layer)
-- Camada absorvente com perfil polinomial
+## Saídas
 
-### 🔷 `fdtd3d`
-- Cavidade PEC com dimensões \(1 \times 0.5 \times 0.75\) m
-- Modo dominante TE101
-- Análise espectral via FFT
-- Frequências comparadas com valores analíticos
+Arquivos gerados em `out/`:
 
----
+- `ey_point1.csv` - histórico temporal do campo elétrico para o caso 2D com ABC;
+- `ey_point1_meta.csv` - metadados da rodada 2D com ABC;
+- `ey_point1_pml.csv` - histórico temporal do campo elétrico para o caso 2D com PML;
+- `ey_point1_pml_meta.csv` - metadados da rodada 2D com PML;
+- `hz_center_fft.csv` - espectro do campo magnético no centro da cavidade 3D;
+- `hz_center_time.csv` - histórico temporal do campo magnético no centro da cavidade;
+- `hz_center_meta.csv` - metadados da rodada 3D;
+- `ey_point1_comparison.png` - comparação entre ABC e PML;
+- `hz_center_fft_plot.png` - gráfico do espectro 3D.
 
-## 📸 Exemplos de Saídas Geradas
+## Visualização
 
-### 🟢 Comparação do Campo \( E_y \) com e sem PML
+```bash
+cd Cap_03
+python3 scripts/plot_fdtd_ey.py
+python3 scripts/plot_fdtd3d_fft.py
+python3 scripts/pml_performance.py --thick out/ey_point1_pml_thick.csv --thick-meta out/ey_point1_pml_thick_meta.csv --reference out/ey_point1.csv
+python3 scripts/cyl_test.py --old out/cyl_old.csv --new out/cyl_new.csv --new-longer out/cyl_new_longer.csv
+```
 
-> Campo elétrico \( E_y \) registrado ao longo do tempo em um ponto fixo da malha 2D.  
-> A linha sólida representa a simulação com ABC; a tracejada, com PML.  
-> A diferença entre as curvas evidencia o desempenho superior da PML em absorver a onda incidente sem reflexões artificiais.
+## Limitações Atuais
 
-![Comparação Ey com/sem PML](out/ey_point1_comparison.png)
+- O demo 2D com ABC ainda contém trechos explicitamente marcados no código como não testados ou sujeitos a sinal espúrio nos cantos da interface campo total/campo espalhado.
+- O demo PML atual preserva a estrutura, os parâmetros e os pós-processamentos do original, mas a injeção scat/tot nas componentes split de `H_z` segue marcada para validação adicional; por enquanto, a tradução mantém a formulação estável já validada no port C++.
+- Os scripts auxiliares já foram portados, mas ainda precisam ser usados com um conjunto de rodadas de referência mais representativo.
 
----
+## Próximos Passos Naturais
 
-### 🔵 Espectro de \( H_z \) na Cavidade 3D
-
-> Magnitude da FFT do campo magnético \( H_z \) no centro da cavidade PEC \(1 \times 0{,}5 \times 0{,}75\) m.  
-> As linhas verticais tracejadas representam os modos TE analíticos da cavidade, permitindo comparação direta com os picos simulados.
-
-![Espectro Hz na cavidade 3D](out/hz_center_fft_plot.png)
-
-
----
-
-📚 Este capítulo faz parte do repositório de tradução dos códigos MATLAB para C++, com foco em fidelidade física, extensibilidade computacional e documentação didática.
+- consolidar a validação numérica de `fdtd_2d_demo.cpp` e `fdtd2d_pml.cpp`;
+- documentar a teoria do capítulo com o mesmo nível didático do `Cap_02`;
+- validar numericamente os resultados C++ contra os dados MATLAB de referência.

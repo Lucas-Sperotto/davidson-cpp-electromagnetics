@@ -8,8 +8,8 @@ void renumber_dof_LTQN(const std::vector<int>& dof_free_flag,
                        std::vector<int>& dof_e2,
                        std::vector<int>& dof_f1,
                        std::vector<int>& dof_f2) {
-    dof_e1.assign(NUM_EDGES, 0); // 0 indica grau prescrito
-    dof_e2.assign(NUM_EDGES, 0);
+    dof_e1.assign(NUM_EDGES, -1); // -1 indica grau prescrito
+    dof_e2.assign(NUM_EDGES, -1);
     dof_f1.resize(NUM_ELEMENTS);
     dof_f2.resize(NUM_ELEMENTS);
 

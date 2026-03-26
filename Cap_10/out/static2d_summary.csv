@@ -1,0 +1,12 @@
+key,value
+a,2.5
+b,1.25
+h,0.5
+w,0.5
+eps_r_sub,2.55
+voltage,1
+x_mesh,20
+y_mesh,20
+num_nodes,441
+num_elements,800
+capacitance_per_m,5.89136e-11

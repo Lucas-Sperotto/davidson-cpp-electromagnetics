@@ -17,7 +17,8 @@ void plot_field(const std::vector<double> &dofs,
                 const std::vector<double> &XX,
                 const std::vector<double> &YY,
                 int rows, int cols, int plotnum,
-                double eigvalue)
+                double eigvalue,
+                const std::string &filename_prefix)
 {
 
     int Nx = XX.size();
@@ -86,12 +87,16 @@ void plot_field(const std::vector<double> &dofs,
         }
     }
 
-    // Cria pasta "out" se não existir
-    std::filesystem::create_directory("../out");
+    const std::filesystem::path out_dir = PROJECT_OUT_DIR;
+    std::filesystem::create_directories(out_dir);
 
     // Formata o nome do arquivo
     std::ostringstream filename;
-    filename << "../out/field_kc_" << std::fixed << std::setprecision(6) << eigvalue << ".csv";
+    filename << (out_dir / (filename_prefix + [&]() {
+        std::ostringstream value;
+        value << std::fixed << std::setprecision(6) << eigvalue;
+        return value.str();
+    }() + ".csv")).string();
 
     // Abre o arquivo
     std::ofstream fout(filename.str());

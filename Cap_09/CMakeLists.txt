@@ -10,6 +10,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native")
 
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
+file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/out)
+add_compile_definitions(PROJECT_OUT_DIR="${CMAKE_SOURCE_DIR}/out")
+
 add_executable(fem_tl
     FEM_1D_1st.cpp
     FEM_1D_solver.cpp

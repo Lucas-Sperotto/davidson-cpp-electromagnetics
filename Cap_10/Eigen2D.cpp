@@ -9,6 +9,8 @@
 #include <fstream>
 #include <iomanip>
 #include <string>
+#include <filesystem>
+#include <stdexcept>
 
 #include "trimesh.h"
 #include "edgemake.h"
@@ -19,6 +21,7 @@
 #include "plot_field.h"
 #include "simplex2D.h"
 #include "whitney.h"
+#include "TEeig_err.h"
 
 using namespace Eigen;
 
@@ -28,6 +31,43 @@ const double eps_0 = 8.854e-12;
 const double mu_0 = 4.0 * M_PI * 1e-7;
 const double eps_r = 1.0;
 const double mu_r = 1.0;
+
+namespace
+{
+struct Eigen2DConfig
+{
+    double a = 2.286e-2;
+    double b = 1.016e-2;
+    int x_mesh = 8;
+    int y_mesh = 4;
+    int field_grid_x = 21;
+    int field_grid_y = 11;
+    int num_physical_modes = 6;
+    int num_spurious_modes = 6;
+};
+
+std::string require_value(int &index, int argc, char **argv)
+{
+    if (index + 1 >= argc)
+        throw std::runtime_error(std::string("Falta valor para ") + argv[index]);
+    return argv[++index];
+}
+
+void print_help()
+{
+    std::cout
+        << "Uso: ./build/Eigen2D [opcoes]\n"
+        << "  --a VALOR                largura do guia (padrao 2.286e-2)\n"
+        << "  --b VALOR                altura do guia (padrao 1.016e-2)\n"
+        << "  --x-mesh N               divisao da malha em x (padrao 8)\n"
+        << "  --y-mesh N               divisao da malha em y (padrao 4)\n"
+        << "  --field-grid-x N         grade de avaliacao dos campos em x (padrao 21)\n"
+        << "  --field-grid-y N         grade de avaliacao dos campos em y (padrao 11)\n"
+        << "  --num-physical-modes N   numero de modos fisicos para exportar (padrao 6)\n"
+        << "  --num-spurious-modes N   numero de modos espurios para exportar (padrao 6)\n"
+        << "  --help                   mostra esta ajuda\n";
+}
+} // namespace
 
 void write_csv(const std::string &path, const Eigen::MatrixXd &M)
 {
@@ -57,13 +97,23 @@ void write_csv(const std::string &path, const Eigen::VectorXd &V)
     }
 }
 
-void Eigen2D()
+void Eigen2D(const Eigen2DConfig &config)
 {
-    double a = 2.286e-2; // X band guide in cm
-    double b = 1.016e-2;
+    const std::filesystem::path out_dir = PROJECT_OUT_DIR;
+    std::filesystem::create_directories(out_dir);
+
+    const double a = config.a;
+    const double b = config.b;
+
+    std::cout << "Parametros do Eigen2D:\n"
+              << "  a=" << a << ", b=" << b
+              << ", x_mesh=" << config.x_mesh << ", y_mesh=" << config.y_mesh << "\n"
+              << "  field_grid_x=" << config.field_grid_x << ", field_grid_y=" << config.field_grid_y
+              << ", num_physical_modes=" << config.num_physical_modes
+              << ", num_spurious_modes=" << config.num_spurious_modes << "\n";
 
     std::vector<std::vector<double>> x_nodes, y_nodes;
-    trimesh(a, b, 8, 4, x_nodes, y_nodes); // também preenche ELEMENTS e NODE_COORD
+    trimesh(a, b, config.x_mesh, config.y_mesh, x_nodes, y_nodes);
 
     // for (int i = 0; i < NUM_NODES; ++i)
     //     std::cout << "Node " << i << ": (" << NODE_COORD[i][0] << ", " << NODE_COORD[i][1] << ")\n";
@@ -142,7 +192,7 @@ void Eigen2D()
             {
                 int edge_k = ELEMENT_EDGES[ielem][kedge];
                 int kk = dof_e1[edge_k];
-                if (jj >= 0 && jj >= 0)
+                if (jj >= 0 && kk >= 0)
                 {
                     S[jj][kk] += S_elem[jedge][kedge];
                     T[jj][kk] += T_elem[jedge][kedge];
@@ -156,11 +206,9 @@ void Eigen2D()
     {
         for (int j = 0; j < NUM_DOFS; ++j)
         {
-            std::cout << T[i][j] << "\t";
             S_mat(i, j) = S[i][j] / mu_r;
             T_mat(i, j) = T[i][j] * eps_r;
         }
-        std::cout << std::endl;
     }
     // std::cout << "S_mat dimensions: " << S_mat.rows() << " x " << S_mat.cols() << std::endl;
     /*
@@ -193,14 +241,20 @@ void Eigen2D()
         */
 
     GeneralizedSelfAdjointEigenSolver<MatrixXd> solver(S_mat, T_mat);
-    write_csv("cpp_S_mat.csv", S_mat);
-    write_csv("cpp_T_mat.csv", T_mat);
+    if (solver.info() != Eigen::Success)
+    {
+        std::cerr << "Falha ao resolver o problema generalizado de autovalores.\n";
+        return;
+    }
+
+    write_csv((out_dir / "cpp_S_mat.csv").string(), S_mat);
+    write_csv((out_dir / "cpp_T_mat.csv").string(), T_mat);
 
     VectorXd eigvals = solver.eigenvalues();
     MatrixXd eigvecs = solver.eigenvectors();
 
-    write_csv("cpp_eigvals.csv", eigvals);
-    write_csv("cpp_eigvecs.csv", eigvecs);
+    write_csv((out_dir / "cpp_eigvals.csv").string(), eigvals);
+    write_csv((out_dir / "cpp_eigvecs.csv").string(), eigvecs);
 
     MatrixXd V = eigvecs; // cópia
                           // for (int i = 0; i < V.cols(); ++i) {
@@ -212,92 +266,160 @@ void Eigen2D()
     //  for (int i = 0; i < eigvals.size(); ++i)
     //     std::cout << "eig[" << i << "]: " << eigvals[i] << std::endl;
 
-    for (int i = 0; i < eigvals.size(); ++i)
-        std::cout << "kc[" << i << "]: " << std::sqrt(eigvals[i]) << std::endl;
+    constexpr double zero_tol = 1e-6;
 
     std::vector<std::pair<double, int>> indexed_kc;
     for (int i = 0; i < eigvals.size(); ++i)
-        // if (eigvals[i] > 0)
-        indexed_kc.emplace_back(std::sqrt(eigvals[i]), i);
-    // std::sort(indexed_kc.begin(), indexed_kc.end());
-    //  std::cout << "Indexed kc size: " << indexed_kc.size() << std::endl;
+    {
+        double lambda = eigvals[i];
+        if (std::abs(lambda) <= zero_tol)
+            lambda = 0.0;
+        if (lambda >= 0.0)
+            indexed_kc.emplace_back(std::sqrt(lambda), i);
+    }
 
-    // for (int i = 0; i < indexed_kc.size(); ++i)
-    //    std::cout << "kc[" << i << "]: " << indexed_kc[i].first << std::endl;
+    std::sort(indexed_kc.begin(), indexed_kc.end());
 
     std::vector<int> node_flag;
     int num_free_nodes = 0;
     free_nodes(a, b, node_flag, num_free_nodes);
 
     int start_idx = num_free_nodes;
-    int num_plot_modes = 6;
-    std::cout << "num_free_nodes: " << num_free_nodes << std::endl;
+    int available_modes = indexed_kc.size() > static_cast<std::size_t>(start_idx)
+                              ? static_cast<int>(indexed_kc.size()) - start_idx
+                              : 0;
+    int num_plot_modes = std::min(config.num_physical_modes, available_modes);
+    if (num_plot_modes <= 0)
+    {
+        std::cerr << "Nao ha modos fisicos suficientes para plotar.\n";
+        return;
+    }
+
+    std::cout << "Modos nulos/espurios ignorados: " << start_idx << "\n";
     // Geração da grade de avaliação
     std::vector<double> XX, YY;
-    int NX = 21, NY = 11;
+    int NX = config.field_grid_x;
+    int NY = config.field_grid_y;
     for (int i = 0; i <= NX; ++i)
         XX.push_back((double)i / NX * a);
     for (int j = 0; j <= NY; ++j)
         YY.push_back((double)j / NY * b);
 
+    std::vector<double> TEeigvalues;
+    TEeigvalues.reserve(indexed_kc.size());
+    for (const auto &[kc, _] : indexed_kc)
+        TEeigvalues.push_back(kc);
+
+    std::vector<double> rel_err =
+        TEeig_err(a, b, TEeigvalues, std::min(available_modes, 8), num_free_nodes);
+
+    std::ofstream summary((out_dir / "eigdata_whitney_modes.csv").string());
+    summary << "rank,kind,kc,internal_index,relative_error\n";
+    summary << std::scientific << std::setprecision(10);
+    for (std::size_t i = 0; i < indexed_kc.size(); ++i)
+    {
+        const bool is_physical = static_cast<int>(i) >= start_idx;
+        const int physical_rank = static_cast<int>(i) - start_idx;
+        double err = -1.0;
+        if (is_physical && physical_rank >= 0 && physical_rank < static_cast<int>(rel_err.size()))
+            err = rel_err[physical_rank];
+        summary << (i + 1) << ","
+                << (is_physical ? "physical" : "spurious") << ","
+                << indexed_kc[i].first << ","
+                << indexed_kc[i].second << ","
+                << err << "\n";
+    }
+    summary.close();
+
+    std::ofstream meta((out_dir / "eigen2d_summary.csv").string());
+    meta << "key,value\n";
+    meta << "a," << a << "\n";
+    meta << "b," << b << "\n";
+    meta << "x_mesh," << config.x_mesh << "\n";
+    meta << "y_mesh," << config.y_mesh << "\n";
+    meta << "num_nodes," << NUM_NODES << "\n";
+    meta << "num_elements," << NUM_ELEMENTS << "\n";
+    meta << "num_edges," << NUM_EDGES << "\n";
+    meta << "num_dofs," << NUM_DOFS << "\n";
+    meta << "num_free_nodes," << num_free_nodes << "\n";
+    meta << "num_physical_modes_exported," << num_plot_modes << "\n";
+    meta.close();
+
     for (int ii = 0; ii < num_plot_modes; ++ii)
     {
         int idx = indexed_kc[start_idx + ii].second;
 
-        std::cout << "idx: " << idx << std::endl;
         VectorXd eigmode = eigvecs.col(idx);
-       // double maximo = 0.0;
-       // for (int j = 0; j < eigmode.size(); ++j)
-        //if(maximo < eigmode[j])
-        //maximo = eigmode[j];
 
-//for (int j = 0; j < eigmode.size(); ++j)
-       // eigmode[j] /= maximo;
+        std::cout << "Modo TE " << (ii + 1)
+                  << " | indice interno " << idx
+                  << " | kc = " << indexed_kc[start_idx + ii].first << "\n";
 
-
-        for (int j = 0; j < eigmode.size(); ++j)
-        std::cout << "eigmode["<< j <<"]: " << eigmode[j] << std::endl;
-        
         std::vector<double> dofs(eigmode.data(), eigmode.data() + eigmode.size());
 
-        plot_field(dofs, dof_e1, XX, YY, 3, 2, ii + 1, indexed_kc[start_idx + ii].first);
+        plot_field(dofs, dof_e1, XX, YY, 3, 2, ii + 1, indexed_kc[start_idx + ii].first, "field_kc_");
     }
 
-    // for (int i = 0; i < V.col(start_idx).size(); ++i)
-    //     std::cout << "eigvecs: " << V.col(start_idx)[i] << std::endl;
-    //  Também plota modos espúrios (primeiros modos antes de free_nodes)
-    //  for (int ii = 0; ii < num_plot_modes; ++ii)
-    //  {
-    //     int idx = indexed_kc[ii].second;
-    //    VectorXd eigmode = eigvecs.col(idx);
-    //     std::vector<double> dofs(eigmode.data(), eigmode.data() + eigmode.size());
-
-    //    plot_field(dofs, dof_e1, XX, YY, 3, 2, ii + 1, indexed_kc[ii].first);
-    // }
+    const int num_spurious_modes = std::min(config.num_spurious_modes, start_idx);
+    for (int ii = 0; ii < num_spurious_modes; ++ii)
+    {
+        int idx = indexed_kc[ii].second;
+        VectorXd eigmode = eigvecs.col(idx);
+        std::vector<double> dofs(eigmode.data(), eigmode.data() + eigmode.size());
+        std::ostringstream prefix;
+        prefix << "spur_field_mode_" << std::setw(2) << std::setfill('0') << (ii + 1) << "_kc_";
+        plot_field(dofs, dof_e1, XX, YY, 3, 2, ii + 1, indexed_kc[ii].first, prefix.str());
+    }
 }
 
-int main()
+int main(int argc, char **argv)
 {
-    Eigen2D(); // Chama sua função principal que faz toda a lógica
-
-    /*
-        // Definir malha
-        NODE_COORD = {{0.0,0.0}, {1.0,0.0}, {0.0,1.0}};
-        ELEMENTS   = {{0,1,2}}; // em C++ começa do 0
-
-        double xp = 0.2, yp = 0.3;
-
-        auto [lambda, area] = simplex2D(0, xp, yp);
-        std::cout << "Lambda em C++:\n";
-        for (double l : lambda) std::cout << l << " ";
-        std::cout << "\nÁrea = " << area << "\n";
-
-        auto W = whitney(0, xp, yp);
-        std::cout << "Whitney em C++:\n";
-        for (auto &row : W) {
-            std::cout << row[0] << "\t" << row[1] << "\n";
+    Eigen2DConfig config;
+    try
+    {
+        for (int i = 1; i < argc; ++i)
+        {
+            const std::string arg = argv[i];
+            if (arg == "--help" || arg == "-h")
+            {
+                print_help();
+                return 0;
+            }
+            if (arg == "--a")
+                config.a = std::stod(require_value(i, argc, argv));
+            else if (arg == "--b")
+                config.b = std::stod(require_value(i, argc, argv));
+            else if (arg == "--x-mesh")
+                config.x_mesh = std::stoi(require_value(i, argc, argv));
+            else if (arg == "--y-mesh")
+                config.y_mesh = std::stoi(require_value(i, argc, argv));
+            else if (arg == "--field-grid-x")
+                config.field_grid_x = std::stoi(require_value(i, argc, argv));
+            else if (arg == "--field-grid-y")
+                config.field_grid_y = std::stoi(require_value(i, argc, argv));
+            else if (arg == "--num-physical-modes")
+                config.num_physical_modes = std::stoi(require_value(i, argc, argv));
+            else if (arg == "--num-spurious-modes")
+                config.num_spurious_modes = std::stoi(require_value(i, argc, argv));
+            else
+                throw std::runtime_error("Opcao desconhecida: " + arg);
         }
+    }
+    catch (const std::exception &ex)
+    {
+        std::cerr << "Erro: " << ex.what() << "\n";
+        print_help();
+        return 1;
+    }
 
-    */
+    if (config.a <= 0.0 || config.b <= 0.0 || config.x_mesh <= 0 || config.y_mesh <= 0 ||
+        config.field_grid_x <= 0 || config.field_grid_y <= 0 ||
+        config.num_physical_modes < 0 || config.num_spurious_modes < 0)
+    {
+        std::cerr << "Erro: parametros geometricos, malha e contagens devem ser validos.\n";
+        return 1;
+    }
+
+    Eigen2D(config);
     return 0;
 }

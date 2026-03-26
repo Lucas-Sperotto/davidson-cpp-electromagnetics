@@ -1,21 +1,26 @@
-# plot_fdtd_ey.py
-import matplotlib.pyplot as plt
-import pandas as pd
+from pathlib import Path
 
-# Diretórios
-out_dir = "../out"
+import matplotlib.pyplot as plt
+import numpy as np
+
+OUT_DIR = Path(__file__).resolve().parent.parent / "out"
+
+
+def load_signal(path: Path) -> tuple[np.ndarray, np.ndarray]:
+    data = np.genfromtxt(path, delimiter=",", names=True, dtype=float, encoding="utf-8")
+    return np.atleast_1d(data["tempo_ns"]), np.atleast_1d(data["Ey_Vpm"])
 
 
 # Carrega os dados
 try:
-    df_std = pd.read_csv('../out/ey_point1.csv')
-    plt.plot(df_std['tempo_ns'], df_std['Ey_Vpm'], label='Sem PML')
+    tempo_ns, ey = load_signal(OUT_DIR / "ey_point1.csv")
+    plt.plot(tempo_ns, ey, label='Sem PML')
 except FileNotFoundError:
     print("Arquivo ey_point1.csv não encontrado.")
 
 try:
-    df_pml = pd.read_csv('../out/ey_point1_pml.csv')
-    plt.plot(df_pml['tempo_ns'], df_pml['Ey_Vpm'], label='Com PML')
+    tempo_ns, ey = load_signal(OUT_DIR / "ey_point1_pml.csv")
+    plt.plot(tempo_ns, ey, label='Com PML')
 except FileNotFoundError:
     print("Arquivo ey_point1_pml.csv não encontrado.")
 
@@ -25,5 +30,5 @@ plt.title('Campo $E_y$ no ponto de observação')
 plt.legend()
 plt.grid(True)
 plt.tight_layout()
-plt.savefig('../out/ey_point1_comparison.png', dpi=300)
-plt.show()
+plt.savefig(OUT_DIR / 'ey_point1_comparison.png', dpi=300)
+plt.close()

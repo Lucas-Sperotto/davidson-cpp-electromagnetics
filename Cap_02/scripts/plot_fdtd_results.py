@@ -1,26 +1,26 @@
-# Cap_02/scripts/plot_fdtd_results.py
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
-import os
+from pathlib import Path
+import csv
 
-# Diretórios
-out_dir = "../out"
+OUT_DIR = Path(__file__).resolve().parents[1] / "out"
 
-comparison_voltage = pd.read_csv(os.path.join(out_dir, 'comparison_voltage.csv'))
-parametros = pd.read_csv(os.path.join(out_dir, 'simulation_parameters.csv'))
 
-#print("\nParâmetros da Simulação:")
-#print(parametros.to_string(index=False))
+def read_dict_rows(path):
+    with path.open(newline="") as handle:
+        return list(csv.DictReader(handle))
 
-# Extrai os dados
-z_exact = comparison_voltage['z_exact']
-V_exact_real = comparison_voltage['Re(V_exact)']
-V_exact_imag = comparison_voltage['Im(V_exact)']
-z_fdtd = comparison_voltage['z_fdtd']
-V_fdtd_real = comparison_voltage['Re(V_fdtd)']
-V_fdtd_imag = comparison_voltage['Im(V_fdtd)']
+
+comparison_rows = read_dict_rows(OUT_DIR / "comparison_voltage.csv")
+parametros = read_dict_rows(OUT_DIR / "simulation_parameters.csv")
+
+z_exact = np.array([float(row["z_exact"]) for row in comparison_rows if row["z_exact"]], dtype=float)
+V_exact_real = np.array([float(row["Re(V_exact)"]) for row in comparison_rows if row["z_exact"]], dtype=float)
+V_exact_imag = np.array([float(row["Im(V_exact)"]) for row in comparison_rows if row["z_exact"]], dtype=float)
+z_fdtd = np.array([float(row["z_fdtd"]) for row in comparison_rows if row["z_fdtd"]], dtype=float)
+V_fdtd_real = np.array([float(row["Re(V_fdtd)"]) for row in comparison_rows if row["z_fdtd"]], dtype=float)
+V_fdtd_imag = np.array([float(row["Im(V_fdtd)"]) for row in comparison_rows if row["z_fdtd"]], dtype=float)
 
 # Cria o gráfico
 plt.figure(figsize=(8, 6))
@@ -44,87 +44,87 @@ plt.legend()
 plt.grid(True)
 plt.tight_layout()
 
-param_text = "\n".join(f"{row['Parameter']}: {row['Value']}" for _, row in parametros.iterrows())
+param_text = "\n".join(f"{row['Parameter']}: {row['Value']}" for row in parametros)
 plt.gcf().text(0.9, 0.2, param_text, ha='right', va='bottom', bbox=dict(facecolor='white', alpha=0.8))
 
 # Salva o gráfico como arquivo PNG
-plt.savefig(os.path.join(out_dir, 'comparison_voltage_plot.png'))
+plt.savefig(OUT_DIR / "comparison_voltage_plot.png")
 
-# Exibe o gráfico
-#plt.show()
+with (OUT_DIR / "erro_relativo.csv").open() as handle:
+    first_line = handle.readline().strip()
+    handle.readline()
+    reader = csv.DictReader(handle)
+    erro_rows = list(reader)
 
-# Lê a tabela ignorando as duas primeiras linhas
-df = pd.read_csv(os.path.join(out_dir, 'erro_relativo.csv'), skiprows=2)
-
-# Captura a norma L2 da primeira linha
-with open(os.path.join(out_dir, 'erro_relativo.csv'), 'r') as f:
-    first_line = f.readline().strip()
-    norma_l2 = float(first_line.split(':')[1].strip())
+norma_l2 = float(first_line.split(":")[1].strip())
+erro_index = np.array([float(row["Index"]) for row in erro_rows], dtype=float)
+erro_relativo = np.array([float(row["Erro_relativo"]) for row in erro_rows], dtype=float)
 
 # Cria o gráfico
 plt.figure(figsize=(10, 6))
-plt.plot(df['Index'], df['Erro_relativo'], marker='o')
-plt.title(f'Erro Relativo Percentual Ponto a Ponto\nNorma L2 Relativa: {norma_l2:.6f} (%)') # Adiciona a norma L2 no topo
-plt.xlabel('Index (z)')
-plt.ylabel('Erro Relativo (%)')
+plt.plot(erro_index, erro_relativo, marker='o')
+plt.title(f'Erro Relativo Percentual Ponto a Ponto\nNorma L2 Relativa: {norma_l2:.6f} (%)')
+plt.xlabel("Index (z)")
+plt.ylabel("Erro Relativo (%)")
 
 plt.grid(True)
-plt.savefig(os.path.join(out_dir, 'erro_relativo.png'))
+plt.savefig(OUT_DIR / "erro_relativo.png")
 
-#plt.show()
-# Lê o arquivo de tensões
-voltage_series = pd.read_csv(os.path.join(out_dir, 'voltage_over_time.csv'))
+voltage_series = np.genfromtxt(OUT_DIR / "voltage_over_time.csv", delimiter=",", skip_header=1)
 
 fig, ax = plt.subplots()
 line, = ax.plot([], [], lw=2)
-ax.set_xlim(1, voltage_series.shape[1]-1)
+ax.set_xlim(1, voltage_series.shape[1] - 1)
 ax.set_ylim(-1, 1)
-ax.set_xlabel('Index (z)')
-ax.set_ylabel('Normalized Voltage')
+ax.set_xlabel("Index (z)")
+ax.set_ylabel("Normalized Voltage")
+
 
 def init():
     line.set_data([], [])
     return line,
 
+
 def update(frame):
-    x = range(1, voltage_series.shape[1])  # posição espacial
-    y = voltage_series.iloc[frame, 1:]     # ignora a coluna TimeStep
+    x = range(1, voltage_series.shape[1])
+    y = voltage_series[frame, 1:]
     line.set_data(x, y)
-    ax.set_title(f'Voltage at timestep {voltage_series.iloc[frame, 0]}')
+    ax.set_title(f"Voltage at timestep {int(voltage_series[frame, 0])}")
     return line,
+
 
 ani = FuncAnimation(fig, update, frames=len(voltage_series), init_func=init, blit=True)
 
-# Salva o vídeo
-ani.save(os.path.join(out_dir, 'voltage_simulation.mp4'), writer='ffmpeg')
-ani.save(os.path.join(out_dir, 'voltage_simulation.gif'), writer='pillow')
-plt.close(fig)  # fecha apenas depois de salvar
+ani.save(OUT_DIR / "voltage_simulation.mp4", writer="ffmpeg")
+ani.save(OUT_DIR / "voltage_simulation.gif", writer="pillow")
+plt.close(fig)
 
-# Lê o arquivo CSV da corrente
-current_series = pd.read_csv(os.path.join(out_dir, 'current_over_time.csv'))
+current_series = np.genfromtxt(OUT_DIR / "current_over_time.csv", delimiter=",", skip_header=1)
 
 fig, ax = plt.subplots()
 line, = ax.plot([], [], lw=2)
-ax.set_xlim(1, current_series.shape[1]-1)
-ax.set_ylim(-1, 1)  # ajuste se os valores da corrente tiverem outra faixa
-ax.set_xlabel('Index (z)')
-ax.set_ylabel('Current (A)')
+ax.set_xlim(1, current_series.shape[1] - 1)
+ax.set_ylim(-1, 1)
+ax.set_xlabel("Index (z)")
+ax.set_ylabel("Current (A)")
+
 
 def init():
     line.set_data([], [])
     return line,
 
+
 def update(frame):
-    x = range(1, current_series.shape[1])  # posição espacial
-    y = current_series.iloc[frame, 1:]     # ignora a coluna TimeStep
+    x = range(1, current_series.shape[1])
+    y = current_series[frame, 1:]
     line.set_data(x, y)
-    ax.set_title(f'Current at timestep {int(current_series.iloc[frame, 0])}')
+    ax.set_title(f"Current at timestep {int(current_series[frame, 0])}")
     return line,
+
 
 ani = FuncAnimation(fig, update, frames=len(current_series), init_func=init, blit=True)
 
-# Salva o GIF
-ani.save(os.path.join(out_dir, 'current_simulation.mp4'), writer='ffmpeg')
-ani.save(os.path.join(out_dir, 'current_simulation.gif'), writer='pillow')
+ani.save(OUT_DIR / "current_simulation.mp4", writer="ffmpeg")
+ani.save(OUT_DIR / "current_simulation.gif", writer="pillow")
 
-plt.close(fig)  # fecha apenas depois de salvar
+plt.close(fig)

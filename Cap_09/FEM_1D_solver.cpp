@@ -1,4 +1,5 @@
 #include <vector>
+#include <stdexcept>
 #include <Eigen/Dense>
 #include "FEM_1D_solver.h"
 
@@ -41,10 +42,10 @@ std::vector<double> FEM_1D_solver(int N_elem, double h, double omega,
     T *= gamma;
 
     // Monta A (n x n) e F (n)
-    Eigen::MatrixXd M =  S + T;
+    Eigen::MatrixXd M = S + T;
 
-    Eigen::VectorXd F = Eigen::VectorXd::Zero(n); 
-    F(n - 1) = -M(N - 2, N - 1) * V_in;               // Voltage at source end.
+    Eigen::VectorXd F = Eigen::VectorXd::Zero(n);
+    F(n - 1) = -M(N - 2, N - 1) * V_in; // Voltage at source end.
 
     Eigen::MatrixXd A = M.topLeftCorner(n, n);
 

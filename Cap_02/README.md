@@ -10,9 +10,12 @@ Este diretório contém a tradução para C++ dos códigos MATLAB do Capítulo 2
 
 ```text
 Cap_02/
+├── include/
+│   └── gaussder.hpp                # Pulso gaussiano derivado normalizado
 ├── src/
 │   ├── fdtd_1D_demo.cpp             # Simulação FDTD 1D com senoide
 │   ├── fdtd_1D_WB_demo.cpp          # Simulação FDTD 1D banda larga
+│   └── gaussder.cpp                 # Tradução de gaussder_norm.m
 ├── scripts/
 │   ├── plot_fdtd_results.py        # Visualização de resultados da senoide
 │   └── plot_fdtd_wb_results.py     # Visualização de resultados banda larga
@@ -231,7 +234,6 @@ sudo apt install build-essential gfortran cmake pkg-config libfftw3-dev
 Os scripts de visualização requerem as seguintes bibliotecas:
 
 - numpy
-- pandas
 - matplotlib
 - pillow
 - ffmpeg (externo, usado pelo matplotlib)
@@ -239,13 +241,13 @@ Os scripts de visualização requerem as seguintes bibliotecas:
 Instale com:
 
 ```bash
-sudo apt install python3 python3-pip python3-numpy python3-matplotlib python3-pandas python3-pil ffmpeg
+sudo apt install python3 python3-pip python3-numpy python3-matplotlib python3-pil ffmpeg
 ```
 
 ou via `pip`:
 
 ```bash
-pip install numpy matplotlib pandas pillow
+pip install numpy matplotlib pillow
 ```
 
 ---

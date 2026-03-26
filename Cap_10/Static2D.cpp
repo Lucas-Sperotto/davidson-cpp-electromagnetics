@@ -5,6 +5,9 @@
 #include <tuple>
 #include <fstream>
 #include <iomanip>
+#include <filesystem>
+#include <string>
+#include <stdexcept>
 
 #include "globals.h" //OK
 #include "trimesh.h"
@@ -14,8 +17,43 @@
 
 #include <Eigen/Sparse>
 #include <Eigen/Dense>
-#include <Eigen/Sparse>
-#include <Eigen/Dense>
+
+namespace
+{
+struct Static2DConfig
+{
+    double a = 2.5;
+    double b = 1.25;
+    double h = 0.50;
+    double w = 0.50;
+    double eps_r_sub = 2.55;
+    double voltage = 1.0;
+    int x_mesh = 20;
+    int y_mesh = 20;
+};
+
+std::string require_value(int &index, int argc, char **argv)
+{
+    if (index + 1 >= argc)
+        throw std::runtime_error(std::string("Falta valor para ") + argv[index]);
+    return argv[++index];
+}
+
+void print_help()
+{
+    std::cout
+        << "Uso: ./build/Static2D [opcoes]\n"
+        << "  --a VALOR           largura total do problema original (padrao 2.5)\n"
+        << "  --b VALOR           altura da caixa (padrao 1.25)\n"
+        << "  --h VALOR           altura do substrato (padrao 0.5)\n"
+        << "  --w VALOR           largura do condutor central (padrao 0.5)\n"
+        << "  --eps-r-sub VALOR   permissividade relativa do substrato (padrao 2.55)\n"
+        << "  --voltage VALOR     tensao prescrita no strip (padrao 1.0)\n"
+        << "  --x-mesh N          divisao da malha em x (padrao 20)\n"
+        << "  --y-mesh N          divisao da malha em y (padrao 20)\n"
+        << "  --help              mostra esta ajuda\n";
+}
+} // namespace
 
 double compute_static_capacitance(const Eigen::VectorXd &phi_tot,
                                   const std::vector<double> &eps_r,
@@ -53,19 +91,76 @@ double compute_static_capacitance(const Eigen::VectorXd &phi_tot,
     return C;
 }
 
-int main()
+int main(int argc, char **argv)
 {
+    const std::filesystem::path out_dir = PROJECT_OUT_DIR;
+    std::filesystem::create_directories(out_dir);
+
+    Static2DConfig config;
+    try
+    {
+        for (int i = 1; i < argc; ++i)
+        {
+            const std::string arg = argv[i];
+            if (arg == "--help" || arg == "-h")
+            {
+                print_help();
+                return 0;
+            }
+            if (arg == "--a")
+                config.a = std::stod(require_value(i, argc, argv));
+            else if (arg == "--b")
+                config.b = std::stod(require_value(i, argc, argv));
+            else if (arg == "--h")
+                config.h = std::stod(require_value(i, argc, argv));
+            else if (arg == "--w")
+                config.w = std::stod(require_value(i, argc, argv));
+            else if (arg == "--eps-r-sub")
+                config.eps_r_sub = std::stod(require_value(i, argc, argv));
+            else if (arg == "--voltage")
+                config.voltage = std::stod(require_value(i, argc, argv));
+            else if (arg == "--x-mesh")
+                config.x_mesh = std::stoi(require_value(i, argc, argv));
+            else if (arg == "--y-mesh")
+                config.y_mesh = std::stoi(require_value(i, argc, argv));
+            else
+                throw std::runtime_error("Opcao desconhecida: " + arg);
+        }
+    }
+    catch (const std::exception &ex)
+    {
+        std::cerr << "Erro: " << ex.what() << "\n";
+        print_help();
+        return 1;
+    }
+
+    if (config.a <= 0.0 || config.b <= 0.0 || config.h <= 0.0 || config.w <= 0.0 ||
+        config.eps_r_sub <= 0.0 || config.voltage == 0.0 || config.x_mesh <= 0 || config.y_mesh <= 0)
+    {
+        std::cerr << "Erro: parametros geometricos, material e malha devem ser positivos; voltage deve ser nao nula.\n";
+        return 1;
+    }
+    if (config.h > config.b)
+    {
+        std::cerr << "Erro: h nao pode exceder b.\n";
+        return 1;
+    }
+
     const double eps_0 = 8.854e-12;
-    const double mu_0 = 4.0 * M_PI * 1e-7;
-    const double mu_r = 1.0;
-    double a = 2.5;
-    double b = a / 2.0;
-    double h = 0.50;
-    double w = h;
-    double eps_r_sub = 1.0; // 2.55; // 2.55;//2.55;
-    double V = 1.0;
-    // std::cout << "Nodes: " << NUM_NODES << "\n";
-    int x_mesh = 100, y_mesh = 100;
+    const double a = config.a;
+    const double b = config.b;
+    const double h = config.h;
+    const double w = config.w;
+    const double eps_r_sub = config.eps_r_sub;
+    const double V = config.voltage;
+    const int x_mesh = config.x_mesh;
+    const int y_mesh = config.y_mesh;
+
+    std::cout << "Parametros do Static2D:\n"
+              << "  a=" << a << ", b=" << b << ", h=" << h << ", w=" << w << "\n"
+              << "  eps_r_sub=" << eps_r_sub << ", V=" << V
+              << ", x_mesh=" << x_mesh << ", y_mesh=" << y_mesh << "\n";
+
     std::vector<std::vector<double>> x_nodes, y_nodes;
 
     // Gera malha e preenche ELEMENTS e NODE_COORD
@@ -195,25 +290,25 @@ int main()
     cg.setTolerance(tol);
     cg.compute(A);
     std::cout << "Resolvendo...\n";
-    //  Caso a fatoração do pré-condicionador falhe, ainda podemos tentar resolver
     Eigen::VectorXd phi_tot;
-    if (cg.info() != Eigen::Success)
+    if (cg.info() == Eigen::Success)
     {
-        // Tenta sem pré-condicionador (diagonal)
+        phi_tot = cg.solve(b_vec);
+        std::cout << "[CG] iterações=" << cg.iterations()
+                  << " | erro=" << cg.error() << "\n";
+    }
+    else
+    {
         Eigen::ConjugateGradient<Eigen::SparseMatrix<double>, Eigen::Lower | Eigen::Upper, Eigen::DiagonalPreconditioner<double>> cg_alt;
 
         cg_alt.setMaxIterations(max_iter);
         cg_alt.setTolerance(tol);
         cg_alt.compute(A);
         phi_tot = cg_alt.solve(b_vec);
-        std::cout << "Resolvendo com pré condicionador...\n";
-        std::cout << "[CG] iterações=" << cg_alt.iterations()
+        std::cout << "Fatoracao com IncompleteCholesky falhou; usando pre-condicionador diagonal.\n";
+        std::cout << "[CG alt] iterações=" << cg_alt.iterations()
                   << " | erro=" << cg_alt.error() << "\n";
     }
-
-    phi_tot = cg.solve(b_vec);
-    std::cout << "[CG] iterações=" << cg.iterations()
-              << " | erro=" << cg.error() << "\n";
 
     // Capacitância (sua função existente)
     std::cout << "Solução Calculada.\n";
@@ -298,7 +393,7 @@ int main()
         }
 
         // (3) Salva campo + potencial em CSV
-        std::ofstream f("../out/field_map.csv");
+        std::ofstream f((out_dir / "field_map.csv").string());
         f << "x,y,phi,Ex,Ey\n";
         f.setf(std::ios::scientific);
         f << std::setprecision(10);
@@ -319,7 +414,7 @@ int main()
         f.close();
 
         // (4) Exporta nós do microstrip (prescritos a V) para desenhar o condutor
-        std::ofstream g("../out/strip_nodes.csv");
+        std::ofstream g((out_dir / "strip_nodes.csv").string());
         g << "x,y\n";
         g.setf(std::ios::scientific);
         g << std::setprecision(10);
@@ -333,14 +428,30 @@ int main()
         g.close();
 
         // (5) Opcional: salva parâmetros para o Python ler (facilita manter coerência)
-        std::ofstream p("../out/geom_params.csv");
-        p << "a_half,b,h,w,Nx,Ny\n";
+        std::ofstream p((out_dir / "geom_params.csv").string());
+        p << "a_half,b,h,w,Nx,Ny,eps_r_sub,voltage,capacitance_per_m\n";
         p.setf(std::ios::scientific);
         p << std::setprecision(10);
-        p << Lx << "," << Ly << "," << h << "," << w << "," << Nx << "," << Ny << "\n";
+        p << Lx << "," << Ly << "," << h << "," << w << "," << Nx << "," << Ny << ","
+          << eps_r_sub << "," << V << "," << C << "\n";
         p.close();
 
-        std::cout << "Arquivos salvos: field_map.csv, strip_nodes.csv, geom_params.csv\n";
+        std::ofstream summary((out_dir / "static2d_summary.csv").string());
+        summary << "key,value\n";
+        summary << "a," << a << "\n";
+        summary << "b," << b << "\n";
+        summary << "h," << h << "\n";
+        summary << "w," << w << "\n";
+        summary << "eps_r_sub," << eps_r_sub << "\n";
+        summary << "voltage," << V << "\n";
+        summary << "x_mesh," << x_mesh << "\n";
+        summary << "y_mesh," << y_mesh << "\n";
+        summary << "num_nodes," << NUM_NODES << "\n";
+        summary << "num_elements," << NUM_ELEMENTS << "\n";
+        summary << "capacitance_per_m," << C << "\n";
+        summary.close();
+
+        std::cout << "Arquivos salvos: field_map.csv, strip_nodes.csv, geom_params.csv, static2d_summary.csv\n";
     }
     // ==================== FIM do bloco ====================
     return 0;

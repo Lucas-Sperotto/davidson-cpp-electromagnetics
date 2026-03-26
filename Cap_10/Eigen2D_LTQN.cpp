@@ -7,6 +7,10 @@
 #include <Eigen/Eigenvalues>
 #include <algorithm>
 #include <tuple>
+#include <filesystem>
+#include <iomanip>
+#include <string>
+#include <stdexcept>
 
 #include "trimesh.h"
 #include "edgemake.h"
@@ -25,38 +29,52 @@ const double mu_0 = 4 * M_PI * 1e-7;
 const double eps_r = 1.0;
 const double mu_r = 1.0;
 
-void Eigen2D_LTQN()
+namespace
 {
-    // Dimensões do guia
-    double a = 2.286e-2; // X-band guide
+struct Eigen2DLtqnConfig
+{
+    double a = 2.286e-2;
     double b = 1.016e-2;
+    int x_mesh = 4;
+    int y_mesh = 2;
+};
+
+std::string require_value(int &index, int argc, char **argv)
+{
+    if (index + 1 >= argc)
+        throw std::runtime_error(std::string("Falta valor para ") + argv[index]);
+    return argv[++index];
+}
+
+void print_help()
+{
+    std::cout
+        << "Uso: ./build/Eigen2D_LTQN [opcoes]\n"
+        << "  --a VALOR        largura do guia (padrao 2.286e-2)\n"
+        << "  --b VALOR        altura do guia (padrao 1.016e-2)\n"
+        << "  --x-mesh N       divisao da malha em x (padrao 4)\n"
+        << "  --y-mesh N       divisao da malha em y (padrao 2)\n"
+        << "  --help           mostra esta ajuda\n";
+}
+} // namespace
+
+void Eigen2D_LTQN(const Eigen2DLtqnConfig &config)
+{
+    const std::filesystem::path out_dir = PROJECT_OUT_DIR;
+    std::filesystem::create_directories(out_dir);
+
+    // Dimensões do guia
+    const double a = config.a;
+    const double b = config.b;
+
+    std::cout << "Parametros do Eigen2D_LTQN:\n"
+              << "  a=" << a << ", b=" << b
+              << ", x_mesh=" << config.x_mesh << ", y_mesh=" << config.y_mesh << "\n";
 
     // Gerar a malha triangular
     std::vector<std::vector<double>> x_nodes, y_nodes;
-    trimesh(a, b, 4, 2, x_nodes, y_nodes); // função a ser implementada
+    trimesh(a, b, config.x_mesh, config.y_mesh, x_nodes, y_nodes);
     // A função também deve preencher ELEMENTS e NODE_COORD
-
-    // (Opcional) Imprimir coordenadas e IDs de nós/elementos — substitui triplot + text do MATLAB
-    for (int i = 0; i < NUM_NODES; ++i)
-    {
-        std::cout << "Node " << i << ": (" << NODE_COORD[i][0] << ", " << NODE_COORD[i][1] << ")\n";
-    }
-    for (int e = 0; e < NUM_ELEMENTS; ++e)
-    {
-        double xc = 0.0, yc = 0.0;
-        for (int j = 0; j < 3; ++j)
-        {
-            xc += NODE_COORD[ELEMENTS[e][j]][0];
-            yc += NODE_COORD[ELEMENTS[e][j]][1];
-        }
-        xc /= 3.0;
-        yc /= 3.0;
-        std::cout << "Element " << e << " center: (" << xc << ", " << yc << ")\n";
-    }
-
-    // Pausa manual: aguarda o usuário
-    std::cout << "Press ENTER to continue...\n";
-    std::cin.get();
 
     // Criar as arestas e associar com os elementos
     edgemake(); // Função para preencher EDGES, ELEMENT_EDGES e NUM_EDGES
@@ -97,7 +115,7 @@ void Eigen2D_LTQN()
                 int kk_e1 = dof_e1[ELEMENT_EDGES[ielem][kedge]];
                 int kk_e2 = dof_e2[ELEMENT_EDGES[ielem][kedge]];
 
-                if (jj_e1 && kk_e1)
+                if (jj_e1 >= 0 && jj_e2 >= 0 && kk_e1 >= 0 && kk_e2 >= 0)
                 {
                     S[jj_e1][kk_e1] += S_elem[jedge][kedge];
                     S[jj_e1][kk_e2] += S_elem[jedge][kedge + 3];
@@ -109,7 +127,7 @@ void Eigen2D_LTQN()
                 }
             }
 
-            if (jj_e1)
+            if (jj_e1 >= 0 && jj_e2 >= 0)
             {
                 S[jj_e1][ll_f1] += S_elem[jedge][6];
                 S[jj_e1][ll_f2] += S_elem[jedge][7];
@@ -155,16 +173,26 @@ void Eigen2D_LTQN()
 
     // Resolver o problema generalizado de autovalores
     GeneralizedSelfAdjointEigenSolver<MatrixXd> solver(S_mat, T_mat);
+    if (solver.info() != Eigen::Success)
+    {
+        std::cerr << "Falha ao resolver o problema generalizado LTQN.\n";
+        return;
+    }
+
     VectorXd eigvals = solver.eigenvalues();
     MatrixXd eigvecs = solver.eigenvectors();
 
-    // Extração dos autovalores positivos e ordenação
+    constexpr double zero_tol = 1e-6;
+
+    // Extração dos autovalores e ordenação
     std::vector<std::pair<double, int>> indexed_kc;
     for (int i = 0; i < eigvals.size(); ++i)
     {
-        double val = eigvals[i];
-        if (val > 0)
-            indexed_kc.emplace_back(std::sqrt(val), i);
+        double lambda = eigvals[i];
+        if (std::abs(lambda) <= zero_tol)
+            lambda = 0.0;
+        if (lambda >= 0.0)
+            indexed_kc.emplace_back(std::sqrt(lambda), i);
     }
     std::sort(indexed_kc.begin(), indexed_kc.end());
 
@@ -182,21 +210,92 @@ void Eigen2D_LTQN()
     }
     // Avaliação de erro dos primeiros modos úteis
     std::vector<double> rel_err = TEeig_err(a, b, TEeigvalues, std::min(NUM_DOFS - num_zero_eigvals, 8), num_zero_eigvals);
-    
 
-
-    // Opcional: salvar dados
-    std::string filename = "eigdata_LTQN_" + std::to_string(NUM_ELEMENTS) + ".txt";
-    std::ofstream fout(filename);
-    for (const auto &[val, idx] : indexed_kc)
+    std::ofstream summary((out_dir / "eigdata_LTQN_modes.csv").string());
+    summary << "rank,kc,internal_index,relative_error\n";
+    summary << std::scientific << std::setprecision(10);
+    for (std::size_t i = 0; i < indexed_kc.size(); ++i)
     {
-        fout << val << "\n";
+        double err = -1.0;
+        const int physical_rank = static_cast<int>(i) - num_zero_eigvals;
+        if (physical_rank >= 0 && physical_rank < static_cast<int>(rel_err.size()))
+            err = rel_err[physical_rank];
+        summary << (i + 1) << ","
+                << indexed_kc[i].first << ","
+                << indexed_kc[i].second << ","
+                << err << "\n";
     }
-    fout.close();
+    summary.close();
+
+    std::ofstream ferr((out_dir / "eigdata_LTQN_relerr.csv").string());
+    ferr << "mode,rel_err\n";
+    ferr << std::scientific << std::setprecision(10);
+    for (std::size_t i = 0; i < rel_err.size(); ++i)
+    {
+        ferr << (i + 1) << "," << rel_err[i] << "\n";
+    }
+    ferr.close();
+
+    std::ofstream meta((out_dir / "eigen2d_ltqn_summary.csv").string());
+    meta << "key,value\n";
+    meta << "a," << a << "\n";
+    meta << "b," << b << "\n";
+    meta << "x_mesh," << config.x_mesh << "\n";
+    meta << "y_mesh," << config.y_mesh << "\n";
+    meta << "num_nodes," << NUM_NODES << "\n";
+    meta << "num_elements," << NUM_ELEMENTS << "\n";
+    meta << "num_edges," << NUM_EDGES << "\n";
+    meta << "num_dofs," << NUM_DOFS << "\n";
+    meta << "num_zero_eigvals," << num_zero_eigvals << "\n";
+    meta.close();
+
+    std::cout << "Modos nulos/espurios ignorados: " << num_zero_eigvals << "\n";
+    for (std::size_t i = 0; i < rel_err.size(); ++i)
+    {
+        std::cout << "Modo TE " << (i + 1)
+                  << " | kc = " << TEeigvalues[num_zero_eigvals + static_cast<int>(i)]
+                  << " | erro relativo = " << rel_err[i] << "\n";
+    }
 }
 
-int main()
+int main(int argc, char **argv)
 {
-    Eigen2D_LTQN();
+    Eigen2DLtqnConfig config;
+    try
+    {
+        for (int i = 1; i < argc; ++i)
+        {
+            const std::string arg = argv[i];
+            if (arg == "--help" || arg == "-h")
+            {
+                print_help();
+                return 0;
+            }
+            if (arg == "--a")
+                config.a = std::stod(require_value(i, argc, argv));
+            else if (arg == "--b")
+                config.b = std::stod(require_value(i, argc, argv));
+            else if (arg == "--x-mesh")
+                config.x_mesh = std::stoi(require_value(i, argc, argv));
+            else if (arg == "--y-mesh")
+                config.y_mesh = std::stoi(require_value(i, argc, argv));
+            else
+                throw std::runtime_error("Opcao desconhecida: " + arg);
+        }
+    }
+    catch (const std::exception &ex)
+    {
+        std::cerr << "Erro: " << ex.what() << "\n";
+        print_help();
+        return 1;
+    }
+
+    if (config.a <= 0.0 || config.b <= 0.0 || config.x_mesh <= 0 || config.y_mesh <= 0)
+    {
+        std::cerr << "Erro: parametros geometricos e malha devem ser positivos.\n";
+        return 1;
+    }
+
+    Eigen2D_LTQN(config);
     return 0;
 }

@@ -19,11 +19,10 @@
 
 #include <string>
 
+#include "../include/gaussder.hpp"
+
 // Definindo um alias para a biblioteca filesystem para simplificar chamadas
 namespace fs = std::filesystem;
-
-// Função impulso gaussiano derivado normalizado
-double gaussder_norm(double, double, double);
 
 // Função principal do programa
 int main()
@@ -242,11 +241,4 @@ int main()
     */
     std::cout << "Simulação banda larga finalizada. Resultados salvos em Cap_02/out/.\n";
     return 0;
-}
-
-// Função impulso gaussiano derivado normalizado
-double gaussder_norm(double t, double m, double sigma)
-{
-    // return -1.0 / std::sqrt(2.0 * M_PI) * (t - m) / sigma * sigma * sigma * exp(-(t-m)^2/(2*sigma^2));
-    return -std::exp(0.5) * (t - m) / sigma * std::exp(-std::pow((t - m), 2) / (2 * sigma * sigma));
 }
