@@ -37,6 +37,24 @@ Legenda de status:
 | `static_mom.m` | `Cap_04/static_mom.cpp` | Traduzido com adaptação | Script convertido para executável com saída CSV |
 | `thin_dipole.m` | `Cap_04/thin_dipole.cpp` | Traduzido com adaptação | Entradas interativas convertidas para CLI e saídas CSV |
 
+## Capítulo 7
+
+| MATLAB original | Equivalente atual | Status | Observação |
+| --- | --- | --- | --- |
+| `scalar_pot.m` | `Cap_07/scalar_pot.cpp` | Traduzido com adaptação | Gera CSVs para as figuras das integrais de Sommerfeld |
+| `V_pot_eps.m` | `Cap_07/V_pot_eps.cpp` | Traduzido | Estudo do potencial para diferentes permissividades |
+| `V_pot_height.m` | `Cap_07/V_pot_height.cpp` | Traduzido | Estudo do potencial para diferentes alturas |
+| `MoM_Som.m` | `Cap_07/MoM_Som.cpp` | Traduzido com adaptação | Prompt interativo substituído por CLI |
+| `D_TE.m` | `Cap_07/src/D_TE.cpp` | Traduzido | Denominador TE |
+| `D_TM.m` | `Cap_07/src/D_TM.cpp` | Traduzido | Denominador TM |
+| `F.m` | `Cap_07/src/F.cpp` | Traduzido | Integrando original |
+| `F_reg1.m` | `Cap_07/src/F_reg1.cpp` | Traduzido | Região 1 |
+| `F_reg2.m` | `Cap_07/src/F_reg2.cpp` | Traduzido | Região 2 com singularidade extraída |
+| `F_reg3.m` | `Cap_07/src/F_reg3.cpp` | Traduzido | Região 3 com termo estático extraído |
+| `F_static.m` | `Cap_07/src/F_static.cpp` | Traduzido | Termo estático |
+| `V_int.m` | `Cap_07/src/V_int.cpp` | Traduzido | Integração do potencial escalar |
+| `root_D_TM.m` | `Cap_07/src/root_D_TM.cpp` | Traduzido | Busca do polo TM |
+
 ## Capítulo 9
 
 | MATLAB original | Equivalente atual | Status | Observação |

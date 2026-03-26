@@ -20,6 +20,7 @@ https://www.cambridge.org/br/universitypress/subjects/engineering/rf-and-microwa
 | `Cap_02` | FDTD 1D | Sim | Traduzido e funcional | Mais completa |
 | `Cap_03` | FDTD 2D/3D | Sim | Demos principais e scripts auxiliares principais traduzidos | Precisa validacao fina |
 | `Cap_04` | MoM 2D / eletrostática / dipolo fino | Sim | Traduzido e funcional | Boa base, pode aprofundar |
+| `Cap_07` | Integrais de Sommerfeld / dipolo impresso | Sim | Traduzido e funcional | Boa base, pode aprofundar |
 | `Cap_09` | FEM 1D | Sim | Traduzido e funcional | Boa, mas pode padronizar |
 | `Cap_10` | FEM 2D / modos / microstrip | Sim | Conjunto principal traduzido e funcional | Precisa aprofundar |
 
@@ -28,6 +29,7 @@ https://www.cambridge.org/br/universitypress/subjects/engineering/rf-and-microwa
 - [`Cap_02/`](Cap_02/) - capítulo 2 em C++ com scripts Python de visualização.
 - [`Cap_03/`](Cap_03/) - capítulo 3 em C++ com demos 2D, PML e 3D.
 - [`Cap_04/`](Cap_04/) - capítulo 4 em C++ com espalhamento TM, MoM estático e dipolo fino.
+- [`Cap_07/`](Cap_07/) - capítulo 7 em C++ com integrais de Sommerfeld e dipolo impresso.
 - [`Cap_09/`](Cap_09/) - capítulo 9 em C++ com solver FEM 1D.
 - [`Cap_10/`](Cap_10/) - capítulo 10 em C++ com elementos de Whitney e LTQN.
 - `original_matlab/` - base local de comparação com os scripts originais do livro.
@@ -68,6 +70,7 @@ sudo apt install python3 python3-pip python3-numpy python3-matplotlib python3-pi
 - [`Cap_02/README.md`](Cap_02/README.md) - referência mais completa hoje para o padrão didático desejado.
 - [`Cap_03/README.md`](Cap_03/README.md) - estado atual do capítulo 3 e limitações conhecidas.
 - [`Cap_04/README.md`](Cap_04/README.md) - tradução do método dos momentos do capítulo 4.
+- [`Cap_07/README.md`](Cap_07/README.md) - integrais de Sommerfeld e dipolo impresso.
 - [`Cap_09/README.md`](Cap_09/README.md) - solver FEM 1D.
 - [`Cap_10/README.md`](Cap_10/README.md) - estrutura e status do capítulo 10.
 - [`TRANSLATION_MATRIX.md`](TRANSLATION_MATRIX.md) - mapa atual entre arquivos MATLAB e equivalentes C++.

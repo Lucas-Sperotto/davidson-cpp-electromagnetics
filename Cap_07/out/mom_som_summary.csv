@@ -1,0 +1,11 @@
+key,value
+freq_res,1e+10
+eps_r_prime,2.55
+tan_delta,0
+d,0.00359751
+L,0.0116919
+max_mode_index,4
+num_int,12
+freq_start_scale,0.9
+freq_stop_scale,1
+freq_step_scale,0.05
