@@ -50,9 +50,7 @@ void run_fdtd2d_pml_simulation(const Fdtd2DPmlConfig &config)
     const int N_y = refine * 200;
     const int M = refine * 350;
     const int L_mat = static_cast<int>(std::round(static_cast<double>(N_x) / 2.0));
-    const int L_idx = L_mat;
-    // Nesta traducao do caso PML, a interface scat/tot segue o posicionamento
-    // que ja se mostrou estavel no port C++ existente.
+    const int L_idx = L_mat - 1;
 
     const double delta_s = line_source ? 0.005 : 0.005 / refine;
     const double delta_t = delta_s / (c * std::sqrt(2.0));
@@ -231,20 +229,44 @@ void run_fdtd2d_pml_simulation(const Fdtd2DPmlConfig &config)
             }
         }
 
-        // A injecao scat/tot no script MATLAB usa um tratamento especial
-        // nas componentes split de H_z. A traducao literal dessa etapa ainda
-        // esta sob validacao; mantemos aqui a formulacao adaptada que segue
-        // estavel e produz os sinais temporais esperados para o capitulo.
-        for (int i = 0; i < N_x; ++i)
-        {
-            for (int j = 0; j < N_y; ++j)
-                H_z_n[i][j] = H_zx_n[i][j] + H_zy_n[i][j];
-        }
-
         if (line_source)
         {
-            H_z_n[source_x_idx][source_y_idx] =
-                gaussder_norm((m_mat - 1.0) * delta_t, m_offset, sigma);
+            for (int i = 0; i < N_x; ++i)
+            {
+                for (int j = 0; j < N_y; ++j)
+                    H_z_n[i][j] = H_zx_n[i][j] + H_zy_n[i][j];
+            }
+            H_z_n[source_x_idx][source_y_idx] = gaussder_norm((m_mat - 1.0) * delta_t, m_offset, sigma);
+        }
+        else
+        {
+            const double incident_ey =
+                peak * gaussder_norm((m_mat - 1.0) * delta_t - (L_mat - 1.0) * delta_s / c,
+                                     m_offset, sigma);
+
+            for (int j = 0; j < N_y; ++j)
+            {
+                H_zx_n[L_idx][j] = 0.0;
+                H_zy_n[L_idx][j] = 0.0;
+            }
+
+            for (int j = 0; j < N_y - 1; ++j)
+            {
+                H_zx_n[L_idx][j] =
+                    D_aHzx[L_idx][j] * H_zx_nmin1[L_idx][j] -
+                    D_bHzx[L_idx][j] * (E_x_nmin1[L_idx][j + 1] - E_x_nmin1[L_idx][j]);
+
+                H_zy_n[L_idx][j] =
+                    D_aHzy[L_idx][j] * H_zy_nmin1[L_idx][j] +
+                    D_bHzy[L_idx][j] *
+                        (E_y_nmin1[L_idx + 1][j] - E_y_nmin1[L_idx][j] - incident_ey);
+            }
+
+            for (int i = 0; i < N_x; ++i)
+            {
+                for (int j = 0; j < N_y; ++j)
+                    H_z_n[i][j] = H_zx_n[i][j] + H_zy_n[i][j];
+            }
         }
 
         for (int i = 1; i < N_x; ++i)

@@ -20,6 +20,8 @@ void print_help()
         << "  --cyl-present           inclui cilindro PEC\n"
         << "  --refine N              fator de refinamento da malha\n"
         << "  --pulse-compress X      compressao do pulso gaussiano\n"
+        << "  --snapshot-step N       salva estados internos no passo N\n"
+        << "  --snapshot-prefix ARQ   prefixo dos CSVs de snapshot em out/\n"
         << "  --output ARQ            nome do CSV de saida em out/\n"
         << "  --meta ARQ              nome do CSV de metadados em out/\n";
 }
@@ -44,6 +46,10 @@ int main(int argc, char **argv) {
                 config.refine = std::stoi(require_value(i, argc, argv));
             else if (arg == "--pulse-compress")
                 config.pulse_compress = std::stod(require_value(i, argc, argv));
+            else if (arg == "--snapshot-step")
+                config.snapshot_step = std::stoi(require_value(i, argc, argv));
+            else if (arg == "--snapshot-prefix")
+                config.snapshot_prefix = require_value(i, argc, argv);
             else if (arg == "--output")
                 config.output_filename = require_value(i, argc, argv);
             else if (arg == "--meta")

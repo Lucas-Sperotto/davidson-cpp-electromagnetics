@@ -20,8 +20,8 @@ Legenda de status:
 
 | MATLAB original | Equivalente atual | Status | Observação |
 | --- | --- | --- | --- |
-| `FDTD_2D/fdtd_2d_demo.m` | `Cap_03/src/fdtd_2d_demo.cpp` | Traduzido com adaptação | Alguns parâmetros estão fixos e há trechos ainda marcados como não testados |
-| `FDTD_2D/fdtd_2d_pml_demo.m` | `Cap_03/src/fdtd2d_pml.cpp` | Traduzido com adaptação | Estrutura e parâmetros preservados; a injeção scat/tot do PML segue em formulação estável adaptada |
+| `FDTD_2D/fdtd_2d_demo.m` | `Cap_03/src/fdtd_2d_demo.cpp` | Traduzido | Validado contra o MATLAB por histórico temporal e snapshots internos; os cantos traseiros seguem comentados como no original |
+| `FDTD_2D/fdtd_2d_pml_demo.m` | `Cap_03/src/fdtd2d_pml.cpp` | Traduzido com adaptação | Formulação scat/tot principal realinhada com o MATLAB; ainda falta consolidar a validação tardia em documentação |
 | `FDTD_3D/fdtd_3D_demo.m` | `Cap_03/src/fdtd3d.cpp` | Traduzido com adaptação | O cenário principal foi preservado |
 | `FDTD_2D/gaussder_norm.m` | `Cap_03/src/gaussder.cpp` | Traduzido | Precisa apenas de padronização estrutural |
 | `FDTD_2D/PMLperformance.m` | `Cap_03/scripts/pml_performance.py` | Traduzido com adaptação | Traduzido como script Python para comparação entre rodadas |
@@ -95,9 +95,9 @@ Legenda de status:
 | --- | --- | --- | --- |
 | `Static2D.m` | `Cap_10/Static2D.cpp` | Traduzido | Solver principal |
 | `Eigen2D.m` | `Cap_10/Eigen2D.cpp` | Traduzido | Solver principal com Whitney |
-| `Eigen2D_LTQN.m` | `Cap_10/Eigen2D_LTQN.cpp` | Traduzido | Solver principal com LTQN |
+| `Eigen2D_LTQN.m` | `Cap_10/Eigen2D_LTQN.cpp` | Traduzido | Solver principal com LTQN, validado contra MATLAB |
 | `sandt.m` | `Cap_10/src/sandt.cpp` | Traduzido | Matriz local Whitney |
-| `sandt_LTQN.m` | `Cap_10/src/sandt_LTQN.cpp` | Traduzido | Matriz local LTQN |
+| `sandt_LTQN.m` | `Cap_10/src/sandt_LTQN.cpp` | Traduzido | Matriz local LTQN validada por comparação direta com o MATLAB |
 | `LTQN.m` | `Cap_10/src/LTQN.cpp` | Traduzido | Base LTQN |
 | `curl_LTQN.m` | `Cap_10/src/curl_LTQN.cpp` | Traduzido | Rotacional LTQN |
 | `whitney.m` | `Cap_10/src/whitney.cpp` | Traduzido | Base de Whitney |
@@ -113,7 +113,7 @@ Legenda de status:
 | `renumber_dof.m` | `Cap_10/src/renumber_dof.cpp` | Traduzido | Renumeração de DOFs |
 | `renumber_dof_LTQN.m` | `Cap_10/src/renumber_dof_LTQN.cpp` | Traduzido | Renumeração LTQN |
 | `simplex2D.m` | `Cap_10/src/simplex2D.cpp` | Traduzido | Coordenadas baricêntricas |
-| `tri_quad.m` | `Cap_10/src/tri_quad.cpp` | Traduzido | Quadratura em triângulo |
+| `tri_quad.m` | `Cap_10/src/tri_quad.cpp` | Traduzido | Regra simétrica de 6 pontos realinhada e validada contra o MATLAB |
 | `nodal_1st.m` | `Cap_10/src/nodal_1st.cpp` | Traduzido | Base nodal |
 | `s_nodal.m` | `Cap_10/src/s_nodal.cpp` | Traduzido | Matriz nodal |
 

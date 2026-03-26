@@ -21,3 +21,6 @@ Thumbs.db
 .vscode/
 *.code-workspace
 settings.json
+
+matlab_debug/
+original_matlab/

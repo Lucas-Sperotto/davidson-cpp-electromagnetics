@@ -10,14 +10,14 @@ Este diretório reúne a tradução para C++ dos demos FDTD do Capítulo 3 do li
 
 Estado atual do capítulo:
 
-- `fdtd_2d_demo.m` -> traduzido em `fdtd_2d_demo.cpp`;
-- `fdtd_2d_pml_demo.m` -> traduzido em `fdtd2d_pml.cpp` com adaptacao controlada na injecao scat/tot do PML;
+- `fdtd_2d_demo.m` -> traduzido em `fdtd_2d_demo.cpp` e validado numericamente contra o MATLAB;
+- `fdtd_2d_pml_demo.m` -> traduzido em `fdtd2d_pml.cpp`, com formulacao scat/tot alinhada ao script MATLAB e validacao inicial concluida;
 - `fdtd_3D_demo.m` -> traduzido em `fdtd3d.cpp`;
 - `gaussder_norm.m` -> incorporado em `gaussder.cpp`;
 - `PMLperformance.m` -> traduzido em `scripts/pml_performance.py`;
 - `cyl_test.m` -> traduzido em `scripts/cyl_test.py`.
 
-Os demos principais já compilam e rodam, e os scripts auxiliares principais de comparação já possuem equivalente. O capítulo agora entra numa fase de validação fina e refinamento didático.
+Os demos principais já compilam e rodam, e os scripts auxiliares principais de comparação já possuem equivalente. O caso 2D com ABC agora já passou por comparação direta com o MATLAB em histórico temporal e snapshots internos; o caso PML ainda precisa de consolidação documental do comportamento tardio.
 
 ## Estrutura Atual
 
@@ -78,6 +78,12 @@ Exemplos:
 ./build/fdtd3d --refine 2 --seed 12345
 ```
 
+Para validação interna passo a passo do demo 2D com ABC:
+
+```bash
+./build/fdtd_2d_demo --cyl-present --snapshot-step 200 --snapshot-prefix abc_m200
+```
+
 ## Scripts Originais de Referência
 
 Arquivos MATLAB usados como base local:
@@ -112,14 +118,29 @@ python3 scripts/pml_performance.py --thick out/ey_point1_pml_thick.csv --thick-m
 python3 scripts/cyl_test.py --old out/cyl_old.csv --new out/cyl_new.csv --new-longer out/cyl_new_longer.csv
 ```
 
+## Validação MATLAB
+
+Validação local recente feita contra versões instrumentadas dos scripts MATLAB originais:
+
+- `fdtd_2d_demo.cpp`: histórico `E_y_point1` coincidente com erro máximo de aproximadamente `5.05e-16`;
+- `fdtd_2d_demo.cpp`: snapshots internos de `H_z`, `E_x` e `E_y` entre `m = 100` e `m = 450` coincidentes com erros máximos na faixa de `1e-15`;
+- os termos incidentes e a malha material do caso ABC também foram confrontados diretamente, confirmando a fidelidade da tradução;
+- `fdtd2d_pml.cpp`: a formulação literal da interface scat/tot nas componentes split de `H_z` foi restaurada e o transiente inicial passou a coincidir com o MATLAB.
+
+Ferramentas locais usadas nessa validação:
+
+- `matlab_debug/Cap_03/run_fdtd_2d_debug.m`
+- `matlab_debug/Cap_03/run_fdtd_2d_debug_multisnapshot.m`
+- `matlab_debug/Cap_03/run_fdtd_2d_pml_debug.m`
+
 ## Limitações Atuais
 
-- O demo 2D com ABC ainda contém trechos explicitamente marcados no código como não testados ou sujeitos a sinal espúrio nos cantos da interface campo total/campo espalhado.
-- O demo PML atual preserva a estrutura, os parâmetros e os pós-processamentos do original, mas a injeção scat/tot nas componentes split de `H_z` segue marcada para validação adicional; por enquanto, a tradução mantém a formulação estável já validada no port C++.
-- Os scripts auxiliares já foram portados, mas ainda precisam ser usados com um conjunto de rodadas de referência mais representativo.
+- O demo 2D com ABC preserva as mesmas cautelas do original MATLAB: os cantos traseiros da interface campo total/campo espalhado continuam comentados por injetarem sinal espúrio, exatamente como no script de referência.
+- O demo PML já reproduz a formulação principal do original, mas ainda falta consolidar em Markdown a análise do comportamento tardio herdado do próprio script MATLAB.
+- Os scripts auxiliares já foram portados, mas ainda vale ampliar o conjunto de rodadas de referência documentadas.
 
 ## Próximos Passos Naturais
 
-- consolidar a validação numérica de `fdtd_2d_demo.cpp` e `fdtd2d_pml.cpp`;
-- documentar a teoria do capítulo com o mesmo nível didático do `Cap_02`;
-- validar numericamente os resultados C++ contra os dados MATLAB de referência.
+- documentar formalmente no capítulo a validação MATLAB já concluída para `fdtd_2d_demo.cpp`;
+- consolidar a validação tardia de `fdtd2d_pml.cpp` em texto, figuras e comparação reproduzível;
+- documentar a teoria do capítulo com o mesmo nível didático do `Cap_02`.

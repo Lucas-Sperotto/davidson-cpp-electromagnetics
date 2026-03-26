@@ -56,6 +56,32 @@ void print_help()
         << "  --y-mesh N       divisao da malha em y (padrao 2)\n"
         << "  --help           mostra esta ajuda\n";
 }
+
+void write_csv(const std::string &path, const Eigen::MatrixXd &M)
+{
+    std::ofstream f(path);
+    f.setf(std::ios::scientific);
+    f << std::setprecision(17);
+    for (int i = 0; i < M.rows(); ++i)
+    {
+        for (int j = 0; j < M.cols(); ++j)
+        {
+            if (j)
+                f << ',';
+            f << M(i, j);
+        }
+        f << '\n';
+    }
+}
+
+void write_csv(const std::string &path, const Eigen::VectorXd &V)
+{
+    std::ofstream f(path);
+    f.setf(std::ios::scientific);
+    f << std::setprecision(17);
+    for (int i = 0; i < V.size(); ++i)
+        f << V(i) << '\n';
+}
 } // namespace
 
 void Eigen2D_LTQN(const Eigen2DLtqnConfig &config)
@@ -171,6 +197,9 @@ void Eigen2D_LTQN(const Eigen2DLtqnConfig &config)
         }
     }
 
+    write_csv((out_dir / "cpp_S_ltqn_mat.csv").string(), S_mat);
+    write_csv((out_dir / "cpp_T_ltqn_mat.csv").string(), T_mat);
+
     // Resolver o problema generalizado de autovalores
     GeneralizedSelfAdjointEigenSolver<MatrixXd> solver(S_mat, T_mat);
     if (solver.info() != Eigen::Success)
@@ -181,6 +210,9 @@ void Eigen2D_LTQN(const Eigen2DLtqnConfig &config)
 
     VectorXd eigvals = solver.eigenvalues();
     MatrixXd eigvecs = solver.eigenvectors();
+
+    write_csv((out_dir / "cpp_eigvals_ltqn.csv").string(), eigvals);
+    write_csv((out_dir / "cpp_eigvecs_ltqn.csv").string(), eigvecs);
 
     constexpr double zero_tol = 1e-6;
 

@@ -14,14 +14,40 @@ namespace
 using Matrix = std::vector<std::vector<double>>;
 
 constexpr double pi = 3.14159265358979323846;
-constexpr double c = 2.99792458e8;
-constexpr double eps_0 = 8.854187817e-12;
+constexpr double c = 2.997925e8;
+constexpr double eps_0 = 8.854e-12;
 constexpr double mu_0 = 4.0 * pi * 1.0e-7;
 const double eta_0 = std::sqrt(mu_0 / eps_0);
 
 Matrix make_matrix(int nx, int ny, double value = 0.0)
 {
     return Matrix(nx, std::vector<double>(ny, value));
+}
+
+void write_matrix_csv(const std::filesystem::path &path, const Matrix &matrix)
+{
+    std::ofstream file(path);
+    file.precision(17);
+    file << std::scientific;
+    for (std::size_t i = 0; i < matrix.size(); ++i)
+    {
+        for (std::size_t j = 0; j < matrix[i].size(); ++j)
+        {
+            if (j)
+                file << ',';
+            file << matrix[i][j];
+        }
+        file << '\n';
+    }
+}
+
+void write_vector_csv(const std::filesystem::path &path, const std::vector<double> &values)
+{
+    std::ofstream file(path);
+    file.precision(17);
+    file << std::scientific;
+    for (double value : values)
+        file << value << '\n';
 }
 } // namespace
 
@@ -38,6 +64,9 @@ void run_fdtd2d_simulation(const Fdtd2DConfig &config)
     const bool cyl_present = config.cyl_present;
     const int refine = config.refine;
     const double pulse_compress = config.pulse_compress;
+    const bool snapshot_requested = config.snapshot_step > 0;
+    const std::string snapshot_prefix =
+        config.snapshot_prefix.empty() ? "fdtd2d_snapshot" : config.snapshot_prefix;
 
     const int N_x = refine * 200;
     const int N_y = refine * 100;
@@ -294,6 +323,22 @@ void run_fdtd2d_simulation(const Fdtd2DConfig &config)
         E_y_point1[m_idx] = E_y_n[point1_x_idx][point1_y_idx];
         E_y_point2[m_idx] = E_y_n[point2_x_idx][point2_y_idx];
 
+        if (snapshot_requested && m_mat == config.snapshot_step)
+        {
+            write_matrix_csv(out_dir / (snapshot_prefix + "_H_z_n.csv"), H_z_n);
+            write_matrix_csv(out_dir / (snapshot_prefix + "_E_x_n.csv"), E_x_n);
+            write_matrix_csv(out_dir / (snapshot_prefix + "_E_y_n.csv"), E_y_n);
+            write_matrix_csv(out_dir / (snapshot_prefix + "_H_z_nmin1.csv"), H_z_nmin1);
+            write_matrix_csv(out_dir / (snapshot_prefix + "_E_x_nmin1.csv"), E_x_nmin1);
+            write_matrix_csv(out_dir / (snapshot_prefix + "_E_y_nmin1.csv"), E_y_nmin1);
+            write_vector_csv(out_dir / (snapshot_prefix + "_E_y_nmin1_inc_front.csv"), E_y_nmin1_inc_front);
+            write_vector_csv(out_dir / (snapshot_prefix + "_E_y_nmin1_inc_back.csv"), E_y_nmin1_inc_back);
+            write_vector_csv(out_dir / (snapshot_prefix + "_H_z_n_inc.csv"), H_z_n_inc);
+            write_vector_csv(out_dir / (snapshot_prefix + "_H_z_n_inc2.csv"), H_z_n_inc2);
+            write_vector_csv(out_dir / (snapshot_prefix + "_E_x_nmin1_inc_top.csv"), E_x_nmin1_inc_top);
+            write_vector_csv(out_dir / (snapshot_prefix + "_E_x_nmin1_inc_bottom.csv"), E_x_nmin1_inc_bottom);
+        }
+
         H_z_nmin1 = H_z_n;
         E_x_nmin1 = E_x_n;
         E_y_nmin1 = E_y_n;
@@ -315,6 +360,7 @@ void run_fdtd2d_simulation(const Fdtd2DConfig &config)
     meta << "cyl_present," << (cyl_present ? 1 : 0) << "\n";
     meta << "refine," << refine << "\n";
     meta << "pulse_compress," << pulse_compress << "\n";
+    meta << "snapshot_step," << config.snapshot_step << "\n";
     meta << "N_x," << N_x << "\n";
     meta << "N_y," << N_y << "\n";
     meta << "M," << M << "\n";

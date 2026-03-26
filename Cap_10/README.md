@@ -14,7 +14,8 @@ Estado atual do capítulo:
 - `Static2D`, `Eigen2D` e `Eigen2D_LTQN` compilam e rodam;
 - os defaults do `Static2D` foram realinhados com o MATLAB original;
 - o capítulo agora gera saídas e resumos numéricos mais explícitos em `out/`;
-- a documentação ainda pode crescer em teoria e validação formal C++ versus MATLAB.
+- a formulação LTQN foi validada diretamente contra o MATLAB original;
+- a documentação ainda pode crescer em teoria e validação formal dos demais executáveis.
 
 ## Arquivos MATLAB de Referência
 
@@ -124,6 +125,8 @@ Arquivos gerados em `Cap_10/out/`:
 
 ### Eigen2D_LTQN
 
+- `cpp_S_ltqn_mat.csv`, `cpp_T_ltqn_mat.csv` - matrizes globais LTQN exportadas para comparação;
+- `cpp_eigvals_ltqn.csv`, `cpp_eigvecs_ltqn.csv` - autovalores e autovetores LTQN do problema generalizado;
 - `eigdata_LTQN_modes.csv` - tabela consolidada dos modos LTQN;
 - `eigdata_LTQN_relerr.csv` - erro relativo dos primeiros modos úteis;
 - `eigen2d_ltqn_summary.csv` - resumo da rodada.
@@ -156,15 +159,24 @@ Plot de todos os campos exportados:
 python3 scripts/plot_all_fields.py
 ```
 
+## Validação MATLAB
+
+Validação local recente do ramo LTQN:
+
+- `tri_quad(6)` foi realinhado com a regra simétrica de 6 pontos do MATLAB;
+- as matrizes globais LTQN `S` e `T` passaram a coincidir com o MATLAB com erro máximo de aproximadamente `1.46e-10` e `2.22e-16`, respectivamente;
+- os autovalores úteis `k_c` de `Eigen2D_LTQN` passaram a coincidir com o MATLAB até erro numérico de arredondamento;
+- a comparação foi feita usando exports instrumentados do MATLAB e os CSVs `cpp_S_ltqn_mat.csv`, `cpp_T_ltqn_mat.csv` e `cpp_eigvals_ltqn.csv`.
+
 ## Observações Técnicas
 
 - O capítulo ainda usa estruturas globais para malha e conectividade, o que manteve a tradução próxima do estilo MATLAB.
 - O `Static2D` voltou a usar, por padrão, `eps_r_sub = 2.55` e malha `20 x 20`, em linha com o script original.
-- O solver LTQN segue funcional e produz valores físicos coerentes, mas ainda merece uma validação documentada e reprodutível contra o MATLAB.
+- O solver LTQN agora está documentado com uma validação direta contra o MATLAB, incluindo quadratura, matrizes globais e autovalores.
 - O `Eigen2D` agora exporta explicitamente modos físicos e espúrios, aproximando melhor o comportamento do script original.
 
 ## Próximos Passos Naturais
 
 - documentar a teoria do capítulo em maior profundidade;
-- registrar uma validação numérica C++ versus MATLAB com os mesmos parâmetros;
+- registrar uma validação numérica C++ versus MATLAB para `Eigen2D` com Whitney e para `Static2D`;
 - reduzir gradualmente a dependência de estado global sem perder a legibilidade da tradução.
